@@ -1,4 +1,4 @@
-"""pyramid_gaq installation script.
+"""pyramid_formencode_classic installation script.
 """
 import os
 
@@ -31,7 +31,7 @@ requires = [
     ]
 
 setup(name="pyramid_formencode_classic",
-      version="0.0.3",
+      version="0.0.4",
       description="an implementation of the classic pylons formencode validation, for pyramid",
       long_description=get_docs(),
       classifiers=[
@@ -41,7 +41,7 @@ setup(name="pyramid_formencode_classic",
         "License :: OSI Approved :: BSD License",
         ],
       keywords="web pyramid",
-      py_modules=['pyramid_gaq'],
+      py_modules=['pyramid_formencode_classic'],
       author="Jonathan Vanasco",
       author_email="jonathan@findmeon.com",
       url="https://github.com/jvanasco/pyramid_formencode_classic",

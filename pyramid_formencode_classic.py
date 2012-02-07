@@ -1,5 +1,5 @@
 """
-v 0.0.3
+v 0.0.5
 
 a port of some classic pylons styling, but without much of the cruft that was not used often
 
@@ -116,9 +116,30 @@ import logging
 log = logging.getLogger(__name__)
 
 import formencode
+import formencode.htmlfill
 import sys
 
 
+class BaseException(Exception):
+    """base exception class"""
+    def __init__(self,message,errors=None):
+        self.message= message
+        if errors:
+            self.errors= errors
+    def __str__(self):
+        return repr(self.message)
+
+class FormInvalid(BaseException):
+    """Raise in your code when a form is invalid"""
+    pass
+
+class FieldInvalid(BaseException):
+    """Raise in your code when a formfield is invalid"""
+    pass
+
+class ValidationStop(BaseException):
+    """Stop validating"""
+    pass
 
 
 def determine_response_charset(response):
@@ -158,9 +179,6 @@ def formatter_nobr(error):
     return '<span class="error-message">%s</span>\n' % formencode.rewritingparser.html_quote(error)
 
 
-class ValidationStop(Exception):
-    """Stop validating"""
-    pass
 
 
 class FormStash( object ):

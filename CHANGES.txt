@@ -1,2 +1,9 @@
+0.0.5
+safer import of htmlfill
+provide custom exceptions
+
+0.0.4
+fix setup
+
 0.0.3
 initial release
