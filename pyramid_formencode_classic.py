@@ -44,11 +44,61 @@ As with all formencode implementaitons, you can control where an error message a
 
 there is a trivial attempt at multiple form handling - a "form_stash" argument can be used , which will store different "FormStash" wrapped structures in the names provided.
 
-the caveat to this approach right now, is that it doesn't support using a "render" on the form object -- it expects forms to be manually coded.  this was originally by design ( to have more control ).   I'd love to be able to support that - or find other ways to allow the subrequest mechanism to go away.  
+MAJOR CAVEATS
+    1. it doesn't support using a "render" on the form object -- it expects forms to be manually coded , and errors to be regexed out via htmlfill. live with it.
+    2. this REQUIRES one of the following two scenarios:
+        a-  the form methods return a response object via "pyramid.renderers.render_to_response"
+        
+            your handlers would look like this
+
+                def test(self):
+                    if 'submit' in self.request.POST:
+                        return self._test_submit()
+                    return self._test_print()
+
+                def _test_print(self):
+                    return render_to_response( "/test_form.mako" , {"project":"MyApp"} , self.request) 
+
+                def _test_submit(self):
+                    try:
+                        result = formhandling.form_validate( self.request , schema=forms.FormLogin , error_main="Error")
+                        if not result:
+                            raise formhandling.FormInvalid()
+                        ...
+                    except formhandling.FormInvalid :
+                        # you could set a field manually too
+                        #formhandling.formerrors_set(self.request,section="field",message='missing this field')
+                        return formhandling.form_reprint( self.request , self._login_print )
+        
+        b- you use an action decorator
+
+            your handlers would look like this
+
+                @action(renderer='/test_form.mako')
+                def test(self):
+                    if 'submit' in self.request.POST:
+                        return self._test_submit()
+                    return self._test_print()
+
+                def _test_print(self):
+                    return {"project":"MyApp"}
+
+                def _test_submit(self):
+                    try:
+                        result = formhandling.form_validate( self.request , schema=forms.FormLogin , error_main="Error")
+                        if not result:
+                            raise formhandling.FormInvalid()
+                        ...
+                    except formhandling.FormInvalid :
+                        # you could set a field manually too
+                        #formhandling.formerrors_set(self.request,section="field",message='missing this field')
+                        return formhandling.form_reprint( self.request , None , render_view=self._test_print , render_view_template="/test_form.mako" )
+                        
+
+Needly to say: this is really nice and clean in the first scenario, and messy in the latter.
 
 
 80% of this code is adapted from Pylons, 20% is outright copy/pasted.
-
 
 
 define your form
@@ -118,11 +168,14 @@ log = logging.getLogger(__name__)
 import formencode
 import formencode.htmlfill
 import sys
+import types
+from pyramid.response import Response as PyramidResponse
+from pyramid.renderers import render as pyramid_render
 
 
 class BaseException(Exception):
     """base exception class"""
-    def __init__(self,message,errors=None):
+    def __init__(self,message='',errors=None):
         self.message= message
         if errors:
             self.errors= errors
@@ -358,7 +411,7 @@ def form_validate(\
 
 
 
-def form_reprint( request , form_print_method , form_stash='formStash', auto_error_formatter=formatter_nobr , **htmlfill_kwargs ):
+def form_reprint( request , form_print_method , form_stash='formStash', render_view=None, render_view_template=None, auto_error_formatter=formatter_nobr , **htmlfill_kwargs ):
     """reprint a form
         args:       
         ``request`` -- request instance
@@ -371,7 +424,14 @@ def form_reprint( request , form_print_method , form_stash='formStash', auto_err
     """
     log.debug("form_reprint - starting...")
 
-    response= form_print_method()
+    response= None
+    if form_print_method:
+        response= form_print_method()
+    elif render_view and render_view_template:
+        response= PyramidResponse(pyramid_render(render_view_template , render_view(), request=request))
+    else:
+       raise ValueError("invalid args submitted")
+    
 
     # If the form_content is an exception response, return it
     # potential ways to check:
@@ -383,7 +443,7 @@ def form_reprint( request , form_print_method , form_stash='formStash', auto_err
         return response
         
     formStash= getattr( request , form_stash )
-
+    
     form_content= response.text
 
     # Ensure htmlfill can safely combine the form_content, params and

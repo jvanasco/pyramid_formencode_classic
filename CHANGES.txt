@@ -1,6 +1,7 @@
 0.0.5
 safer import of htmlfill
 provide custom exceptions
+integrating support for @action
 
 0.0.4
 fix setup
