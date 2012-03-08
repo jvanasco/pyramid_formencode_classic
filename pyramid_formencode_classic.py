@@ -1,5 +1,5 @@
 """
-v 0.0.5
+v 0.0.6
 
 a port of some classic pylons styling, but without much of the cruft that was not used often
 
@@ -61,9 +61,12 @@ MAJOR CAVEATS
 
                 def _test_submit(self):
                     try:
-                        result = formhandling.form_validate( self.request , schema=forms.FormLogin , error_main="Error")
+                        ( result , formStash ) = formhandling.form_validate( self.request , schema=forms.FormLogin , error_main="Error")
                         if not result:
                             raise formhandling.FormInvalid()
+                        userAccount= query_for_useraccount( formStash.results['email'] )
+                        if not userAccount:
+                            formStash.setError( section='email', message='Invalid' , raise_form_invalid=True )
                         ...
                     except formhandling.FormInvalid :
                         # you could set a field manually too
@@ -248,41 +251,56 @@ class FormStash( object ):
         self.errors= {}
         self.results= {}
         self.defaults= {}
+        
+    def setError(self,section='Error_Main',message="Error",raise_form_invalid=False,raise_field_invalid=False):
+        """manages the dict of errors"""
+        if message is None:
+            if section in self.errors:
+                del self.errors[section]
+        else:
+            self.errors[section]= message
+        if self.errors:
+            self.is_error = True
+        if raise_form_invalid:
+            raise FormInvalid()
+        if raise_field_invalid:
+            raise FieldInvalid()
+    
+    def clearError(self,section=None):
+        """clear the dict of errors"""
+        if self.errors :
+            if section:
+                if section in self.errors :
+                   del self.errors['section']
+            else:
+                self.errors= {}
+        if self.errors:
+            self.is_error = True
 
 
 def get_form( request, form_stash='formStash' ):
+    """helper function. to proxy FormStash object"""
     return getattr( request , form_stash )
 
 
 def _form_ensure( request , form_stash='formStash' ):
-    """ensures there is a FormStash instance attached to the request"""
+    """helper function. ensures there is a FormStash instance attached to the request"""
     if not hasattr( request , form_stash):
         setattr( request , form_stash , FormStash() )
     return getattr( request , form_stash )
 
 
-def formerrors_set( request , form_stash='formStash' , section='Error_Main' , message='There was an error with your submission...' ):
-    """manages the dict of errors"""
+def formerrors_set( request , form_stash='formStash' , section='Error_Main' , message='There was an error with your submission...',raise_form_invalid=False,raise_field_invalid=False):
+    """helper function. to proxy FormStash object"""
     form= _form_ensure( request , form_stash=form_stash )
-    if message is None:
-        if section in form.errors:
-            del form.errors[section]
-    else:
-        form.errors[section]= message
-    if form.errors:
-        form.is_error = True
+    form.setError( section=section , message=message , raise_form_invalid=raise_form_invalid , raise_field_invalid=raise_field_invalid )
 
 
 def formerrors_clear( request, form_stash='formStash' , section=None ):
+    """helper function. to proxy FormStash object"""
     form= _form_ensure( request , form_stash=form_stash )
-    if form.errors :
-        if section:
-            if section in form.errors :
-               del form.errors['section']
-        else:
-            form.errors= {}
-    if form.errors:
-        form.is_error = True
+    form.clearError( section=section , message=message )
+
     
 
 def form_validate(\
@@ -297,6 +315,7 @@ def form_validate(\
         list_char='-'  , 
         state= None,
         error_main=None ,
+        return_stash= True
     ):
     """form validation only : returns True/False ; sets up Errors ;
     
@@ -352,6 +371,13 @@ def form_validate(\
 
     ``error_main`` ( None )
         If there are any errors that occur, this will drop an error in "Error_Main" key.
+        
+    ``return_stash`` ( True )
+        When set to True, returns a tuple of the status and the wrapped stash.  Otherwise just returns the status, and a separate call is needed to get the Stash.
+        As True:
+            ( status , stash )= form_validate()
+        else:
+            status = form_validate()
 
     """
     log.debug("form_validate - starting...")
@@ -403,7 +429,9 @@ def form_validate(\
         pass
         
     setattr( request , form_stash, formStash )
-
+    
+    if return_stash :
+        return ( not formStash.is_error , formStash )
     return not formStash.is_error
 
 

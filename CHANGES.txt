@@ -1,10 +1,15 @@
+0.0.6
+	updated form_validate() to return a FormStash object
+	migrated formerrors_set() & formerrors_clear() into helper methods that wrap FormStash class methods, form.setError() form.clearError()
+	added raise_form_invalid and raise_field_invalid to formerrors_set() and form.setError()
+
 0.0.5
-safer import of htmlfill
-provide custom exceptions
-integrating support for @action
+	safer import of htmlfill
+	provide custom exceptions
+	integrating support for @action
 
 0.0.4
-fix setup
+	fix setup
 
 0.0.3
-initial release
+	initial release
