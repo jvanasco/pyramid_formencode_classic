@@ -31,7 +31,7 @@ requires = [
     ]
 
 setup(name="pyramid_formencode_classic",
-      version="0.0.6",
+      version="0.0.7",
       description="an implementation of the classic pylons formencode validation, for pyramid",
       long_description=get_docs(),
       classifiers=[

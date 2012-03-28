@@ -1,3 +1,14 @@
+0.0.7
+	2012.03.27
+	support for twitter-bootstrap
+	- added `formatter_help_inline`
+	- added `formatter_none`
+	- added `FormStash.set_css_error`
+	- added `FormStash.hasError`
+	- added `FormStash.cssError`
+	- added `FormStash.getError`
+
+
 0.0.6
 	updated form_validate() to return a FormStash object
 	migrated formerrors_set() & formerrors_clear() into helper methods that wrap FormStash class methods, form.setError() form.clearError()

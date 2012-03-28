@@ -161,6 +161,21 @@ define your view/handler
             # login via helper
             h.do_login()
             return HTTPFound(location='/account/home')
+            
+    
+	To handle  twitter bootstrap style errors, it's a bit complicated -- but doable
+	
+		<%
+			form= formhandling.get_form(request)
+		%>
+		<div class="control-group ${form.errorCss('email_address')}">
+			<label class="control-label" for="email_address">Email</label>
+			<input id="email_address" name="email_address" placeholder="Email Address" size="30" type="text" />
+			% if form.hasError('email_address'):
+				<span class="help-inline">${form.getError('email_address')}</span>
+			% endif
+		</div>
+
         
 
 released under the BSD license, as it incorporates some Pylons code (which was BSD)
@@ -227,14 +242,28 @@ def encode_formencode_errors(errors, encoding, encoding_errors='strict'):
 
 
 
+def formatter_help_inline(error):
+    """
+    Formatter that escapes the error, wraps the error in a span with
+    class ``help-inline``, and doesn't add a ``<br>`` ; somewhat compatible with twitter's bootstrap
+    """
+    return '<span class="help-inline">%s</span>\n' % formencode.rewritingparser.html_quote(error)
+
+
 def formatter_nobr(error):
     """
     Formatter that escapes the error, wraps the error in a span with
     class ``error-message``, and doesn't add a ``<br>``
     """
     return '<span class="error-message">%s</span>\n' % formencode.rewritingparser.html_quote(error)
+    
 
-
+def formatter_none(error):
+    """
+    Formatter that ignores the error.
+    This is useful / necessary when handling custom css/html
+    """
+    return ''
 
 
 class FormStash( object ):
@@ -246,12 +275,32 @@ class FormStash( object ):
     errors= None
     results= None
     defaults= None
+    css_error= 'error'
 
     def __init__(self):
         self.errors= {}
         self.results= {}
         self.defaults= {}
+    
+    def set_css_error(self,css_error='error'):
+        self.css_error= css_error
         
+    def hasError(self,section):
+        if section in self.errors :
+            return True
+        return False
+
+    def cssError(self,section,css_error=None):
+        if section in self.errors :
+            if css_error:
+                return css_error
+            return self.css_error
+        return ''
+
+    def getError(self,section):
+        if section in self.errors :
+            return self.errors[section]
+
     def setError(self,section='Error_Main',message="Error",raise_form_invalid=False,raise_field_invalid=False):
         """manages the dict of errors"""
         if message is None:
@@ -279,8 +328,8 @@ class FormStash( object ):
 
 
 def get_form( request, form_stash='formStash' ):
-    """helper function. to proxy FormStash object"""
-    return getattr( request , form_stash )
+    """helper function. to proxy FormStash object.  this is deprecated and just wrapping _form_ensure."""
+    return _form_ensure( request , form_stash )
 
 
 def _form_ensure( request , form_stash='formStash' ):
