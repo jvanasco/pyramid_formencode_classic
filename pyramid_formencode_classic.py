@@ -162,19 +162,39 @@ define your view/handler
             h.do_login()
             return HTTPFound(location='/account/home')
             
+
+Twitter Bootstrap Example
+=========================
     
-	To handle  twitter bootstrap style errors, it's a bit complicated -- but doable
-	
-		<%
-			form= formhandling.get_form(request)
-		%>
-		<div class="control-group ${form.errorCss('email_address')}">
-			<label class="control-label" for="email_address">Email</label>
-			<input id="email_address" name="email_address" placeholder="Email Address" size="30" type="text" />
-			% if form.hasError('email_address'):
-				<span class="help-inline">${form.getError('email_address')}</span>
-			% endif
-		</div>
+    To handle  twitter bootstrap style errors, it's a bit more manual work -- but doable
+    
+        Mako:
+            <% form= formhandling.get_form(request) %>
+			${form.htmlErrorMain('Error_Main')|n}
+            <div class="control-group ${form.cssError('email_address')}">
+                <label class="control-label" for="email_address">Email</label>
+                <input id="email_address" name="email_address" placeholder="Email Address" size="30" type="text" />
+				${form.htmlError('email_address')|n}
+			</div>
+				
+			you could also show an error with:
+				% if form.hasError('email_address'):
+					<span class="help-inline">${form.getError('email_address')}</span>
+				% endif
+
+
+
+        Pyramid:
+            text= formhandling.form_reprint( self.request , self._login_print , auto_error_formatter=formhandling.formatter_none )     
+    
+    in the above example there are a few things to note:
+
+        1. in the mako template we use `get_form` to pull/create the default formStash object for the request.  You can specify a specific formStash object if you'd like.
+        2. a call is made to `form.cssError()` specifying the 'email_address' field.  this would result in the "control-group error" css mix if there is an error in 'email_address'.
+        3. We tell pyramid to use 'formhandling.formatter_none' as the error formatter.  This surpresses errors.  We need to do that instead of using custom error formatters, because FormEncode places errors BEFORE the fields, not AFTER.  
+        4. I've included two methods of presenting field errors.  they are funtinoally the same.
+        5. I've used an ErrorMain to show that there are issues on the form - not just a specific field.
+        
 
         
 
@@ -276,28 +296,60 @@ class FormStash( object ):
     results= None
     defaults= None
     css_error= 'error'
+    html_error_template= """<span class="help-inline">%(error)s</span>"""
+    html_error_main_template = """<div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> %(error)s</span></div>"""
+
 
     def __init__(self):
         self.errors= {}
         self.results= {}
         self.defaults= {}
     
-    def set_css_error(self,css_error='error'):
+    def set_css_error(self,css_error):
+        """sets the css error field for the form"""
         self.css_error= css_error
+    
+    def set_html_error_template(self,html_error_template):
+        """sets the html error template field for the form"""
+        self.html_error_template = html_error_template
+
+    def set_html_error_template(self,html_error_template):
+        """sets the html error template MAIN field for the form.  useful for alerting the entire form is bad."""
+        self.html_error_main_template = html_error_main_template
         
     def hasError(self,section):
+        """Returns True or False if there is an error.  Does not return the value of the error field, because the value could be False."""
         if section in self.errors :
             return True
         return False
 
     def cssError(self,section,css_error=None):
+        """Returns the css class if there is an error.  returns '' if there is not.  The default css_error is 'error' and can be set with `set_css_error`.  You can also overwrite with a `css_error` kwarg."""
         if section in self.errors :
             if css_error:
                 return css_error
             return self.css_error
         return ''
+        
+    def htmlError( self,section,template=None):
+        """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
+        if self.hasError(section):
+            if template is None:
+                template = self.html_error_template
+            return template % { 'error': self.getError(section) }
+        return ''
+        
+    def htmlErrorMain( self,section,template=None):
+        """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
+        if self.hasError(section):
+            if template is None:
+                template = self.html_error_main_template
+            return template % { 'error': self.getError(section) }
+        return ''
+    
 
     def getError(self,section):
+        """Returns the error."""
         if section in self.errors :
             return self.errors[section]
 
@@ -364,7 +416,9 @@ def form_validate(\
         list_char='-'  , 
         state= None,
         error_main=None ,
-        return_stash= True
+        return_stash= True ,
+        raise_form_invalid = False ,
+        raise_field_invalid = False
     ):
     """form validation only : returns True/False ; sets up Errors ;
     
@@ -479,6 +533,12 @@ def form_validate(\
         
     setattr( request , form_stash, formStash )
     
+    if formStash.is_error:
+        if raise_form_invalid:
+            raise FormInvalid()
+        if raise_field_invalid:
+            raise FieldInvalid()
+
     if return_stash :
         return ( not formStash.is_error , formStash )
     return not formStash.is_error

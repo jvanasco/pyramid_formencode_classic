@@ -1,3 +1,12 @@
+0.0.8
+	2012.03.28
+	better support for twitter-bootstrap
+	- improved docs
+	- added `set_html_error_template`
+	- added `set_html_error_main_template`
+	- added `htmlError`
+	- added `htmlErrorMain`
+
 0.0.7
 	2012.03.27
 	support for twitter-bootstrap
@@ -7,7 +16,6 @@
 	- added `FormStash.hasError`
 	- added `FormStash.cssError`
 	- added `FormStash.getError`
-
 
 0.0.6
 	updated form_validate() to return a FormStash object
