@@ -26,17 +26,17 @@ def get_docs():
 
 
 requires = [
-    "pyramid", 
+    "pyramid",
     "FormEncode>=1.2.4",
     ]
 
 setup(name="pyramid_formencode_classic",
-      version="0.0.8",
+      version="0.0.9",
       description="an implementation of the classic pylons formencode validation, for pyramid",
       long_description=get_docs(),
       classifiers=[
         "Intended Audience :: Developers",
-        "Framework :: Pylons",
+        "Framework :: Pryamid",
         "Programming Language :: Python",
         "License :: OSI Approved :: BSD License",
         ],

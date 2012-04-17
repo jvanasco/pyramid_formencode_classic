@@ -1,5 +1,5 @@
 """
-v 0.0.6
+v 0.0.9
 
 a port of some classic pylons styling, but without much of the cruft that was not used often
 
@@ -11,35 +11,35 @@ As you can see below, 'methods' are broken into multiple parts:
 - a callable dispatcher ( login )
 - a private printer ( _login_print )
 - a private submit processor ( _login_submit )
-    
+
 The formencode schema does not interact with the database.  it is used entirely for "lightweight" validation and cheap operations ( length, presence, etc )
 
-The more involved operations occur in the submit processor.  
+The more involved operations occur in the submit processor.
 
-At any time, if an error is occured, a call to "form_reprint" can be made.  that function makes a subrequest and runs htmlfill on it.  
+At any time, if an error is occured, a call to "form_reprint" can be made.  that function makes a subrequest and runs htmlfill on it.
 
 Custom errors can be set as well.
 
 If you want to set a "oh noes! message" for the form, pass in the `error_main` argument to validate, that will set an error in Error_Main , which will do one of two things:
 a-  formencode.htmlfill will replace this marking in your template
-        <form:error name="Error_Main"/> 
+        <form:error name="Error_Main"/>
     with the follwing :
         <span class="error-message">${error_main}</span><br/>
-        
+
     caveat:
         <form:error name="Error_Main"/> will appear on valid documents , as htmlfill won't be called to strip it out
         if you want to strip it out, you could do the following :
-        
+
             - pass your formStash into a template via the print mechanism
             - test for form validity in the form ; the FormStash class has an is_error attribute which is set True on errors ( and cleared when no errors exist )
-        
-        
-        
+
+
+
 b- if the marking is not in your template, it will be at the top of the document ( before the html ) as
     <!-- for: Error_Main -->
     <span class="error-message">${error_main}</span>
-    
-As with all formencode implementaitons, you can control where an error message appears by placing an explicit <form:error name="${formfield}"/> 
+
+As with all formencode implementaitons, you can control where an error message appears by placing an explicit <form:error name="${formfield}"/>
 
 
 there is a trivial attempt at multiple form handling - a "form_stash" argument can be used , which will store different "FormStash" wrapped structures in the names provided.
@@ -48,7 +48,7 @@ MAJOR CAVEATS
     1. it doesn't support using a "render" on the form object -- it expects forms to be manually coded , and errors to be regexed out via htmlfill. live with it.
     2. this REQUIRES one of the following two scenarios:
         a-  the form methods return a response object via "pyramid.renderers.render_to_response"
-        
+
             your handlers would look like this
 
                 def test(self):
@@ -57,7 +57,7 @@ MAJOR CAVEATS
                     return self._test_print()
 
                 def _test_print(self):
-                    return render_to_response( "/test_form.mako" , {"project":"MyApp"} , self.request) 
+                    return render_to_response( "/test_form.mako" , {"project":"MyApp"} , self.request)
 
                 def _test_submit(self):
                     try:
@@ -72,7 +72,7 @@ MAJOR CAVEATS
                         # you could set a field manually too
                         #formhandling.formerrors_set(self.request,section="field",message='missing this field')
                         return formhandling.form_reprint( self.request , self._login_print )
-        
+
         b- you use an action decorator
 
             your handlers would look like this
@@ -96,7 +96,7 @@ MAJOR CAVEATS
                         # you could set a field manually too
                         #formhandling.formerrors_set(self.request,section="field",message='missing this field')
                         return formhandling.form_reprint( self.request , None , render_view=self._test_print , render_view_template="/test_form.mako" )
-                        
+
 
 Needly to say: this is really nice and clean in the first scenario, and messy in the latter.
 
@@ -108,11 +108,11 @@ define your form
 =================
 
     import formencode
-    
+
     class _Schema_Base(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-    
+
     class FormLogin(_Schema_Base):
         email_address = formencode.validators.Email(not_empty=True)
         password = formencode.validators.UnicodeString(not_empty=True)
@@ -133,15 +133,15 @@ define your view/handler
 
 
         def _login_print(self):
-            return render_to_response( "web/account/login.mako" , {"project":"MyApp" } , self.request) 
-    
-    
+            return render_to_response( "web/account/login.mako" , {"project":"MyApp" } , self.request)
+
+
         def _login_submit(self):
 
             try :
                 if not formhandling.form_validate( self.request , schema=forms.FormLogin , error_main="OH NOES!" ):
                     raise formhandling.ValidationStop("Invalid Form")
-                    
+
                 results= self.request.formStash.results
 
                 useraccount = model.find_user( results['email_address'] )
@@ -150,53 +150,53 @@ define your view/handler
 
                 if not useraccount.verify_submitted_password( results['password'] ):
                     formhandling.formerrors_set(self.request,section="email_address",message="Wrong password")
-            
+
             except formhandling.ValidationStop :
                 formhandling.formerrors_set(self.request,section="Error_Main",message="There was an error with your form")
                 return formhandling.form_reprint( self.request , self._login_print )
 
             except:
                 raise
-            
+
             # login via helper
             h.do_login()
             return HTTPFound(location='/account/home')
-            
+
 
 Twitter Bootstrap Example
 =========================
-    
+
     To handle  twitter bootstrap style errors, it's a bit more manual work -- but doable
-    
+
         Mako:
             <% form= formhandling.get_form(request) %>
-			${form.htmlErrorMain('Error_Main')|n}
+            ${form.htmlErrorMain('Error_Main')|n}
             <div class="control-group ${form.cssError('email_address')}">
                 <label class="control-label" for="email_address">Email</label>
                 <input id="email_address" name="email_address" placeholder="Email Address" size="30" type="text" />
-				${form.htmlError('email_address')|n}
-			</div>
-				
-			you could also show an error with:
-				% if form.hasError('email_address'):
-					<span class="help-inline">${form.getError('email_address')}</span>
-				% endif
+                ${form.htmlError('email_address')|n}
+            </div>
+
+            you could also show an error with:
+                % if form.hasError('email_address'):
+                    <span class="help-inline">${form.getError('email_address')}</span>
+                % endif
 
 
 
         Pyramid:
-            text= formhandling.form_reprint( self.request , self._login_print , auto_error_formatter=formhandling.formatter_none )     
-    
+            text= formhandling.form_reprint( self.request , self._login_print , auto_error_formatter=formhandling.formatter_none )
+
     in the above example there are a few things to note:
 
         1. in the mako template we use `get_form` to pull/create the default formStash object for the request.  You can specify a specific formStash object if you'd like.
         2. a call is made to `form.cssError()` specifying the 'email_address' field.  this would result in the "control-group error" css mix if there is an error in 'email_address'.
-        3. We tell pyramid to use 'formhandling.formatter_none' as the error formatter.  This surpresses errors.  We need to do that instead of using custom error formatters, because FormEncode places errors BEFORE the fields, not AFTER.  
+        3. We tell pyramid to use 'formhandling.formatter_none' as the error formatter.  This surpresses errors.  We need to do that instead of using custom error formatters, because FormEncode places errors BEFORE the fields, not AFTER.
         4. I've included two methods of presenting field errors.  they are funtinoally the same.
         5. I've used an ErrorMain to show that there are issues on the form - not just a specific field.
-        
 
-        
+
+
 
 released under the BSD license, as it incorporates some Pylons code (which was BSD)
 """
@@ -276,14 +276,15 @@ def formatter_nobr(error):
     class ``error-message``, and doesn't add a ``<br>``
     """
     return '<span class="error-message">%s</span>\n' % formencode.rewritingparser.html_quote(error)
-    
+
 
 def formatter_none(error):
     """
     Formatter that ignores the error.
     This is useful / necessary when handling custom css/html
+    It outputs an html comment just so you don't go insane debugging.
     """
-    return ''
+    return '<!-- formatter_none -->'
 
 
 class FormStash( object ):
@@ -299,16 +300,19 @@ class FormStash( object ):
     html_error_template= """<span class="help-inline">%(error)s</span>"""
     html_error_main_template = """<div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> %(error)s</span></div>"""
 
+    csrf_error_string = """We're worried about the security of your form submission. Please reload this page and try again. It would be best to highlight the URL in your web-browser and hit 'return'."""
+    csrf_error_section = 'Error_Main'
+
 
     def __init__(self):
         self.errors= {}
         self.results= {}
         self.defaults= {}
-    
+
     def set_css_error(self,css_error):
         """sets the css error field for the form"""
         self.css_error= css_error
-    
+
     def set_html_error_template(self,html_error_template):
         """sets the html error template field for the form"""
         self.html_error_template = html_error_template
@@ -316,7 +320,7 @@ class FormStash( object ):
     def set_html_error_template(self,html_error_template):
         """sets the html error template MAIN field for the form.  useful for alerting the entire form is bad."""
         self.html_error_main_template = html_error_main_template
-        
+
     def hasError(self,section):
         """Returns True or False if there is an error.  Does not return the value of the error field, because the value could be False."""
         if section in self.errors :
@@ -330,7 +334,7 @@ class FormStash( object ):
                 return css_error
             return self.css_error
         return ''
-        
+
     def htmlError( self,section,template=None):
         """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
         if self.hasError(section):
@@ -338,7 +342,7 @@ class FormStash( object ):
                 template = self.html_error_template
             return template % { 'error': self.getError(section) }
         return ''
-        
+
     def htmlErrorMain( self,section,template=None):
         """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
         if self.hasError(section):
@@ -346,7 +350,7 @@ class FormStash( object ):
                 template = self.html_error_main_template
             return template % { 'error': self.getError(section) }
         return ''
-    
+
 
     def getError(self,section):
         """Returns the error."""
@@ -366,7 +370,7 @@ class FormStash( object ):
             raise FormInvalid()
         if raise_field_invalid:
             raise FieldInvalid()
-    
+
     def clearError(self,section=None):
         """clear the dict of errors"""
         if self.errors :
@@ -377,6 +381,17 @@ class FormStash( object ):
                 self.errors= {}
         if self.errors:
             self.is_error = True
+
+
+    def csrf_input_field( self , id="csrf_" , name="csrf_", type="hidden" , csrf_token='' ):
+        return """<input id="%(id)s" type="%(type)s" name="%(name)s" value="%(csrf_token)s" />""" % \
+            {
+                'id':id ,
+                'name':name,
+                'type':type,
+                'csrf_token' : csrf_token
+             }
+
 
 
 def get_form( request, form_stash='formStash' ):
@@ -402,33 +417,34 @@ def formerrors_clear( request, form_stash='formStash' , section=None ):
     form= _form_ensure( request , form_stash=form_stash )
     form.clearError( section=section , message=message )
 
-    
-
 def form_validate(\
-        request , 
-        schema=None , 
+        request ,
+        schema=None ,
         form_stash= 'formStash',
-        validate_post=True , 
-        validate_get=False , 
-        validate_params=None , 
-        variable_decode=False , 
-        dict_char='.' , 
-        list_char='-'  , 
+        form_stash_object= None,
+        validate_post=True ,
+        validate_get=False ,
+        validate_params=None ,
+        variable_decode=False ,
+        dict_char='.' ,
+        list_char='-'  ,
         state= None,
         error_main=None ,
         return_stash= True ,
         raise_form_invalid = False ,
-        raise_field_invalid = False
+        raise_field_invalid = False ,
+        csrf_name = 'csrf_',
+        csrf_token = None
     ):
     """form validation only : returns True/False ; sets up Errors ;
-    
-    Validate input for a FormEncode schema. 
-    
+
+    Validate input for a FormEncode schema.
+
     This is largely ported Pylons core, as is all of the docstring!
 
     Given a form schema, validate will attempt to validate the schema
 
-    If validation was successful, the valid result dict will be saved as ``request.formResult.results``. 
+    If validation was successful, the valid result dict will be saved as ``request.formResult.results``.
 
     .. warnings ::
             ``validate_post`` and ``validate_get`` applies to *where* the arguments to be
@@ -439,10 +455,13 @@ def form_validate(\
 
     ``schema`` ( None )
         Refers to a FormEncode Schema object to use during validation.
-        
+
     ``form_stash`` ( formStash )
-        Name of the attribute formStash will be saved into. 
+        Name of the attribute formStash will be saved into.
         Useful if you have multiple forms.
+
+    ``form_stash_object`` ( None )
+        you can pass in a form stash object if you decided to subclass or alter FormStash
 
     ``validate_post`` ( True )
         Boolean that indicates whether or not POST variables
@@ -460,7 +479,7 @@ def form_validate(\
         function should be run on the form input before validation.
 
     ``dict_char`` ( '.' )
-        Passed through to FormEncode. Toggles the form field naming 
+        Passed through to FormEncode. Toggles the form field naming
         scheme used to determine what is used to represent a dict. This
         option is only applicable when used with variable_decode=True.
 
@@ -474,7 +493,7 @@ def form_validate(\
 
     ``error_main`` ( None )
         If there are any errors that occur, this will drop an error in "Error_Main" key.
-        
+
     ``return_stash`` ( True )
         When set to True, returns a tuple of the status and the wrapped stash.  Otherwise just returns the status, and a separate call is needed to get the Stash.
         As True:
@@ -485,12 +504,14 @@ def form_validate(\
     """
     log.debug("form_validate - starting...")
     errors= {}
-    formStash= FormStash()
+    if form_stash_object is None:
+        formStash= FormStash()
+    else:
+        formStash= form_stash_object
     formStash.schema= schema
-    
-    
+
     try:
-    
+
         # if we don't pass in ``validate_params``...
         ## we must validate via GET, POST or BOTH
         if not validate_params:
@@ -500,15 +521,15 @@ def form_validate(\
                 validate_params = request.POST
             elif not validate_post and validate_get :
                 validate_params = request.GET
-            
+
         # if there are no params to validate against, then just stop
         if not validate_params:
             formStash.is_error= True
             raise ValidationStop()
-            
+
         # initialize our results
         results= {}
-            
+
         if schema:
             log.debug("form_validate - validating against a schema")
             try:
@@ -527,12 +548,18 @@ def form_validate(\
             if error_main:
                 formerrors_set( request , section='Error_Main', message=error_main )
 
+        else:
+            if csrf_token is not None:
+                if request.params.get(csrf_name) != csrf_token :
+                    formStash.setError( section=formStash.csrf_error_section , message=formStash.csrf_error_string , raise_form_invalid=False , raise_field_invalid=False )
+
+
     except ValidationStop :
         log.debug("form_validate - encountered a ValidationStop")
         pass
-        
+
     setattr( request , form_stash, formStash )
-    
+
     if formStash.is_error:
         if raise_form_invalid:
             raise FormInvalid()
@@ -544,18 +571,18 @@ def form_validate(\
     return not formStash.is_error
 
 
-    
+
 
 
 
 def form_reprint( request , form_print_method , form_stash='formStash', render_view=None, render_view_template=None, auto_error_formatter=formatter_nobr , **htmlfill_kwargs ):
     """reprint a form
-        args:       
+        args:
         ``request`` -- request instance
         ``form_print_method`` -- bound method to execute
         kwargs:
-        ``frorm_stash`` (formStash) -- specify a stash 
-        ``auto_error_formatter`` (formatter_nobr) -- specify a formatter for rendering errors 
+        ``frorm_stash`` (formStash) -- specify a stash
+        ``auto_error_formatter`` (formatter_nobr) -- specify a formatter for rendering errors
             this is an htmlfill_kwargs , but we default to one without a br
         `**htmlfill_kwargs` -- passed on to htmlfill
     """
@@ -568,7 +595,7 @@ def form_reprint( request , form_print_method , form_stash='formStash', render_v
         response= PyramidResponse(pyramid_render(render_view_template , render_view(), request=request))
     else:
        raise ValueError("invalid args submitted")
-    
+
 
     # If the form_content is an exception response, return it
     # potential ways to check:
@@ -578,9 +605,9 @@ def form_reprint( request , form_print_method , form_stash='formStash', render_v
     if hasattr(response, 'exception'):
         log.debug("form_reprint - response has exception, redirecting")
         return response
-        
+
     formStash= getattr( request , form_stash )
-    
+
     form_content= response.text
 
     # Ensure htmlfill can safely combine the form_content, params and
@@ -588,24 +615,24 @@ def form_reprint( request , form_print_method , form_stash='formStash', render_v
     if not formStash.is_unicode_params:
         log.debug("Raw string form params: ensuring the '%s' form and FormEncode errors are converted to raw strings for htmlfill", form_print_method )
         encoding= determine_response_charset(response)
-        
+
         if hasattr( response , 'errors' ):
             # WSGIResponse's content may (unlikely) be unicode
             if isinstance(form_content, unicode):
                 form_content= form_content.encode(encoding, response.errors)
-    
+
             # FormEncode>=0.7 errors are unicode (due to being localized via ugettext). Convert any of the possible formencode unpack_errors formats to contain raw strings
             errors= encode_formencode_errors(errors, encoding, response.errors)
-    
+
     elif not isinstance( form_content, unicode):
         log.debug("Unicode form params: ensuring the '%s' form is converted to unicode for htmlfill", form)
         encoding= determine_response_charset(response)
         form_content= form_content.decode(encoding)
-        
+
     form_content= formencode.htmlfill.render(\
             form_content,
             defaults=formStash.defaults,
-            errors=formStash.errors, 
+            errors=formStash.errors,
             auto_error_formatter=auto_error_formatter,
             **htmlfill_kwargs
     )
