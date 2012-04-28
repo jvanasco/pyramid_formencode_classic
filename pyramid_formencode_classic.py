@@ -389,7 +389,7 @@ class FormStash( object ):
                 'id':id ,
                 'name':name,
                 'type':type,
-                'csrf_token' : csrf_token
+                'csrf_token':csrf_token
              }
 
 
