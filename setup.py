@@ -36,7 +36,7 @@ setup(name="pyramid_formencode_classic",
       long_description=get_docs(),
       classifiers=[
         "Intended Audience :: Developers",
-        "Framework :: Pryamid",
+        "Framework :: Pyramid",
         "Programming Language :: Python",
         "License :: OSI Approved :: BSD License",
         ],
