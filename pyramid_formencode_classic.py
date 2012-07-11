@@ -1,5 +1,5 @@
 """
-v 0.0.9
+v 0.0.10
 
 a port of some classic pylons styling, but without much of the cruft that was not used often
 
@@ -261,7 +261,6 @@ def encode_formencode_errors(errors, encoding, encoding_errors='strict'):
 
 
 
-
 def formatter_help_inline(error):
     """
     Formatter that escapes the error, wraps the error in a span with
@@ -289,6 +288,7 @@ def formatter_none(error):
 
 class FormStash( object ):
     """Wrapper object, stores all the vars and objects surrounding a form validation"""
+    name= None
     is_error= None
     is_parsed= False
     is_unicode_params= False
@@ -297,17 +297,22 @@ class FormStash( object ):
     results= None
     defaults= None
     css_error= 'error'
+    error_main_key= 'Error_Main'
     html_error_template= """<span class="help-inline">%(error)s</span>"""
-    html_error_main_template = """<div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> %(error)s</span></div>"""
+    html_error_main_template = """<div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> %(error)s</span></div></div>"""
 
     csrf_error_string = """We're worried about the security of your form submission. Please reload this page and try again. It would be best to highlight the URL in your web-browser and hit 'return'."""
     csrf_error_section = 'Error_Main'
 
 
-    def __init__(self):
+    def __init__(self,error_main_key=None,name=None):
         self.errors= {}
         self.results= {}
         self.defaults= {}
+        if error_main_key:
+            self.error_main_key = error_main_key
+        if name:
+            self.name = name
 
     def set_css_error(self,css_error):
         """sets the css error field for the form"""
@@ -327,7 +332,7 @@ class FormStash( object ):
             return True
         return False
 
-    def cssError(self,section,css_error=None):
+    def cssError(self,section,css_error=''):
         """Returns the css class if there is an error.  returns '' if there is not.  The default css_error is 'error' and can be set with `set_css_error`.  You can also overwrite with a `css_error` kwarg."""
         if section in self.errors :
             if css_error:
@@ -343,8 +348,10 @@ class FormStash( object ):
             return template % { 'error': self.getError(section) }
         return ''
 
-    def htmlErrorMain( self,section,template=None):
+    def htmlErrorMain( self,section=None,template=None):
         """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
+        if section is None:
+            section= self.error_main_key
         if self.hasError(section):
             if template is None:
                 template = self.html_error_main_template
@@ -357,8 +364,10 @@ class FormStash( object ):
         if section in self.errors :
             return self.errors[section]
 
-    def setError(self,section='Error_Main',message="Error",raise_form_invalid=False,raise_field_invalid=False):
+    def setError( self, section=None , message="Error" , raise_form_invalid=False , raise_field_invalid=False ):
         """manages the dict of errors"""
+        if section is None :
+            section= self.error_main_key
         if message is None:
             if section in self.errors:
                 del self.errors[section]
@@ -394,19 +403,19 @@ class FormStash( object ):
 
 
 
-def get_form( request, form_stash='formStash' ):
+def get_form( request, form_stash='formStash' , error_main_key=None ):
     """helper function. to proxy FormStash object.  this is deprecated and just wrapping _form_ensure."""
-    return _form_ensure( request , form_stash )
+    return _form_ensure( request , form_stash=form_stash , error_main_key=error_main_key )
 
 
-def _form_ensure( request , form_stash='formStash' ):
+def _form_ensure( request , form_stash='formStash' , error_main_key=None ):
     """helper function. ensures there is a FormStash instance attached to the request"""
-    if not hasattr( request , form_stash):
-        setattr( request , form_stash , FormStash() )
+    if not hasattr( request , form_stash ):
+        setattr( request , form_stash , FormStash( name=form_stash , error_main_key=error_main_key ) )
     return getattr( request , form_stash )
 
 
-def formerrors_set( request , form_stash='formStash' , section='Error_Main' , message='There was an error with your submission...',raise_form_invalid=False,raise_field_invalid=False):
+def formerrors_set( request , form_stash='formStash' , section=None , message='There was an error with your submission...',raise_form_invalid=False,raise_field_invalid=False):
     """helper function. to proxy FormStash object"""
     form= _form_ensure( request , form_stash=form_stash )
     form.setError( section=section , message=message , raise_form_invalid=raise_form_invalid , raise_field_invalid=raise_field_invalid )
@@ -430,6 +439,7 @@ def form_validate(\
         list_char='-'  ,
         state= None,
         error_main=None ,
+        error_main_key='Error_Main',
         return_stash= True ,
         raise_form_invalid = False ,
         raise_field_invalid = False ,
@@ -491,8 +501,12 @@ def form_validate(\
     ``state``
         Passed through to FormEncode for use in validators that utilize a state object.
 
+    ``error_main_key`` ( 'Error_Main' )
+        If there are any errors that occur, this will be the key they are dropped into.
+
     ``error_main`` ( None )
-        If there are any errors that occur, this will drop an error in "Error_Main" key.
+        If there are any errors that occur, this will drop an error in the key that corresponds to ``error_main_key``.
+
 
     ``return_stash`` ( True )
         When set to True, returns a tuple of the status and the wrapped stash.  Otherwise just returns the status, and a separate call is needed to get the Stash.
@@ -505,7 +519,7 @@ def form_validate(\
     log.debug("form_validate - starting...")
     errors= {}
     if form_stash_object is None:
-        formStash= FormStash()
+        formStash= FormStash( error_main_key=error_main_key , name=form_stash )
     else:
         formStash= form_stash_object
     formStash.schema= schema
@@ -546,7 +560,7 @@ def form_validate(\
             log.debug("form_validate - Errors found in validation")
             formStash.is_error= True
             if error_main:
-                formerrors_set( request , section='Error_Main', message=error_main )
+                formStash.setError( section=formStash.error_main_key , message=error_main )
 
         else:
             if csrf_token is not None:

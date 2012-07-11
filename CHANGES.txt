@@ -1,3 +1,8 @@
+0.0.10
+	2012.07.11
+	- changed default css error to '' from `None`, should improve html rendering
+	- changed the set_error on `validate` to reference the formStash object, not the global request.  this should better support multi-form pages.
+
 0.0.9
 	2012.04.16
 	added pyramid classifier
