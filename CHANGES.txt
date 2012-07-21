@@ -1,3 +1,12 @@
+0.0.11
+	2012.07.19
+	- cgi escape will now show the output for formatter_none to aid in debugging.  there may be a future toggle for this behavior.
+	- form_validate now has a error_string_key that will be used when a string error exists ( string error should be a schema error )
+	- form_validate is better inline with the classic formencode behavior, specifically the management of mixed() params
+	- form_validate will now test errors for type, and coerce a String error into a Dict, using error_string_key as the key.  this should make developing against this easier,
+	- form_reprint is better inline with the classic formencode behavior, specifically cloning the htmlfill_kwargs and setting a default encoding to match request.charset
+
+
 0.0.10
 	2012.07.11
 	- changed default css error to '' from `None`, should improve html rendering

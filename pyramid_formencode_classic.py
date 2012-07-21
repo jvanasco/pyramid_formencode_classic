@@ -1,5 +1,5 @@
 """
-v 0.0.10
+v 0.0.11
 
 a port of some classic pylons styling, but without much of the cruft that was not used often
 
@@ -203,6 +203,7 @@ released under the BSD license, as it incorporates some Pylons code (which was B
 import logging
 log = logging.getLogger(__name__)
 
+import cgi
 import formencode
 import formencode.htmlfill
 import sys
@@ -283,8 +284,7 @@ def formatter_none(error):
     This is useful / necessary when handling custom css/html
     It outputs an html comment just so you don't go insane debugging.
     """
-    return '<!-- formatter_none -->'
-
+    return '<!-- formatter_none (%s)-->' % cgi.escape(error)
 
 class FormStash( object ):
     """Wrapper object, stores all the vars and objects surrounding a form validation"""
@@ -440,6 +440,7 @@ def form_validate(\
         state= None,
         error_main=None ,
         error_main_key='Error_Main',
+        error_string_key='Error_String',
         return_stash= True ,
         raise_form_invalid = False ,
         raise_field_invalid = False ,
@@ -507,6 +508,8 @@ def form_validate(\
     ``error_main`` ( None )
         If there are any errors that occur, this will drop an error in the key that corresponds to ``error_main_key``.
 
+    ``error_string_key`` ( 'Error_String' )
+        If there are is a string-based error that occurs, this will be the key they are dropped into.
 
     ``return_stash`` ( True )
         When set to True, returns a tuple of the status and the wrapped stash.  Otherwise just returns the status, and a separate call is needed to get the Stash.
@@ -536,8 +539,16 @@ def form_validate(\
             elif not validate_post and validate_get :
                 validate_params = request.GET
 
+        validate_params = validate_params.mixed()
+
+        if variable_decode :
+            log.debug("form_validate - running variable_decode on params")
+            decoded_params = formencode.variable_decode( validate_params , dict_char , list_char )
+        else :
+            decoded_params = validate_params
+
         # if there are no params to validate against, then just stop
-        if not validate_params:
+        if not decoded_params:
             formStash.is_error= True
             raise ValidationStop()
 
@@ -547,14 +558,16 @@ def form_validate(\
         if schema:
             log.debug("form_validate - validating against a schema")
             try:
-                results= schema.to_python( validate_params , state )
+                results= schema.to_python( decoded_params , state )
             except formencode.Invalid, e:
                 errors= e.unpack_errors( variable_decode , dict_char , list_char )
+                if isinstance( errors , types.StringTypes ) :
+                    errors= { error_string_key : errors }
             formStash.is_parsed= True
 
         formStash.results= results
         formStash.errors= errors
-        formStash.defaults = validate_params
+        formStash.defaults = decoded_params
 
         if errors:
             log.debug("form_validate - Errors found in validation")
@@ -622,6 +635,9 @@ def form_reprint( request , form_print_method , form_stash='formStash', render_v
 
     formStash= getattr( request , form_stash )
 
+    print formStash.__dict__
+    #raise ValueError('ok')
+
     form_content= response.text
 
     # Ensure htmlfill can safely combine the form_content, params and
@@ -643,12 +659,14 @@ def form_reprint( request , form_print_method , form_stash='formStash', render_v
         encoding= determine_response_charset(response)
         form_content= form_content.decode(encoding)
 
+    htmlfill_kwargs2 = htmlfill_kwargs.copy()
+    htmlfill_kwargs2.setdefault('encoding', request.charset)
     form_content= formencode.htmlfill.render(\
             form_content,
             defaults=formStash.defaults,
             errors=formStash.errors,
             auto_error_formatter=auto_error_formatter,
-            **htmlfill_kwargs
+            **htmlfill_kwargs2
     )
     response.text= form_content
     return response
