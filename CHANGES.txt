@@ -1,3 +1,8 @@
+0.0.12
+	2012.08.17
+	- migrated all forms to live under a dict in request.pyramid_formencode_classic and use an API for get/set , this should create a much cleaner request and programming style
+	- this should not have an affect , unless you were directly reading the request attribute.  if that was the case, please move to the get_form method.
+
 0.0.11
 	2012.07.19
 	- cgi escape will now show the output for formatter_none to aid in debugging.  there may be a future toggle for this behavior.

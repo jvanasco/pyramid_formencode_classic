@@ -1,5 +1,5 @@
 """
-v 0.0.11
+v 0.0.12
 
 a port of some classic pylons styling, but without much of the cruft that was not used often
 
@@ -139,20 +139,20 @@ define your view/handler
         def _login_submit(self):
 
             try :
-                if not formhandling.form_validate( self.request , schema=forms.FormLogin , error_main="OH NOES!" ):
-                    raise formhandling.ValidationStop("Invalid Form")
+                ( result , formStash ) = formhandling.form_validate( self.request , schema=forms.FormLogin , error_main="There was an error with your form." )
+                if not result:
+                    raise formhandling.FormInvalid("Invalid Form")
 
-                results= self.request.formStash.results
+                results= formStash.results
 
                 useraccount = model.find_user( results['email_address'] )
                 if not useraccount:
-                    formhandling.formerrors_set(self.request,section="email_address",message="Email not registered")
+                    formStash.setError(self.request,section="email_address",message="Email not registered" , raise_form_invalid=True )
 
                 if not useraccount.verify_submitted_password( results['password'] ):
-                    formhandling.formerrors_set(self.request,section="email_address",message="Wrong password")
+                    formStash.setError(self.request,section="email_address",message="Wrong password" , raise_form_invalid=True)
 
-            except formhandling.ValidationStop :
-                formhandling.formerrors_set(self.request,section="Error_Main",message="There was an error with your form")
+            except formhandling.FormInvalid :
                 return formhandling.form_reprint( self.request , self._login_print )
 
             except:
@@ -211,6 +211,7 @@ import types
 from pyramid.response import Response as PyramidResponse
 from pyramid.renderers import render as pyramid_render
 
+DEFAULT_FORM_STASH= '_default'
 
 class BaseException(Exception):
     """base exception class"""
@@ -402,34 +403,46 @@ class FormStash( object ):
              }
 
 
+def init_request( request ):
+    """helper function. ensures there is a `pyramid_formencode_classic` dict on the request"""
+    if not hasattr( request , 'pyramid_formencode_classic' ):
+        setattr( request , 'pyramid_formencode_classic', {} )
 
-def get_form( request, form_stash='formStash' , error_main_key=None ):
-    """helper function. to proxy FormStash object.  this is deprecated and just wrapping _form_ensure."""
+
+def set_form( request , form_stash=DEFAULT_FORM_STASH , formObject=None ):
+    init_request( request )
+    request.pyramid_formencode_classic[form_stash] = formObject
+
+
+def get_form( request, form_stash=DEFAULT_FORM_STASH , error_main_key=None ):
+    """DEPRECATED.  helper function. to proxy FormStash object.  this is just wrapping _form_ensure."""
     return _form_ensure( request , form_stash=form_stash , error_main_key=error_main_key )
 
 
-def _form_ensure( request , form_stash='formStash' , error_main_key=None ):
+def _form_ensure( request , form_stash=DEFAULT_FORM_STASH , error_main_key=None ):
     """helper function. ensures there is a FormStash instance attached to the request"""
-    if not hasattr( request , form_stash ):
-        setattr( request , form_stash , FormStash( name=form_stash , error_main_key=error_main_key ) )
-    return getattr( request , form_stash )
+    init_request( request )
+    if form_stash not in request.pyramid_formencode_classic:
+        request.pyramid_formencode_classic[form_stash] = FormStash( name=form_stash , error_main_key=error_main_key )
+    return request.pyramid_formencode_classic[form_stash]
 
 
-def formerrors_set( request , form_stash='formStash' , section=None , message='There was an error with your submission...',raise_form_invalid=False,raise_field_invalid=False):
+def formerrors_set( request , form_stash=DEFAULT_FORM_STASH , section=None , message='There was an error with your submission...',raise_form_invalid=False,raise_field_invalid=False):
     """helper function. to proxy FormStash object"""
     form= _form_ensure( request , form_stash=form_stash )
     form.setError( section=section , message=message , raise_form_invalid=raise_form_invalid , raise_field_invalid=raise_field_invalid )
 
 
-def formerrors_clear( request, form_stash='formStash' , section=None ):
+def formerrors_clear( request, form_stash=DEFAULT_FORM_STASH , section=None ):
     """helper function. to proxy FormStash object"""
     form= _form_ensure( request , form_stash=form_stash )
     form.clearError( section=section , message=message )
 
+
 def form_validate(\
         request ,
         schema=None ,
-        form_stash= 'formStash',
+        form_stash= DEFAULT_FORM_STASH,
         form_stash_object= None,
         validate_post=True ,
         validate_get=False ,
@@ -467,8 +480,8 @@ def form_validate(\
     ``schema`` ( None )
         Refers to a FormEncode Schema object to use during validation.
 
-    ``form_stash`` ( formStash )
-        Name of the attribute formStash will be saved into.
+    ``form_stash`` ( pyramid_formencode_classic.DEFAULT_FORM_STASH = '_default' )
+        Name of the attribute the FormStash will be saved into.
         Useful if you have multiple forms.
 
     ``form_stash_object`` ( None )
@@ -573,11 +586,13 @@ def form_validate(\
             log.debug("form_validate - Errors found in validation")
             formStash.is_error= True
             if error_main:
-                formStash.setError( section=formStash.error_main_key , message=error_main )
+                # don't raise an error, because we have to stash the form
+                formStash.setError( section=formStash.error_main_key , message=error_main , raise_form_invalid=False , raise_field_invalid=False )
 
         else:
             if csrf_token is not None:
                 if request.params.get(csrf_name) != csrf_token :
+                    # don't raise an error, because we have to stash the form
                     formStash.setError( section=formStash.csrf_error_section , message=formStash.csrf_error_string , raise_form_invalid=False , raise_field_invalid=False )
 
 
@@ -585,7 +600,8 @@ def form_validate(\
         log.debug("form_validate - encountered a ValidationStop")
         pass
 
-    setattr( request , form_stash, formStash )
+    # save the form onto the request
+    set_form( request , form_stash=form_stash , formObject=formStash )
 
     if formStash.is_error:
         if raise_form_invalid:
@@ -602,13 +618,13 @@ def form_validate(\
 
 
 
-def form_reprint( request , form_print_method , form_stash='formStash', render_view=None, render_view_template=None, auto_error_formatter=formatter_nobr , **htmlfill_kwargs ):
+def form_reprint( request , form_print_method , form_stash=DEFAULT_FORM_STASH, render_view=None, render_view_template=None, auto_error_formatter=formatter_nobr , **htmlfill_kwargs ):
     """reprint a form
         args:
         ``request`` -- request instance
         ``form_print_method`` -- bound method to execute
         kwargs:
-        ``frorm_stash`` (formStash) -- specify a stash
+        ``frorm_stash`` ( pyramid_formencode_classic.DEFAULT_FORM_STASH = _default) -- specify a stash
         ``auto_error_formatter`` (formatter_nobr) -- specify a formatter for rendering errors
             this is an htmlfill_kwargs , but we default to one without a br
         `**htmlfill_kwargs` -- passed on to htmlfill
@@ -633,10 +649,7 @@ def form_reprint( request , form_print_method , form_stash='formStash', render_v
         log.debug("form_reprint - response has exception, redirecting")
         return response
 
-    formStash= getattr( request , form_stash )
-
-    print formStash.__dict__
-    #raise ValueError('ok')
+    formStash= get_form( request, form_stash=form_stash )
 
     form_content= response.text
 
