@@ -535,9 +535,9 @@ def form_validate(\
     log.debug("form_validate - starting...")
     errors= {}
     if form_stash_object is None:
-        formStash= FormStash( error_main_key=error_main_key , name=form_stash )
+        formStash = FormStash( error_main_key=error_main_key , name=form_stash )
     else:
-        formStash= form_stash_object
+        formStash = form_stash_object
     formStash.schema= schema
 
     try:
@@ -563,7 +563,7 @@ def form_validate(\
         # if there are no params to validate against, then just stop
         if not decoded_params:
             formStash.is_error= True
-            raise ValidationStop()
+            raise ValidationStop('not decoded_params')
 
         # initialize our results
         results= {}

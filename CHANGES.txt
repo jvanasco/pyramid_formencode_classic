@@ -1,3 +1,8 @@
+0.1.0
+	2013.08.27
+	- packaging fixes
+
+
 0.0.12
 	2012.08.17
 	- migrated all forms to live under a dict in request.pyramid_formencode_classic and use an API for get/set , this should create a much cleaner request and programming style

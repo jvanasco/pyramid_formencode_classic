@@ -10,7 +10,7 @@ from setuptools import find_packages
 def get_docs():
     result = []
     in_docs = False
-    f = open(os.path.join(os.path.dirname(__file__), 'pyramid_formencode_classic.py'))
+    f = open(os.path.join(os.path.dirname(__file__), 'pyramid_formencode_classic/__init__.py'))
     try:
         for line in f:
             if in_docs:
@@ -30,27 +30,24 @@ requires = [
     "FormEncode>=1.2.4",
     ]
 
-setup(name="pyramid_formencode_classic",
-      version="0.0.12",
-      description="an implementation of the classic pylons formencode validation, for pyramid",
-      long_description=get_docs(),
-      classifiers=[
+setup(
+    name="pyramid_formencode_classic",
+    author="Jonathan Vanasco",
+    author_email="jonathan@findmeon.com",
+    version="0.1.0",
+    url="https://github.com/jvanasco/pyramid_formencode_classic",
+    description="an implementation of the classic pylons formencode validation, for pyramid",
+    long_description=get_docs(),
+    license="MIT",
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
+    install_requires = requires,
+    test_suite="tests",
+    classifiers=[
         "Intended Audience :: Developers",
         "Framework :: Pyramid",
         "Programming Language :: Python",
         "License :: OSI Approved :: BSD License",
-        ],
-      keywords="web pyramid",
-      py_modules=['pyramid_formencode_classic'],
-      author="Jonathan Vanasco",
-      author_email="jonathan@findmeon.com",
-      url="https://github.com/jvanasco/pyramid_formencode_classic",
-      license="MIT",
-      packages=find_packages(),
-      include_package_data=True,
-      zip_safe=False,
-      tests_require = requires,
-      install_requires = requires,
-      test_suite="tests",
-      )
-
+    ],
+)
