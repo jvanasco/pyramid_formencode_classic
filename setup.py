@@ -6,7 +6,6 @@ from setuptools import setup
 from setuptools import find_packages
 
 
-
 def get_docs():
     result = []
     in_docs = False
@@ -24,17 +23,16 @@ def get_docs():
     return '\n'.join(result)
 
 
-
 requires = [
     "pyramid",
     "FormEncode>=1.2.4",
-    ]
+]
 
 setup(
     name="pyramid_formencode_classic",
     author="Jonathan Vanasco",
     author_email="jonathan@findmeon.com",
-    version="0.1.0",
+    version="0.1.1",
     url="https://github.com/jvanasco/pyramid_formencode_classic",
     description="an implementation of the classic pylons formencode validation, for pyramid",
     long_description=get_docs(),

@@ -1,7 +1,11 @@
+0.1.1
+	2014.07.17
+	- flake8
+	- fixed some errors that flake8 found
+
 0.1.0
 	2013.08.27
 	- packaging fixes
-
 
 0.0.12
 	2012.08.17
