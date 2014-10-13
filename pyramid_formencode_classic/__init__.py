@@ -207,34 +207,11 @@ import types
 from pyramid.response import Response as PyramidResponse
 from pyramid.renderers import render as pyramid_render
 
+from .exceptions import *
+from .formatters import *
+
+
 DEFAULT_FORM_STASH = '_default'
-
-
-class BaseException(Exception):
-    """base exception class"""
-
-    def __init__(self, message='', errors=None):
-        self.message = message
-        if errors:
-            self.errors = errors
-
-    def __str__(self):
-        return repr(self.message)
-
-
-class FormInvalid(BaseException):
-    """Raise in your code when a form is invalid"""
-    pass
-
-
-class FieldInvalid(BaseException):
-    """Raise in your code when a formfield is invalid"""
-    pass
-
-
-class ValidationStop(BaseException):
-    """Stop validating"""
-    pass
 
 
 def determine_response_charset(response):
@@ -262,31 +239,6 @@ def encode_formencode_errors(errors, encoding, encoding_errors='strict'):
         # Fallback to an iterable (a list)
         errors = [encode_formencode_errors(error, encoding, encoding_errors) for error in errors]
     return errors
-
-
-def formatter_help_inline(error):
-    """
-    Formatter that escapes the error, wraps the error in a span with
-    class ``help-inline``, and doesn't add a ``<br>`` ; somewhat compatible with twitter's bootstrap
-    """
-    return '<span class="help-inline">%s</span>\n' % formencode.rewritingparser.html_quote(error)
-
-
-def formatter_nobr(error):
-    """
-    Formatter that escapes the error, wraps the error in a span with
-    class ``error-message``, and doesn't add a ``<br>``
-    """
-    return '<span class="error-message">%s</span>\n' % formencode.rewritingparser.html_quote(error)
-
-
-def formatter_none(error):
-    """
-    Formatter that ignores the error.
-    This is useful / necessary when handling custom css/html
-    It outputs an html comment just so you don't go insane debugging.
-    """
-    return '<!-- formatter_none (%s)-->' % cgi.escape(error)
 
 
 class FormStash(object):
