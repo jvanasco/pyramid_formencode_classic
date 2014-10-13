@@ -1,3 +1,7 @@
+"""exceptions
+"""
+
+
 class BaseException(Exception):
     """base exception class"""
 

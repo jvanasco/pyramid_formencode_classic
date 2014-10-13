@@ -1,7 +1,7 @@
 0.1.2
 	2014.10.13
 	- split into multiple files
-	-
+	- changed request's formstash dict to a custom class that wraps dict.
 
 0.1.1
 	2014.07.17

@@ -1,5 +1,5 @@
 """
-v 0.1.1
+v 0.1.2
 
 a port of some classic pylons styling, but without much of the cruft that was not used often
 
@@ -199,18 +199,25 @@ released under the BSD license, as it incorporates some Pylons code (which was B
 import logging
 log = logging.getLogger(__name__)
 
+# stdlib
 import cgi
-import formencode
-import formencode.htmlfill
 import sys
 import types
+
+
+# pypi
+import formencode
+import formencode.htmlfill
 from pyramid.response import Response as PyramidResponse
 from pyramid.renderers import render as pyramid_render
 
+
+# local
 from .exceptions import *
 from .formatters import *
 
 
+# defaults
 DEFAULT_FORM_STASH = '_default'
 
 
@@ -354,10 +361,15 @@ class FormStash(object):
             }
 
 
+class FormStashList(dict):
+    """dict for holding `FormStash`"""
+    pass
+
+
 def init_request(request):
     """helper function. ensures there is a `pyramid_formencode_classic` dict on the request"""
     if not hasattr(request, 'pyramid_formencode_classic'):
-        setattr(request, 'pyramid_formencode_classic', {})
+        setattr(request, 'pyramid_formencode_classic', FormStashList())
 
 
 def set_form(request, form_stash=DEFAULT_FORM_STASH, formObject=None):

@@ -1,5 +1,10 @@
-import formencode
+"""formatters we use
+"""
+# stdlib
 import cgi
+
+# pypi
+import formencode
 
 
 def formatter_help_inline(error):
