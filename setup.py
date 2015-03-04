@@ -32,7 +32,7 @@ setup(
     name="pyramid_formencode_classic",
     author="Jonathan Vanasco",
     author_email="jonathan@findmeon.com",
-    version="0.1.2",
+    version="0.1.3",
     url="https://github.com/jvanasco/pyramid_formencode_classic",
     description="an implementation of the classic pylons formencode validation, for pyramid",
     long_description=get_docs(),

@@ -1,10 +1,10 @@
 """
-v 0.1.2
+v 0.1.3
 
 a port of some classic pylons styling, but without much of the cruft that was not used often
 
 
-This allows for a very particular coding style, which i prefer.
+This allows for a very particular coding style that was popular with the Pylons framework, which I prefer.
 
 As you can see below, 'methods' are broken into multiple parts:
 
@@ -97,7 +97,7 @@ MAJOR CAVEATS
                         return formhandling.form_reprint(self.request, None, render_view=self._test_print, render_view_template="/test_form.mako")
 
 
-Needly to say: this is really nice and clean in the first scenario, and messy in the latter.
+Needless to say: this is really nice and clean in the first scenario, and messy in the latter.
 
 
 80% of this code is adapted from Pylons, 20% is outright copy/pasted.
@@ -220,6 +220,7 @@ from .formatters import *
 # defaults
 DEFAULT_FORM_STASH = '_default'
 
+DEPRECATION_WARNING = False
 
 def determine_response_charset(response):
     """FROM PYLONS -- Determine the charset of the specified Response object,
@@ -287,13 +288,13 @@ class FormStash(object):
         """sets the html error template MAIN field for the form.  useful for alerting the entire form is bad."""
         self.html_error_main_template = html_error_main_template
 
-    def hasError(self, section):
+    def has_error(self, section):
         """Returns True or False if there is an error.  Does not return the value of the error field, because the value could be False."""
         if section in self.errors:
             return True
         return False
 
-    def cssError(self, section, css_error=''):
+    def css_error(self, section, css_error=''):
         """Returns the css class if there is an error.  returns '' if there is not.  The default css_error is 'error' and can be set with `set_css_error`.  You can also overwrite with a `css_error` kwarg."""
         if section in self.errors:
             if css_error:
@@ -301,7 +302,7 @@ class FormStash(object):
             return self.css_error
         return ''
 
-    def htmlError(self, section, template=None):
+    def html_error(self, section, template=None):
         """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
         if self.hasError(section):
             if template is None:
@@ -309,7 +310,7 @@ class FormStash(object):
             return template % {'error': self.getError(section)}
         return ''
 
-    def htmlErrorMain(self, section=None, template=None):
+    def html_error_main(self, section=None, template=None):
         """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
         if section is None:
             section = self.error_main_key
@@ -319,19 +320,52 @@ class FormStash(object):
             return template % {'error': self.getError(section)}
         return ''
 
-    def getError(self, section):
+    def get_error(self, section):
         """Returns the error."""
         if section in self.errors:
             return self.errors[section]
 
-    def setError(self, section=None, message="Error", raise_form_invalid=False, raise_field_invalid=False):
-        """manages the dict of errors"""
+    def set_error(self, section=None, message="Error", raise_form_invalid=False, raise_field_invalid=False, message_append=False, message_prepend=False):
+        """manages the dict of errors
+        
+            `section`: the field in the form
+            `message`: your error message
+            `raise_form_invalid`: default `False`. if `True` will raise `FormInvalid`
+            `raise_field_invalid`: default `False`. if `True` will raise `FieldInvalid`
+            `message_append`: default `False`.  if true, will append the `message` argument to any existing argument in this `section`
+            `message_prepend`: default `False`.  if true, will prepend the `message` argument to any existing argument in this `section`
+            
+            
+            meessage_append and message_prepend allow you to elegantly combine errors
+            
+            consider this code:
+            
+                try:
+                    except CaughtError, e:
+                        formStash.set_error(message="We encountered a `CaughtError`", raise_form_invalid=True)
+                    ...
+                except formhandling.FormInvalid:
+                    formStash.set_error(section='Error_Main', message="There was an error with your form.", message_prepend=True)
+                    return formhandling.form_reprint(...)
+                    
+            This would generate the following text for the `Error_Main` section:
+
+                There was an error with your form.  We encountered a `CaughtError`
+        """
         if section is None:
             section = self.error_main_key
         if message is None:
             if section in self.errors:
                 del self.errors[section]
         else:
+            if message_append and message_prepend:
+                raise ValueError("You can not set both `message_append` `message_prepend`")
+            if message_append or message_prepend:
+                _message_existing = self.errors[section] if (section in self.errors) else ''
+                if message_append:
+                    message = _message_existing + ' ' + message
+                elif message_prepend:
+                    message =  message + ' ' + _message_existing
             self.errors[section] = message
         if self.errors:
             self.is_error = True
@@ -340,7 +374,7 @@ class FormStash(object):
         if raise_field_invalid:
             raise FieldInvalid()
 
-    def clearError(self, section=None):
+    def clear_error(self, section=None):
         """clear the dict of errors"""
         if self.errors:
             if section:
@@ -359,6 +393,44 @@ class FormStash(object):
                 'type': type,
                 'csrf_token': csrf_token
             }
+
+    # --------------------------------------------------------------------------
+    # deprecation support
+
+    def hasError(self, section):
+        if DEPRECATION_WARNING:
+            log.debug("`hasError` is being deprecated to `has_error`")
+        return self.has_error(section)
+
+    def cssError(self, section, css_error=''):
+        if DEPRECATION_WARNING:
+            log.debug("`cssError` is being deprecated to `css_error`")
+        return self.css_error(section, css_error=css_error)
+
+    def htmlError(self, section, template=None):
+        if DEPRECATION_WARNING:
+            log.debug("`htmlError` is being deprecated to `html_error`")
+        return self.html_error(section, template=template)
+
+    def htmlErrorMain(self, section=None, template=None):
+        if DEPRECATION_WARNING:
+            log.debug("`htmlErrorMain` is being deprecated to `html_error_main`")
+        return self.html_error_main(section=section, template=template)
+
+    def getError(self, section):
+        if DEPRECATION_WARNING:
+            log.debug("`getError` is being deprecated to `get_error`")
+        return self.get_error(section)
+
+    def setError(self, section=None, message="Error", raise_form_invalid=False, raise_field_invalid=False):
+        if DEPRECATION_WARNING:
+            log.debug("`setError` is being deprecated to `set_error`")
+        return self.set_error(section=section, message=message, raise_form_invalid=raise_form_invalid, raise_field_invalid=raise_field_invalid)
+
+    def clearError(self, section=None):
+        if DEPRECATION_WARNING:
+            log.debug("`clearError` is being deprecated to `clear_error`")
+        return self.clear_error(section=section)
 
 
 class FormStashList(dict):
