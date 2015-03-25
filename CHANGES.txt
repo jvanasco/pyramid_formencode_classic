@@ -1,3 +1,9 @@
+0.1.4
+	2015.03.25
+	- added `has_errors`
+	- migrated some intenal calls
+	- updated `html_error_main` to better show errors
+
 0.1.3
 	2015.03.04
 	- deprecated `camelCase` function names, replacing with `lower_case` function names.

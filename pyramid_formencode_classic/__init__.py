@@ -1,5 +1,5 @@
 """
-v 0.1.3
+v 0.1.4
 
 a port of some classic pylons styling, but without much of the cruft that was not used often
 
@@ -65,7 +65,7 @@ MAJOR CAVEATS
                             raise formhandling.FormInvalid()
                         userAccount= query_for_useraccount(formStash.results['email'])
                         if not userAccount:
-                            formStash.setError(section='email', message='Invalid', raise_form_invalid=True)
+                            formStash.set_error(section='email', message='Invalid', raise_form_invalid=True)
                         ...
                     except formhandling.FormInvalid:
                         # you could set a field manually too
@@ -146,10 +146,10 @@ define your view/handler
 
                 useraccount = model.find_user(results['email_address'])
                 if not useraccount:
-                    formStash.setError(self.request, section="email_address", message="Email not registered", raise_form_invalid=True)
+                    formStash.set_error(self.request, section="email_address", message="Email not registered", raise_form_invalid=True)
 
                 if not useraccount.verify_submitted_password(results['password']):
-                    formStash.setError(self.request, section="email_address", message="Wrong password", raise_form_invalid=True)
+                    formStash.set_error(self.request, section="email_address", message="Wrong password", raise_form_invalid=True)
 
             except formhandling.FormInvalid:
                 return formhandling.form_reprint(self.request, self._login_print)
@@ -169,16 +169,16 @@ Twitter Bootstrap Example
 
         Mako:
             <% form= formhandling.get_form(request) %>
-            ${form.htmlErrorMain('Error_Main')|n}
-            <div class="control-group ${form.cssError('email_address')}">
+            ${form.html_error_main('Error_Main')|n}
+            <div class="control-group ${form.css_error('email_address')}">
                 <label class="control-label" for="email_address">Email</label>
                 <input id="email_address" name="email_address" placeholder="Email Address" size="30" type="text" />
-                ${form.htmlError('email_address')|n}
+                ${form.html_error('email_address')|n}
             </div>
 
             you could also show an error with:
-                % if form.hasError('email_address'):
-                    <span class="help-inline">${form.getError('email_address')}</span>
+                % if form.has_error('email_address'):
+                    <span class="help-inline">${form.get_error('email_address')}</span>
                 % endif
 
 
@@ -188,7 +188,7 @@ Twitter Bootstrap Example
     in the above example there are a few things to note:
 
         1. in the mako template we use `get_form` to pull/create the default formStash object for the request.  You can specify a specific formStash object if you'd like.
-        2. a call is made to `form.cssError()` specifying the 'email_address' field.  this would result in the "control-group error" css mix if there is an error in 'email_address'.
+        2. a call is made to `form.css_error()` specifying the 'email_address' field.  this would result in the "control-group error" css mix if there is an error in 'email_address'.
         3. We tell pyramid to use 'formhandling.formatter_none' as the error formatter.  This surpresses errors.  We need to do that instead of using custom error formatters, because FormEncode places errors BEFORE the fields, not AFTER.
         4. I've included two methods of presenting field errors.  they are funtinoally the same.
         5. I've used an ErrorMain to show that there are issues on the form - not just a specific field.
@@ -289,8 +289,14 @@ class FormStash(object):
         self.html_error_main_template = html_error_main_template
 
     def has_error(self, section):
-        """Returns True or False if there is an error.  Does not return the value of the error field, because the value could be False."""
+        """Returns True or False if there is an error in `section`.  Does not return the value of the error field, because the value could be False."""
         if section in self.errors:
+            return True
+        return False
+
+    def has_errors(self):
+        """Returns True or False if there is are errors."""
+        if self.errors:
             return True
         return False
 
@@ -304,20 +310,26 @@ class FormStash(object):
 
     def html_error(self, section, template=None):
         """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
-        if self.hasError(section):
+        if self.has_error(section):
             if template is None:
                 template = self.html_error_template
-            return template % {'error': self.getError(section)}
+            return template % {'error': self.get_error(section)}
         return ''
 
     def html_error_main(self, section=None, template=None):
         """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
+        error = None
+        # look in the main error section specifically
         if section is None:
             section = self.error_main_key
-        if self.hasError(section):
+        if self.has_errors():
+            if self.has_error(section):
+                error = self.get_error(section)
+            else:
+                error = "There was an error with your submission."
             if template is None:
                 template = self.html_error_main_template
-            return template % {'error': self.getError(section)}
+            return template % {'error': error}
         return ''
 
     def get_error(self, section):
@@ -465,13 +477,13 @@ def _form_ensure(request, form_stash=DEFAULT_FORM_STASH, error_main_key=None):
 def formerrors_set(request, form_stash=DEFAULT_FORM_STASH, section=None, message='There was an error with your submission...', raise_form_invalid=False, raise_field_invalid=False):
     """helper function. to proxy FormStash object"""
     form = _form_ensure(request, form_stash=form_stash)
-    form.setError(section=section, message=message, raise_form_invalid=raise_form_invalid, raise_field_invalid=raise_field_invalid)
+    form.set_error(section=section, message=message, raise_form_invalid=raise_form_invalid, raise_field_invalid=raise_field_invalid)
 
 
 def formerrors_clear(request, form_stash=DEFAULT_FORM_STASH, section=None):
     """helper function. to proxy FormStash object"""
     form = _form_ensure(request, form_stash=form_stash)
-    form.clearError(section=section)
+    form.clear_error(section=section)
 
 
 def form_validate(
@@ -622,13 +634,13 @@ def form_validate(
             formStash.is_error = True
             if error_main:
                 # don't raise an error, because we have to stash the form
-                formStash.setError(section=formStash.error_main_key, message=error_main, raise_form_invalid=False, raise_field_invalid=False)
+                formStash.set_error(section=formStash.error_main_key, message=error_main, raise_form_invalid=False, raise_field_invalid=False)
 
         else:
             if csrf_token is not None:
                 if request.params.get(csrf_name) != csrf_token:
                     # don't raise an error, because we have to stash the form
-                    formStash.setError(section=formStash.csrf_error_section, message=formStash.csrf_error_string, raise_form_invalid=False, raise_field_invalid=False)
+                    formStash.set_error(section=formStash.csrf_error_section, message=formStash.csrf_error_string, raise_form_invalid=False, raise_field_invalid=False)
 
     except ValidationStop:
         log.debug("form_validate - encountered a ValidationStop")
