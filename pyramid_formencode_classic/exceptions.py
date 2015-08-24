@@ -24,6 +24,11 @@ class FieldInvalid(BaseException):
     pass
 
 
+class CsrfInvalid(FormInvalid, FieldInvalid):
+    """Raise in your code when a formfield is invalid"""
+    pass
+
+
 class ValidationStop(BaseException):
     """Stop validating"""
     pass

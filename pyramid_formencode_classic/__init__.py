@@ -1,206 +1,9 @@
-"""
-v 0.1.4
-
-a port of some classic pylons styling, but without much of the cruft that was not used often
-
-
-This allows for a very particular coding style that was popular with the Pylons framework, which I prefer.
-
-As you can see below, 'methods' are broken into multiple parts:
-
-- a callable dispatcher (login)
-- a private printer (_login_print)
-- a private submit processor (_login_submit)
-
-The formencode schema does not interact with the database.  it is used entirely for "lightweight" validation and cheap operations (length, presence, etc)
-
-The more involved operations occur in the submit processor.
-
-At any time, if an error is occured, a call to "form_reprint" can be made.  that function makes a subrequest and runs htmlfill on it.
-
-Custom errors can be set as well.
-
-If you want to set a "oh noes! message" for the form, pass in the `error_main` argument to validate, that will set an error in Error_Main, which will do one of two things:
-a-  formencode.htmlfill will replace this marking in your template
-        <form:error name="Error_Main"/>
-    with the follwing:
-        <span class="error-message">${error_main}</span><br/>
-
-    caveat:
-        <form:error name="Error_Main"/> will appear on valid documents, as htmlfill won't be called to strip it out
-        if you want to strip it out, you could do the following:
-
-            - pass your formStash into a template via the print mechanism
-            - test for form validity in the form ; the FormStash class has an is_error attribute which is set True on errors (and cleared when no errors exist)
-
-
-b- if the marking is not in your template, it will be at the top of the document (before the html) as
-    <!-- for: Error_Main -->
-    <span class="error-message">${error_main}</span>
-
-As with all formencode implementaitons, you can control where an error message appears by placing an explicit <form:error name="${formfield}"/>
-
-
-there is a trivial attempt at multiple form handling - a "form_stash" argument can be used, which will store different "FormStash" wrapped structures in the names provided.
-
-MAJOR CAVEATS
-    1. it doesn't support using a "render" on the form object -- it expects forms to be manually coded, and errors to be regexed out via htmlfill. live with it.
-    2. this REQUIRES one of the following two scenarios:
-        a-  the form methods return a response object via "pyramid.renderers.render_to_response"
-
-            your handlers would look like this
-
-                def test(self):
-                    if 'submit' in self.request.POST:
-                        return self._test_submit()
-                    return self._test_print()
-
-                def _test_print(self):
-                    return render_to_response("/test_form.mako", {}, self.request)
-
-                def _test_submit(self):
-                    try:
-                        (result, formStash) = formhandling.form_validate(self.request, schema=forms.FormLogin, error_main="Error")
-                        if not result:
-                            raise formhandling.FormInvalid()
-                        userAccount= query_for_useraccount(formStash.results['email'])
-                        if not userAccount:
-                            formStash.set_error(section='email', message='Invalid', raise_form_invalid=True)
-                        ...
-                    except formhandling.FormInvalid:
-                        # you could set a field manually too
-                        #formhandling.formerrors_set(self.request, section="field", message='missing this field')
-                        return formhandling.form_reprint(self.request, self._login_print)
-
-        b- you use an action decorator
-
-            your handlers would look like this
-
-                @action(renderer='/test_form.mako')
-                def test(self):
-                    if 'submit' in self.request.POST:
-                        return self._test_submit()
-                    return self._test_print()
-
-                def _test_print(self):
-                    return {"project":"MyApp"}
-
-                def _test_submit(self):
-                    try:
-                        result = formhandling.form_validate(self.request, schema=forms.FormLogin, error_main="Error")
-                        if not result:
-                            raise formhandling.FormInvalid()
-                        ...
-                    except formhandling.FormInvalid:
-                        # you could set a field manually too
-                        #formhandling.formerrors_set(self.request, section="field", message='missing this field')
-                        return formhandling.form_reprint(self.request, None, render_view=self._test_print, render_view_template="/test_form.mako")
-
-
-Needless to say: this is really nice and clean in the first scenario, and messy in the latter.
-
-
-80% of this code is adapted from Pylons, 20% is outright copy/pasted.
-
-
-define your form
-=================
-
-    import formencode
-
-    class _Schema_Base(formencode.Schema):
-        allow_extra_fields = True
-        filter_extra_fields = False
-
-    class FormLogin(_Schema_Base):
-        email_address = formencode.validators.Email(not_empty=True)
-        password = formencode.validators.UnicodeString(not_empty=True)
-        remember_me = formencode.validators.Bool()
-
-
-define your view/handler
-========================
-
-    import pyramid_formencode_classic as formhandling
-
-    class WebLogin(base):
-
-        def login(self):
-            if 'login' in self.request.POST:
-                return self._login_submit()
-            return self._login_print()
-
-
-        def _login_print(self):
-            return render_to_response("web/account/login.mako", {}, self.request)
-
-
-        def _login_submit(self):
-
-            try:
-                (result, formStash) = formhandling.form_validate(self.request, schema=forms.FormLogin, error_main="There was an error with your form.")
-                if not result:
-                    raise formhandling.FormInvalid("Invalid Form")
-
-                results= formStash.results
-
-                useraccount = model.find_user(results['email_address'])
-                if not useraccount:
-                    formStash.set_error(self.request, section="email_address", message="Email not registered", raise_form_invalid=True)
-
-                if not useraccount.verify_submitted_password(results['password']):
-                    formStash.set_error(self.request, section="email_address", message="Wrong password", raise_form_invalid=True)
-
-            except formhandling.FormInvalid:
-                return formhandling.form_reprint(self.request, self._login_print)
-
-            except:
-                raise
-
-            # login via helper
-            h.do_login()
-            return HTTPFound(location='/account/home')
-
-
-Twitter Bootstrap Example
-=========================
-
-    To handle  twitter bootstrap style errors, it's a bit more manual work -- but doable
-
-        Mako:
-            <% form= formhandling.get_form(request) %>
-            ${form.html_error_main('Error_Main')|n}
-            <div class="control-group ${form.css_error('email_address')}">
-                <label class="control-label" for="email_address">Email</label>
-                <input id="email_address" name="email_address" placeholder="Email Address" size="30" type="text" />
-                ${form.html_error('email_address')|n}
-            </div>
-
-            you could also show an error with:
-                % if form.has_error('email_address'):
-                    <span class="help-inline">${form.get_error('email_address')}</span>
-                % endif
-
-
-        Pyramid:
-            text= formhandling.form_reprint(self.request, self._login_print, auto_error_formatter=formhandling.formatter_none)
-
-    in the above example there are a few things to note:
-
-        1. in the mako template we use `get_form` to pull/create the default formStash object for the request.  You can specify a specific formStash object if you'd like.
-        2. a call is made to `form.css_error()` specifying the 'email_address' field.  this would result in the "control-group error" css mix if there is an error in 'email_address'.
-        3. We tell pyramid to use 'formhandling.formatter_none' as the error formatter.  This surpresses errors.  We need to do that instead of using custom error formatters, because FormEncode places errors BEFORE the fields, not AFTER.
-        4. I've included two methods of presenting field errors.  they are funtinoally the same.
-        5. I've used an ErrorMain to show that there are issues on the form - not just a specific field.
-
-
-released under the BSD license, as it incorporates some Pylons code (which was BSD)
-"""
 import logging
 log = logging.getLogger(__name__)
 
 # stdlib
 import cgi
+import pdb
 import sys
 import types
 
@@ -221,6 +24,7 @@ from .formatters import *
 DEFAULT_FORM_STASH = '_default'
 
 DEPRECATION_WARNING = False
+
 
 def determine_response_charset(response):
     """FROM PYLONS -- Determine the charset of the specified Response object,
@@ -253,6 +57,7 @@ class FormStash(object):
     """Wrapper object, stores all the vars and objects surrounding a form validation"""
     name = None
     is_error = None
+    is_error_csrf = None
     is_parsed = False
     is_unicode_params = False
     schema = None
@@ -337,21 +142,28 @@ class FormStash(object):
         if section in self.errors:
             return self.errors[section]
 
-    def set_error(self, section=None, message="Error", raise_form_invalid=False, raise_field_invalid=False, message_append=False, message_prepend=False):
+    def set_error(self,
+                  section = None,
+                  message = "Error",
+                  raise_form_invalid = False,
+                  raise_field_invalid = False,
+                  message_append = False,
+                  message_prepend = False,
+                  is_error_csrf = None,
+                  ):
         """manages the dict of errors
-        
+
             `section`: the field in the form
             `message`: your error message
             `raise_form_invalid`: default `False`. if `True` will raise `FormInvalid`
             `raise_field_invalid`: default `False`. if `True` will raise `FieldInvalid`
             `message_append`: default `False`.  if true, will append the `message` argument to any existing argument in this `section`
             `message_prepend`: default `False`.  if true, will prepend the `message` argument to any existing argument in this `section`
-            
-            
+
             meessage_append and message_prepend allow you to elegantly combine errors
-            
+
             consider this code:
-            
+
                 try:
                     except CaughtError, e:
                         formStash.set_error(message="We encountered a `CaughtError`", raise_form_invalid=True)
@@ -359,7 +171,7 @@ class FormStash(object):
                 except formhandling.FormInvalid:
                     formStash.set_error(section='Error_Main', message="There was an error with your form.", message_prepend=True)
                     return formhandling.form_reprint(...)
-                    
+
             This would generate the following text for the `Error_Main` section:
 
                 There was an error with your form.  We encountered a `CaughtError`
@@ -377,8 +189,10 @@ class FormStash(object):
                 if message_append:
                     message = _message_existing + ' ' + message
                 elif message_prepend:
-                    message =  message + ' ' + _message_existing
+                    message = message + ' ' + _message_existing
             self.errors[section] = message
+            if is_error_csrf:
+                self.is_error_csrf = True
         if self.errors:
             self.is_error = True
         if raise_form_invalid:
@@ -434,10 +248,21 @@ class FormStash(object):
             log.debug("`getError` is being deprecated to `get_error`")
         return self.get_error(section)
 
-    def setError(self, section=None, message="Error", raise_form_invalid=False, raise_field_invalid=False):
+    def setError(self,
+                 section = None,
+                 message = "Error",
+                 raise_form_invalid = False,
+                 raise_field_invalid = False,
+                 is_error_csrf = None,
+                 ):
         if DEPRECATION_WARNING:
             log.debug("`setError` is being deprecated to `set_error`")
-        return self.set_error(section=section, message=message, raise_form_invalid=raise_form_invalid, raise_field_invalid=raise_field_invalid)
+        return self.set_error(section = section,
+                              message = message,
+                              raise_form_invalid = raise_form_invalid,
+                              raise_field_invalid = raise_field_invalid,
+                              is_error_csrf = is_error_csrf,
+                              )
 
     def clearError(self, section=None):
         if DEPRECATION_WARNING:
@@ -610,6 +435,7 @@ def form_validate(
         # if there are no params to validate against, then just stop
         if not decoded_params:
             formStash.is_error = True
+            pdb.set_trace()
             raise ValidationStop('not decoded_params')
 
         # initialize our results
@@ -640,9 +466,15 @@ def form_validate(
             if csrf_token is not None:
                 if request.params.get(csrf_name) != csrf_token:
                     # don't raise an error, because we have to stash the form
-                    formStash.set_error(section=formStash.csrf_error_section, message=formStash.csrf_error_string, raise_form_invalid=False, raise_field_invalid=False)
+                    formStash.set_error(section = formStash.csrf_error_section,
+                                        message = formStash.csrf_error_string,
+                                        raise_form_invalid = False,
+                                        raise_field_invalid = False,
+                                        is_error_csrf = True,
+                                        )
 
     except ValidationStop:
+        pdb.set_trace()
         log.debug("form_validate - encountered a ValidationStop")
         pass
 
@@ -650,6 +482,7 @@ def form_validate(
     set_form(request, form_stash=form_stash, formObject=formStash)
 
     if formStash.is_error:
+        pdb.set_trace()
         if raise_form_invalid:
             raise FormInvalid()
         if raise_field_invalid:
@@ -724,5 +557,3 @@ def form_reprint(request, form_print_method, form_stash=DEFAULT_FORM_STASH, rend
     )
     response.text = form_content
     return response
-    # comment out the above return, and raise a ValueError to debug the local environment with the Pyramid interactive tool
-    raise ValueError('!!!')
