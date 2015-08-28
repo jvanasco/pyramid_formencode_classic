@@ -1,3 +1,7 @@
+0.1.7
+	2015.08.27
+	- cleaning up how empty form submissions are tracked
+
 0.1.6
 	2015.08.26
 	- deprecating 'section' kwarg for 'field'

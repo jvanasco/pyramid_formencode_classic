@@ -432,13 +432,16 @@ def form_validate(
 
         # if we don't pass in ``validate_params``...
         # we must validate via GET, POST or BOTH
-        if not validate_params:
+        if validate_params is None:
             if validate_post and validate_get:
                 validate_params = request.params
             elif validate_post and not validate_get:
                 validate_params = request.POST
             elif not validate_post and validate_get:
                 validate_params = request.GET
+            elif not validate_post and not validate_get:
+                formStash.set_error(field=formStash.error_main_key, message="Nothing submitted.")
+                raise ValidationStop('no `validate_params`')
 
         validate_params = validate_params.mixed()
 
@@ -450,8 +453,8 @@ def form_validate(
 
         # if there are no params to validate against, then just stop
         if not decoded_params:
-            formStash.is_error = True
-            raise ValidationStop('not decoded_params')
+            formStash.set_error(field=formStash.error_main_key, message="Nothing submitted.")
+            raise ValidationStop('no `decoded_params`')
 
         # initialize our results
         results = {}
@@ -488,10 +491,10 @@ def form_validate(
                                         is_error_csrf = True,
                                         )
 
-    except ValidationStop:
+    except ValidationStop, e:
         log.debug("form_validate - encountered a ValidationStop")
         pass
-
+        
     # save the form onto the request
     set_form(request, form_stash=form_stash, formObject=formStash)
 
