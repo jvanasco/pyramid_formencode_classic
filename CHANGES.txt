@@ -1,3 +1,7 @@
+0.1.6
+	2015.08.26
+	- deprecating 'section' kwarg for 'field'
+
 0.1.5
 	2015.08.24
 	- adding some logging of csrf errors

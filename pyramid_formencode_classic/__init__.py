@@ -70,7 +70,7 @@ class FormStash(object):
     html_error_main_template = """<div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> %(error)s</span></div></div>"""
 
     csrf_error_string = """We're worried about the security of your form submission. Please reload this page and try again. It would be best to highlight the URL in your web-browser and hit 'return'."""
-    csrf_error_section = 'Error_Main'
+    csrf_error_field = csrf_error_section = 'Error_Main'
 
     def __init__(self, error_main_key=None, name=None):
         self.errors = {}
@@ -93,9 +93,9 @@ class FormStash(object):
         """sets the html error template MAIN field for the form.  useful for alerting the entire form is bad."""
         self.html_error_main_template = html_error_main_template
 
-    def has_error(self, section):
-        """Returns True or False if there is an error in `section`.  Does not return the value of the error field, because the value could be False."""
-        if section in self.errors:
+    def has_error(self, field):
+        """Returns True or False if there is an error in `field`.  Does not return the value of the error field, because the value could be False."""
+        if field in self.errors:
             return True
         return False
 
@@ -105,31 +105,34 @@ class FormStash(object):
             return True
         return False
 
-    def css_error(self, section, css_error=''):
+    def css_error(self, field, css_error=''):
         """Returns the css class if there is an error.  returns '' if there is not.  The default css_error is 'error' and can be set with `set_css_error`.  You can also overwrite with a `css_error` kwarg."""
-        if section in self.errors:
+        if field in self.errors:
             if css_error:
                 return css_error
             return self.css_error
         return ''
 
-    def html_error(self, section, template=None):
+    def html_error(self, field, template=None):
         """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
-        if self.has_error(section):
+        if self.has_error(field):
             if template is None:
                 template = self.html_error_template
-            return template % {'error': self.get_error(section)}
+            return template % {'error': self.get_error(field)}
         return ''
 
-    def html_error_main(self, section=None, template=None):
+    def html_error_main(self, field=None, template=None, section=None):
         """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
+        if (section is not None) and (field is None):
+            log.debug("FormStash - `section` is being deprecated for `field`")
+            field = section
         error = None
-        # look in the main error section specifically
-        if section is None:
-            section = self.error_main_key
+        # look in the main error field specifically
+        if field is None:
+            field = self.error_main_key
         if self.has_errors():
-            if self.has_error(section):
-                error = self.get_error(section)
+            if self.has_error(field):
+                error = self.get_error(field)
             else:
                 error = "There was an error with your submission."
             if template is None:
@@ -137,28 +140,29 @@ class FormStash(object):
             return template % {'error': error}
         return ''
 
-    def get_error(self, section):
+    def get_error(self, field):
         """Returns the error."""
-        if section in self.errors:
-            return self.errors[section]
+        if field in self.errors:
+            return self.errors[field]
 
     def set_error(self,
-                  section = None,
+                  field = None,
                   message = "Error",
                   raise_form_invalid = False,
                   raise_field_invalid = False,
                   message_append = False,
                   message_prepend = False,
                   is_error_csrf = None,
+                  section = None,  # this is being deprecated out
                   ):
         """manages the dict of errors
 
-            `section`: the field in the form
+            `field`: the field in the form
             `message`: your error message
             `raise_form_invalid`: default `False`. if `True` will raise `FormInvalid`
             `raise_field_invalid`: default `False`. if `True` will raise `FieldInvalid`
-            `message_append`: default `False`.  if true, will append the `message` argument to any existing argument in this `section`
-            `message_prepend`: default `False`.  if true, will prepend the `message` argument to any existing argument in this `section`
+            `message_append`: default `False`.  if true, will append the `message` argument to any existing argument in this `field`
+            `message_prepend`: default `False`.  if true, will prepend the `message` argument to any existing argument in this `field`
 
             meessage_append and message_prepend allow you to elegantly combine errors
 
@@ -169,28 +173,31 @@ class FormStash(object):
                         formStash.set_error(message="We encountered a `CaughtError`", raise_form_invalid=True)
                     ...
                 except formhandling.FormInvalid:
-                    formStash.set_error(section='Error_Main', message="There was an error with your form.", message_prepend=True)
+                    formStash.set_error(field='Error_Main', message="There was an error with your form.", message_prepend=True)
                     return formhandling.form_reprint(...)
 
-            This would generate the following text for the `Error_Main` section:
+            This would generate the following text for the `Error_Main` field:
 
                 There was an error with your form.  We encountered a `CaughtError`
         """
-        if section is None:
-            section = self.error_main_key
+        if (section is not None) and (field is None):
+            log.debug("FormStash - `section` is being deprecated for `field`")
+            field = section
+        if field is None:
+            field = self.error_main_key
         if message is None:
-            if section in self.errors:
-                del self.errors[section]
+            if field in self.errors:
+                del self.errors[field]
         else:
             if message_append and message_prepend:
                 raise ValueError("You can not set both `message_append` `message_prepend`")
             if message_append or message_prepend:
-                _message_existing = self.errors[section] if (section in self.errors) else ''
+                _message_existing = self.errors[field] if (field in self.errors) else ''
                 if message_append:
                     message = _message_existing + ' ' + message
                 elif message_prepend:
                     message = message + ' ' + _message_existing
-            self.errors[section] = message
+            self.errors[field] = message
             if is_error_csrf:
                 self.is_error_csrf = True
         if self.errors:
@@ -200,12 +207,15 @@ class FormStash(object):
         if raise_field_invalid:
             raise FieldInvalid()
 
-    def clear_error(self, section=None):
+    def clear_error(self, field=None, section=None):
         """clear the dict of errors"""
+        if (section is not None) and (field is None):
+            log.debug("FormStash - `section` is being deprecated for `field`")
+            field = section
         if self.errors:
-            if section:
-                if section in self.errors:
-                    del self.errors['section']
+            if field:
+                if field in self.errors:
+                    del self.errors[field]
             else:
                 self.errors = {}
         if self.errors:
@@ -223,10 +233,10 @@ class FormStash(object):
     # --------------------------------------------------------------------------
     # deprecation support
 
-    def hasError(self, section):
+    def hasError(self, field):
         if DEPRECATION_WARNING:
             log.debug("`hasError` is being deprecated to `has_error`")
-        return self.has_error(section)
+        return self.has_error(field)
 
     def cssError(self, section, css_error=''):
         if DEPRECATION_WARNING:
@@ -299,14 +309,20 @@ def _form_ensure(request, form_stash=DEFAULT_FORM_STASH, error_main_key=None):
     return request.pyramid_formencode_classic[form_stash]
 
 
-def formerrors_set(request, form_stash=DEFAULT_FORM_STASH, section=None, message='There was an error with your submission...', raise_form_invalid=False, raise_field_invalid=False):
+def formerrors_set(request, form_stash=DEFAULT_FORM_STASH, field=None, message='There was an error with your submission...', raise_form_invalid=False, raise_field_invalid=False, section=None, ):
     """helper function. to proxy FormStash object"""
+    if (section is not None) and (field is None):
+        log.debug("FormStash - `section` is being deprecated for `field`")
+        field = section
     form = _form_ensure(request, form_stash=form_stash)
     form.set_error(section=section, message=message, raise_form_invalid=raise_form_invalid, raise_field_invalid=raise_field_invalid)
 
 
-def formerrors_clear(request, form_stash=DEFAULT_FORM_STASH, section=None):
+def formerrors_clear(request, form_stash=DEFAULT_FORM_STASH, field=None, section=None):
     """helper function. to proxy FormStash object"""
+    if (section is not None) and (field is None):
+        log.debug("FormStash - `section` is being deprecated for `field`")
+        field = section
     form = _form_ensure(request, form_stash=form_stash)
     form.clear_error(section=section)
 
@@ -435,7 +451,6 @@ def form_validate(
         # if there are no params to validate against, then just stop
         if not decoded_params:
             formStash.is_error = True
-            pdb.set_trace()
             raise ValidationStop('not decoded_params')
 
         # initialize our results
@@ -460,13 +475,13 @@ def form_validate(
             formStash.is_error = True
             if error_main:
                 # don't raise an error, because we have to stash the form
-                formStash.set_error(section=formStash.error_main_key, message=error_main, raise_form_invalid=False, raise_field_invalid=False)
+                formStash.set_error(field=formStash.error_main_key, message=error_main, raise_form_invalid=False, raise_field_invalid=False)
 
         else:
             if csrf_token is not None:
                 if request.params.get(csrf_name) != csrf_token:
                     # don't raise an error, because we have to stash the form
-                    formStash.set_error(section = formStash.csrf_error_section,
+                    formStash.set_error(field = formStash.csrf_error_field,
                                         message = formStash.csrf_error_string,
                                         raise_form_invalid = False,
                                         raise_field_invalid = False,
@@ -474,7 +489,6 @@ def form_validate(
                                         )
 
     except ValidationStop:
-        pdb.set_trace()
         log.debug("form_validate - encountered a ValidationStop")
         pass
 
@@ -482,7 +496,6 @@ def form_validate(
     set_form(request, form_stash=form_stash, formObject=formStash)
 
     if formStash.is_error:
-        pdb.set_trace()
         if raise_form_invalid:
             raise FormInvalid()
         if raise_field_invalid:
