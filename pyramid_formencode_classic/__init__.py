@@ -148,12 +148,14 @@ class FormStash(object):
     def set_error(self,
                   field = None,
                   message = "Error",
-                  raise_form_invalid = False,
-                  raise_field_invalid = False,
+                  raise_form_invalid = None,
+                  raise_field_invalid = None,
                   message_append = False,
                   message_prepend = False,
                   is_error_csrf = None,
                   section = None,  # this is being deprecated out
+                  raise_FormInvalid = None,
+                  raise_FieldInvalid = None,
                   ):
         """manages the dict of errors
 
@@ -202,9 +204,18 @@ class FormStash(object):
                 self.is_error_csrf = True
         if self.errors:
             self.is_error = True
-        if raise_form_invalid:
+
+        # deprecation helpers
+        if (raise_form_invalid is not None) or (raise_field_invalid is not None):
+            log.debug("FormStash - `raise_form_invalid` is being deprecated to `raise_FormInvalid`; `raise_field_invalid` is being deprecated to `raise_FieldInvalid`.")
+        if raise_FormInvalid is None:
+            raise_FormInvalid = raise_form_invalid
+        if raise_FieldInvalid is None:
+            raise_FieldInvalid = raise_field_invalid
+
+        if raise_FormInvalid:
             raise FormInvalid()
-        if raise_field_invalid:
+        if raise_FieldInvalid:
             raise FieldInvalid()
 
     def clear_error(self, field=None, section=None):
@@ -261,8 +272,8 @@ class FormStash(object):
     def setError(self,
                  section = None,
                  message = "Error",
-                 raise_form_invalid = False,
-                 raise_field_invalid = False,
+                 raise_form_invalid = None,
+                 raise_field_invalid = None,
                  is_error_csrf = None,
                  ):
         if DEPRECATION_WARNING:
@@ -309,7 +320,7 @@ def _form_ensure(request, form_stash=DEFAULT_FORM_STASH, error_main_key=None):
     return request.pyramid_formencode_classic[form_stash]
 
 
-def formerrors_set(request, form_stash=DEFAULT_FORM_STASH, field=None, message='There was an error with your submission...', raise_form_invalid=False, raise_field_invalid=False, section=None, ):
+def formerrors_set(request, form_stash=DEFAULT_FORM_STASH, field=None, message='There was an error with your submission...', raise_form_invalid=None, raise_field_invalid=None, section=None, ):
     """helper function. to proxy FormStash object"""
     if (section is not None) and (field is None):
         log.debug("FormStash - `section` is being deprecated for `field`")
@@ -343,8 +354,10 @@ def form_validate(
     error_main_key='Error_Main',
     error_string_key='Error_String',
     return_stash= True,
-    raise_form_invalid = False,
-    raise_field_invalid = False,
+    raise_form_invalid = None,
+    raise_field_invalid = None,
+    raise_FormInvalid = None,
+    raise_FieldInvalid = None,
     csrf_name = 'csrf_',
     csrf_token = None
 ):
@@ -478,7 +491,7 @@ def form_validate(
             formStash.is_error = True
             if error_main:
                 # don't raise an error, because we have to stash the form
-                formStash.set_error(field=formStash.error_main_key, message=error_main, raise_form_invalid=False, raise_field_invalid=False)
+                formStash.set_error(field=formStash.error_main_key, message=error_main, raise_FormInvalid=False, raise_FieldInvalid=False)
 
         else:
             if csrf_token is not None:
@@ -486,8 +499,8 @@ def form_validate(
                     # don't raise an error, because we have to stash the form
                     formStash.set_error(field = formStash.csrf_error_field,
                                         message = formStash.csrf_error_string,
-                                        raise_form_invalid = False,
-                                        raise_field_invalid = False,
+                                        raise_FormInvalid = False,
+                                        raise_FieldInvalid = False,
                                         is_error_csrf = True,
                                         )
 
@@ -499,9 +512,19 @@ def form_validate(
     set_form(request, form_stash=form_stash, formObject=formStash)
 
     if formStash.is_error:
-        if raise_form_invalid:
+
+        # deprecation helpers
+        if (raise_form_invalid is not None) or (raise_field_invalid is not None):
+            log.debug("FormStash - `raise_form_invalid` is being deprecated to `raise_FormInvalid`; `raise_field_invalid` is being deprecated to `raise_FieldInvalid`.")
+        if raise_FormInvalid is None:
+            raise_FormInvalid = raise_form_invalid
+        if raise_FieldInvalid is None:
+            raise_FieldInvalid = raise_field_invalid
+
+        # now raise
+        if raise_FormInvalid:
             raise FormInvalid()
-        if raise_field_invalid:
+        if raise_FieldInvalid:
             raise FieldInvalid()
 
     if return_stash:

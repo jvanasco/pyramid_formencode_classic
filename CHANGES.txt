@@ -1,3 +1,9 @@
+0.1.8
+	2016.01.18
+	this was supposed to be released on 2015.09.01
+	- renaming `raise_form_invalid` to `raise_FormInvalid`
+	- renaming `raise_field_invalid` to `raise_FieldInvalid`
+
 0.1.7
 	2015.08.27
 	- cleaning up how empty form submissions are tracked
