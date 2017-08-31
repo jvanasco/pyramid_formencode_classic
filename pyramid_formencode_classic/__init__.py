@@ -21,6 +21,8 @@ from .formatters import *
 
 
 # defaults
+__VERSION__ = '0.1.9'
+
 DEFAULT_FORM_STASH = '_default'
 
 DEPRECATION_WARNING = False
@@ -72,7 +74,7 @@ class FormStash(object):
     csrf_error_string = """We're worried about the security of your form submission. Please reload this page and try again. It would be best to highlight the URL in your web-browser and hit 'return'."""
     csrf_error_field = csrf_error_section = 'Error_Main'
 
-    def __init__(self, error_main_key=None, name=None):
+    def __init__(self, error_main_key=None, name=None, is_unicode_params=None):
         self.errors = {}
         self.results = {}
         self.defaults = {}
@@ -80,6 +82,7 @@ class FormStash(object):
             self.error_main_key = error_main_key
         if name:
             self.name = name
+        self.is_unicode_params = is_unicode_params
 
     def set_css_error(self, css_error):
         """sets the css error field for the form"""
@@ -359,7 +362,8 @@ def form_validate(
     raise_FormInvalid = None,
     raise_FieldInvalid = None,
     csrf_name = 'csrf_',
-    csrf_token = None
+    csrf_token = None,
+    is_unicode_params=None,
 ):
     """form validation only: returns True/False ; sets up Errors ;
 
@@ -432,11 +436,17 @@ def form_validate(
         else:
             status = form_validate()
 
+    ``is_unicode_params`` (None)
+        passthrough to new `Form`
+
     """
     log.debug("form_validate - starting...")
     errors = {}
     if form_stash_object is None:
-        formStash = FormStash(error_main_key=error_main_key, name=form_stash)
+        formStash = FormStash(error_main_key=error_main_key,
+                              name=form_stash,
+                              is_unicode_params=is_unicode_params,
+                              )
     else:
         formStash = form_stash_object
     formStash.schema = schema
@@ -460,7 +470,7 @@ def form_validate(
 
         if variable_decode:
             log.debug("form_validate - running variable_decode on params")
-            decoded_params = formencode.variable_decode(validate_params, dict_char, list_char)
+            decoded_params = formencode.variabledecode.variable_decode(validate_params, dict_char, list_char)
         else:
             decoded_params = validate_params
 
@@ -491,7 +501,11 @@ def form_validate(
             formStash.is_error = True
             if error_main:
                 # don't raise an error, because we have to stash the form
-                formStash.set_error(field=formStash.error_main_key, message=error_main, raise_FormInvalid=False, raise_FieldInvalid=False)
+                formStash.set_error(field=formStash.error_main_key,
+                                    message=error_main,
+                                    raise_FormInvalid=False,
+                                    raise_FieldInvalid=False,
+                                    )
 
         else:
             if csrf_token is not None:
@@ -532,7 +546,15 @@ def form_validate(
     return not formStash.is_error
 
 
-def form_reprint(request, form_print_method, form_stash=DEFAULT_FORM_STASH, render_view=None, render_view_template=None, auto_error_formatter=formatter_nobr, **htmlfill_kwargs):
+def form_reprint(
+    request,
+    form_print_method,
+    form_stash=DEFAULT_FORM_STASH,
+    render_view=None,
+    render_view_template=None,
+    auto_error_formatter=formatter_nobr,
+    **htmlfill_kwargs
+):
     """reprint a form
         args:
         ``request`` -- request instance

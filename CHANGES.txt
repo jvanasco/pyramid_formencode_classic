@@ -1,3 +1,8 @@
+0.1.9
+	2017.08.14
+	- added `is_unicode_params` kwarg
+	- migrated version from setup.py to a package variable
+
 0.1.8
 	2016.01.18
 	this was supposed to be released on 2015.09.01
