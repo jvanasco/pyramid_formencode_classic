@@ -21,7 +21,7 @@ from .formatters import *
 
 
 # defaults
-__VERSION__ = '0.1.9'
+__VERSION__ = '0.1.10'
 
 DEFAULT_FORM_STASH = '_default'
 
@@ -122,6 +122,17 @@ class FormStash(object):
             if template is None:
                 template = self.html_error_template
             return template % {'error': self.get_error(field)}
+        return ''
+    
+    def html_error_main_fillable(self, field=None):
+        """If there are errors, returns a hidden input field for `Error_Main` or `field`.
+           otherwise, returns an empty string.
+           the htmlfill parser will update the hidden field to the template.
+        """
+        if field is None:
+            field = self.error_main_key
+        if self.has_errors():
+            return '<input type="hidden" name="%s" />' % field
         return ''
 
     def html_error_main(self, field=None, template=None, section=None):
@@ -235,13 +246,14 @@ class FormStash(object):
         if self.errors:
             self.is_error = True
 
-    def csrf_input_field(self, id="csrf_", name="csrf_", type="hidden", csrf_token=''):
-        return """<input id="%(id)s" type="%(type)s" name="%(name)s" value="%(csrf_token)s" />""" % \
+    def csrf_input_field(self, id="csrf_", name="csrf_", type="hidden", csrf_token='', htmlfill_ignore=True):
+        return """<input id="%(id)s" type="%(type)s" name="%(name)s" value="%(csrf_token)s"%(htmlfill_ignore)s/>""" % \
             {
                 'id': id,
                 'name': name,
                 'type': type,
-                'csrf_token': csrf_token
+                'csrf_token': csrf_token,
+                'htmlfill_ignore': " data-formencode-ignore='1' " if htmlfill_ignore else '',
             }
 
     # --------------------------------------------------------------------------

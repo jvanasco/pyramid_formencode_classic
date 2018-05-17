@@ -1,3 +1,11 @@
+0.1.10
+	2018.08.16
+	- added `html_error_main_fillable` method to FormStash
+	
+0.1.9
+	2017.08.14
+	- added `htmlfill_ignore` kwarg to `FormStash.csrf_input_field`. If true (default) will emit a `data-formencode-ignore` tag, so htmlfill will ignore it.
+
 0.1.9
 	2017.08.14
 	- added `is_unicode_params` kwarg
