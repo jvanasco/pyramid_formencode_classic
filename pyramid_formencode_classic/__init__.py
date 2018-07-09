@@ -27,12 +27,15 @@ import warnings
 def warn_future(message):
     warnings.warn(message, FutureWarning, stacklevel=2)
 
+def warn_user(message):
+    warnings.warn(message, UserWarning, stacklevel=2)
+
 
 # defaults
 __VERSION__ = '0.2.0'
 
 DEFAULT_FORM_STASH = '_default'
-DEFAULT_ERROR_MAIN_KEY = 'Error_Main',
+DEFAULT_ERROR_MAIN_KEY = 'Error_Main'
 
 DEPRECATION_WARNING = False
 
@@ -134,24 +137,38 @@ class FormStash(object):
             return template % {'error': self.get_error(field)}
         return ''
     
-    def html_error_main_fillable(self, field=None):
+    def html_error_placeholder(self, field=None):
         """If there are errors, returns a hidden input field for `Error_Main` or `field`.
            otherwise, returns an empty string.
            the htmlfill parser will update the hidden field to the template.
         """
-        if field is None:
-            field = self.error_main_key
         if self.has_errors():
-            return '<input type="hidden" name="%s" />' % field
+            if field is None:
+                field = self.error_main_key
+            return '<form:error name="%s"/>' % field
+            # return '<input type="hidden" name="%s" />' % field
         return ''
 
+    # copy this method
+    html_error_main_fillable = html_error_placeholder
+
     def html_error_main(self, field=None, template=None):
-        """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
+        warn_user("`html_error_main` is deprecated for a major functionality change; "
+                  "it now proxies `html_error_placeholder`; "
+                  "legacy functionality is available via `render_html_error_main`."
+                  )
+        return self.html_error_placeholder(field=field, template=template)
+    
+    def render_html_error_main(self, field=None, template=None):
+        """
+        Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`
+        This was previously `html_error_main`
+        """
         error = None
         # look in the main error field specifically
-        if field is None:
-            field = self.error_main_key
         if self.has_errors():
+            if field is None:
+                field = self.error_main_key
             if self.has_error(field):
                 error = self.get_error(field)
             else:
@@ -536,6 +553,14 @@ def form_reprint(
         if __debug__:
             log.debug("form_reprint - response has exception, redirecting")
         return response
+
+
+    print "----------------"
+    print response.text
+    print "----------------"
+    # import pdb
+    # pdb.set_trace()
+
 
     formStash = request.pyramid_formencode_classic[form_stash]
 

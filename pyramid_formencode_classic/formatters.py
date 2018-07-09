@@ -36,4 +36,4 @@ def formatter_hidden(error):
     """
     returns a hidden field with the error in the name
     """
-    return '<input type="hidden" name="%s" />' % cgi.escape(error)
+    return '<input type="hidden" name="%s" />\n' % cgi.escape(error)

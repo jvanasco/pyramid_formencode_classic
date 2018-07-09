@@ -25,6 +25,11 @@ class Form_Email(_Schema_Base):
     email_address = formencode.validators.Email(not_empty=True)
 
 
+class Form_EmailUsername(_Schema_Base):
+    email_address = formencode.validators.Email(not_empty=True)
+    username = formencode.validators.UnicodeString(not_empty=True)
+
+
 class DummyRequest(testing.DummyRequest):
     """
     extend `testing.DummyRequest` with a closer represtantion
@@ -59,6 +64,11 @@ class TestRenderSimple(object):
     """
     mixin class
     subclass and define a dict of test/values
+
+    python -munittest pyramid_formencode_classic.tests.core.TestRenderSimple_FormADefault \
+                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormAExplicit \
+                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormAAlt \
+                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormB
     """
 
     template = None
@@ -76,7 +86,9 @@ class TestRenderSimple(object):
         try:
             assert rendered.text == _response_text
         except:
+            print "------------"
             print rendered.text
+            print "------------"
             raise
 
 
@@ -84,6 +96,11 @@ class TestParsing(object):
     """
     mixin class
     subclass and define a dict of test/values
+
+    python -munittest pyramid_formencode_classic.tests.core.TestParsing_FormADefault \
+                      pyramid_formencode_classic.tests.core.TestParsing_FormAExplicit \
+                      pyramid_formencode_classic.tests.core.TestParsing_FormAAlt \
+                      pyramid_formencode_classic.tests.core.TestParsing_FormB
     """
     error_main_key = None
     template = None
@@ -92,6 +109,9 @@ class TestParsing(object):
 
         tests_completed = []
         for test_name, test_data in self._test_no_params__data.items():
+            print "================"
+            print "================"
+            print self.__class__.__name__, test_name
             _template = self.template
             _response_text = test_data['response_text']
             _reprint_kwargs = {}
@@ -109,7 +129,7 @@ class TestParsing(object):
                 (result,
                  formStash
                  ) = pyramid_formencode_classic.form_validate(self.request,
-                                                              schema=Form_Email,
+                                                              schema=Form_EmailUsername,
                                                               error_main="There was an error with your form.",
                                                               **_validate_kwargs
                                                               )
@@ -124,9 +144,10 @@ class TestParsing(object):
                 try:
                     assert rendered.text == _response_text
                 except:
-                    print "----------"
-                    print self.__class__
-                    print test_name
+                    if False:
+                        print "----------------"
+                        print self.__class__
+                        print test_name
                     print rendered.text
                     raise
             tests_completed.append(test_name)
@@ -146,11 +167,14 @@ class TestRenderSimple_FormAAlt(TestRenderSimple, TestHarness, unittest.TestCase
 
     _test_render_simple__data = {
         'response_text': """\
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     }
 
@@ -160,11 +184,14 @@ class TestRenderSimple_FormADefault(TestRenderSimple, TestHarness, unittest.Test
 
     _test_render_simple__data = {
         'response_text': """\
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     }
 
@@ -174,11 +201,14 @@ class TestRenderSimple_FormAExplicit(TestRenderSimple, TestHarness, unittest.Tes
 
     _test_render_simple__data = {
         'response_text': """\
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     }
 
@@ -188,11 +218,14 @@ class TestRenderSimple_FormB(TestRenderSimple, TestHarness, unittest.TestCase):
 
     _test_render_simple__data = {
         'response_text': """\
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     }
 
@@ -207,156 +240,107 @@ class TestParsing_FormADefault(TestParsing, TestHarness, unittest.TestCase):
     'test_formatter_default': {
         # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
         'response_text': """\
-<!-- for: ('Error_Main',) -->
+<!-- for: Error_Main -->
 <span class="error-message">Nothing submitted.</span>
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> Nothing submitted.</span></div></div>
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'test_formatter_is_none': {
         'auto_error_formatter': None,
         'response_text': """\
-<!-- for: ('Error_Main',) -->
+<!-- for: Error_Main -->
 <span class="error-message">Nothing submitted.</span><br />
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> Nothing submitted.</span></div></div>
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'test_formatter_nobr': {
         'auto_error_formatter': formatters.formatter_nobr,
         'response_text': """\
-<!-- for: ('Error_Main',) -->
+<!-- for: Error_Main -->
 <span class="error-message">Nothing submitted.</span>
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> Nothing submitted.</span></div></div>
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'formatter_help_inline': {
         'auto_error_formatter': formatters.formatter_help_inline,
         'response_text': """\
-<!-- for: ('Error_Main',) -->
+<!-- for: Error_Main -->
 <span class="help-inline">Nothing submitted.</span>
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> Nothing submitted.</span></div></div>
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'response_text': """\
-<!-- for: ('Error_Main',) -->
-<!-- formatter_none (Nothing submitted.)--><form action="/" method="POST">
+<!-- for: Error_Main -->
+<!-- formatter_none (Nothing submitted.)--><html><head></head><body><div>
+<form action="/" method="POST">
     
     <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> Nothing submitted.</span></div></div>
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'formatter_hidden': {
         'auto_error_formatter': formatters.formatter_hidden,
         'response_text': """\
-<!-- for: ('Error_Main',) -->
-<input type="hidden" name="Nothing submitted." /><form action="/" method="POST">
+<!-- for: Error_Main -->
+<input type="hidden" name="Nothing submitted." /><html><head></head><body><div>
+<form action="/" method="POST">
+error!
     
     <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> Nothing submitted.</span></div></div>
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     }
 }
 
 
-class TestParsing_FormAExplicit(TestParsing, TestHarness, unittest.TestCase):
+class TestParsing_FormAExplicit(TestParsing_FormADefault, TestParsing, TestHarness, unittest.TestCase):
+    """
+    inherit from TestParsing_FormADefault
+    this should have the same exact output, but with a different template
+    """
     template = 'fixtures/form_email-A-explicit.mako'
-
-    # test_no_params
-    # note the whitespace in the lines here!
-    _test_no_params__data = {
-    'test_formatter_default': {
-        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
-        'response_text': """\
-<!-- for: ('Error_Main',) -->
-<span class="error-message">Nothing submitted.</span>
-<form action="/" method="POST">
-    
-    <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> There was an error with your submission.</span></div></div>
-    <input type="text" name="email" value="" />
-</form>
-""",
-    },
-    'test_formatter_is_none': {
-        'auto_error_formatter': None,
-        'response_text': """\
-<!-- for: ('Error_Main',) -->
-<span class="error-message">Nothing submitted.</span><br />
-<form action="/" method="POST">
-    
-    <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> There was an error with your submission.</span></div></div>
-    <input type="text" name="email" value="" />
-</form>
-""",
-    },
-    'test_formatter_nobr': {
-        'auto_error_formatter': formatters.formatter_nobr,
-        'response_text': """\
-<!-- for: ('Error_Main',) -->
-<span class="error-message">Nothing submitted.</span>
-<form action="/" method="POST">
-    
-    <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> There was an error with your submission.</span></div></div>
-    <input type="text" name="email" value="" />
-</form>
-""",
-    },
-    'formatter_help_inline': {
-        'auto_error_formatter': formatters.formatter_help_inline,
-        'response_text': """\
-<!-- for: ('Error_Main',) -->
-<span class="help-inline">Nothing submitted.</span>
-<form action="/" method="POST">
-    
-    <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> There was an error with your submission.</span></div></div>
-    <input type="text" name="email" value="" />
-</form>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
-        'response_text': """\
-<!-- for: ('Error_Main',) -->
-<!-- formatter_none (Nothing submitted.)--><form action="/" method="POST">
-    
-    <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> There was an error with your submission.</span></div></div>
-    <input type="text" name="email" value="" />
-</form>
-""",
-    },
-    'formatter_hidden': {
-        'auto_error_formatter': formatters.formatter_hidden,
-        'response_text': """\
-<!-- for: ('Error_Main',) -->
-<input type="hidden" name="Nothing submitted." /><form action="/" method="POST">
-    
-    <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> There was an error with your submission.</span></div></div>
-    <input type="text" name="email" value="" />
-</form>
-""",
-    }
-}
 
 
 class TestParsing_FormAAlt(TestParsing, TestHarness, unittest.TestCase):
+    """
+    this behaves slightly differently than TestParsing_FormAExplicit
+    """
     template = 'fixtures/form_email-A-alt.mako'
     error_main_key = 'Error_Alt'
 
@@ -368,11 +352,14 @@ class TestParsing_FormAAlt(TestParsing, TestHarness, unittest.TestCase):
         'response_text': """\
 <!-- for: Error_Alt -->
 <span class="error-message">Nothing submitted.</span>
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> Nothing submitted.</span></div></div>
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'test_formatter_is_none': {
@@ -380,11 +367,14 @@ class TestParsing_FormAAlt(TestParsing, TestHarness, unittest.TestCase):
         'response_text': """\
 <!-- for: Error_Alt -->
 <span class="error-message">Nothing submitted.</span><br />
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> Nothing submitted.</span></div></div>
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'test_formatter_nobr': {
@@ -392,11 +382,14 @@ class TestParsing_FormAAlt(TestParsing, TestHarness, unittest.TestCase):
         'response_text': """\
 <!-- for: Error_Alt -->
 <span class="error-message">Nothing submitted.</span>
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> Nothing submitted.</span></div></div>
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'formatter_help_inline': {
@@ -404,33 +397,42 @@ class TestParsing_FormAAlt(TestParsing, TestHarness, unittest.TestCase):
         'response_text': """\
 <!-- for: Error_Alt -->
 <span class="help-inline">Nothing submitted.</span>
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> Nothing submitted.</span></div></div>
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'response_text': """\
 <!-- for: Error_Alt -->
-<!-- formatter_none (Nothing submitted.)--><form action="/" method="POST">
+<!-- formatter_none (Nothing submitted.)--><html><head></head><body><div>
+<form action="/" method="POST">
     
     <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> Nothing submitted.</span></div></div>
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'formatter_hidden': {
         'auto_error_formatter': formatters.formatter_hidden,
         'response_text': """\
 <!-- for: Error_Alt -->
-<input type="hidden" name="Nothing submitted." /><form action="/" method="POST">
+<input type="hidden" name="Nothing submitted." /><html><head></head><body><div>
+<form action="/" method="POST">
     
-    <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> Nothing submitted.</span></div></div>
+ERROR
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     }
 }
@@ -445,71 +447,90 @@ class TestParsing_FormB(TestParsing, TestHarness, unittest.TestCase):
     'test_formatter_default': {
         # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
         'response_text': """\
-<!-- for: ('Error_Main',) -->
-<span class="error-message">Nothing submitted.</span>
+<html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="Error_Main" value="" />
+    <!-- for: Error_Main -->
+<span class="error-message">Nothing submitted.</span>
+<input type="hidden" name="Error_Main" class="error" value="" />
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'test_formatter_is_none': {
         'auto_error_formatter': None,
         'response_text': """\
-<!-- for: ('Error_Main',) -->
-<span class="error-message">Nothing submitted.</span><br />
+<html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="Error_Main" value="" />
+    <!-- for: Error_Main -->
+<span class="error-message">Nothing submitted.</span><br />
+<input type="hidden" name="Error_Main" class="error" value="" />
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'test_formatter_nobr': {
         'auto_error_formatter': formatters.formatter_nobr,
         'response_text': """\
-<!-- for: ('Error_Main',) -->
-<span class="error-message">Nothing submitted.</span>
+<html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="Error_Main" value="" />
+    <!-- for: Error_Main -->
+<span class="error-message">Nothing submitted.</span>
+<input type="hidden" name="Error_Main" class="error" value="" />
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'formatter_help_inline': {
         'auto_error_formatter': formatters.formatter_help_inline,
         'response_text': """\
-<!-- for: ('Error_Main',) -->
-<span class="help-inline">Nothing submitted.</span>
+<html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="Error_Main" value="" />
+    <!-- for: Error_Main -->
+<span class="help-inline">Nothing submitted.</span>
+<input type="hidden" name="Error_Main" class="error" value="" />
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'response_text': """\
-<!-- for: ('Error_Main',) -->
-<!-- formatter_none (Nothing submitted.)--><form action="/" method="POST">
+<html><head></head><body><div>
+<form action="/" method="POST">
     
-    <input type="hidden" name="Error_Main" value="" />
+    <!-- for: Error_Main -->
+<!-- formatter_none (Nothing submitted.)--><input type="hidden" name="Error_Main" class="error" value="" />
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     },
     'formatter_hidden': {
         'auto_error_formatter': formatters.formatter_hidden,
         'response_text': """\
-<!-- for: ('Error_Main',) -->
-<input type="hidden" name="Nothing submitted." /><form action="/" method="POST">
+<html><head></head><body><div>
+<form action="/" method="POST">
     
-    <input type="hidden" name="Error_Main" value="" />
+    <!-- for: Error_Main -->
+<input type="hidden" name="Nothing submitted." />
+<input type="hidden" name="Error_Main" class="error" value="" />
     <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
 </form>
+</div></body></html>
 """,
     }
 }
