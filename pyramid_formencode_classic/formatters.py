@@ -17,6 +17,8 @@ def formatter_help_inline(error):
 
 def formatter_nobr(error):
     """
+    This is a variant of the htmlfill `default_formatter`, in which a trailing <br/> is not included
+    
     Formatter that escapes the error, wraps the error in a span with
     class ``error-message``, and doesn't add a ``<br>``
     """

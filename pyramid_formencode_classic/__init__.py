@@ -141,6 +141,15 @@ class FormStash(object):
         """If there are errors, returns a hidden input field for `Error_Main` or `field`.
            otherwise, returns an empty string.
            the htmlfill parser will update the hidden field to the template.
+           this function is used to create a placeholder in forms
+
+                <form action="/" method="POST">
+                    <% form = request.pyramid_formencode_classic.get_form() %>
+                    ${form.html_error_placeholder("Error_Main")|n}
+                    <input type="text" name="email" value="" />
+                    <input type="text" name="username" value="" />
+                </form>
+           
         """
         if self.has_errors():
             if field is None:
@@ -150,6 +159,7 @@ class FormStash(object):
         return ''
 
     # copy this method
+    # it should be deprecated. this was a mistake.
     html_error_main_fillable = html_error_placeholder
 
     def html_error_main(self, field=None, template=None):
@@ -157,12 +167,12 @@ class FormStash(object):
                   "it now proxies `html_error_placeholder`; "
                   "legacy functionality is available via `render_html_error_main`."
                   )
-        return self.html_error_placeholder(field=field, template=template)
+        return self.html_error_placeholder(field=field)
     
     def render_html_error_main(self, field=None, template=None):
         """
         Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`
-        This was previously `html_error_main`
+        This was previously `html_error_main` in the 0.1 branch
         """
         error = None
         # look in the main error field specifically
@@ -521,6 +531,7 @@ def form_reprint(
     render_view=None,
     render_view_template=None,
     auto_error_formatter=formatter_nobr,
+    error_formatters=None,
     **htmlfill_kwargs
 ):
     """reprint a form
@@ -554,14 +565,6 @@ def form_reprint(
             log.debug("form_reprint - response has exception, redirecting")
         return response
 
-
-    print "----------------"
-    print response.text
-    print "----------------"
-    # import pdb
-    # pdb.set_trace()
-
-
     formStash = request.pyramid_formencode_classic[form_stash]
 
     form_content = response.text
@@ -589,6 +592,10 @@ def form_reprint(
 
     htmlfill_kwargs2 = htmlfill_kwargs.copy()
     htmlfill_kwargs2.setdefault('encoding', request.charset)
+    if error_formatters is not None:
+        _error_formatters = dict(list(formencode.htmlfill.default_formatter_dict.items()) + list(error_formatters.items()))
+        htmlfill_kwargs2['error_formatters'] = _error_formatters
+
     form_content = formencode.htmlfill.render(
         form_content,
         defaults = formStash.defaults,

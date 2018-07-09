@@ -3,7 +3,10 @@
 	This release is focused on simplifying the API and some performance improvements
 	Many previously deprecated functions have been removed
 	Some utility functions have been removed as well
-	Your project may not be compatible without some simple modification, if so - peg to a release UNDER 0.2.0
+	Your project may not be compatible without some simple modifications, if so - peg to a release UNDER 0.2.0
+	
+	- replaced `html_error_main`:
+		legacy functionality is via `render_html_error_main`
 	
 	- removed deprecated methods	
 		FormStash.hasError  # use has_error
