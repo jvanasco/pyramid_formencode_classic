@@ -65,10 +65,10 @@ class TestRenderSimple(object):
     mixin class
     subclass and define a dict of test/values
 
-    python -munittest pyramid_formencode_classic.tests.core.TestRenderSimple_FormADefault \
-                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormAExplicit \
-                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormAAlt \
-                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormB
+    python -munittest pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorMain_Default \
+                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorMain_Explicit \
+                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorMain_Alt \
+                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorPlaceholder
     """
 
     template = None
@@ -97,10 +97,10 @@ class TestParsing(object):
     mixin class
     subclass and define a dict of test/values
 
-    python -munittest pyramid_formencode_classic.tests.core.TestParsing_FormADefault \
-                      pyramid_formencode_classic.tests.core.TestParsing_FormAExplicit \
-                      pyramid_formencode_classic.tests.core.TestParsing_FormAAlt \
-                      pyramid_formencode_classic.tests.core.TestParsing_FormB
+    python -munittest pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorMain_Default \
+                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorMain_Explicit \
+                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorMain_Alt \
+                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorPlaceholder
     """
     error_main_key = None
     template = None
@@ -170,8 +170,8 @@ class TestBasic(TestHarness, unittest.TestCase):
         self.assertTrue('pyramid_formencode_classic' in exts.descriptors)
 
 
-class TestRenderSimple_FormAAlt(TestRenderSimple, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_email-A-alt.mako'
+class TestRenderSimple_FormA_HtmlErrorMain_Alt(TestRenderSimple, TestHarness, unittest.TestCase):
+    template = 'fixtures/form_a-html_error_main-alt.mako'
 
     _test_render_simple__data = {
         'response_text': """\
@@ -187,8 +187,8 @@ class TestRenderSimple_FormAAlt(TestRenderSimple, TestHarness, unittest.TestCase
     }
 
 
-class TestRenderSimple_FormADefault(TestRenderSimple, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_email-A-default.mako'
+class TestRenderSimple_FormA_HtmlErrorMain_Default(TestRenderSimple, TestHarness, unittest.TestCase):
+    template = 'fixtures/form_a-html_error_main-default.mako'
 
     _test_render_simple__data = {
         'response_text': """\
@@ -204,8 +204,8 @@ class TestRenderSimple_FormADefault(TestRenderSimple, TestHarness, unittest.Test
     }
 
 
-class TestRenderSimple_FormAExplicit(TestRenderSimple, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_email-A-explicit.mako'
+class TestRenderSimple_FormA_HtmlErrorMain_Explicit(TestRenderSimple, TestHarness, unittest.TestCase):
+    template = 'fixtures/form_a-html_error_main-explicit.mako'
 
     _test_render_simple__data = {
         'response_text': """\
@@ -221,8 +221,8 @@ class TestRenderSimple_FormAExplicit(TestRenderSimple, TestHarness, unittest.Tes
     }
 
 
-class TestRenderSimple_FormB(TestRenderSimple, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_email-B.mako'
+class TestRenderSimple_FormA_HtmlErrorPlaceholder(TestRenderSimple, TestHarness, unittest.TestCase):
+    template = 'fixtures/form_a-html_error_placeholder.mako'
 
     _test_render_simple__data = {
         'response_text': """\
@@ -238,9 +238,9 @@ class TestRenderSimple_FormB(TestRenderSimple, TestHarness, unittest.TestCase):
     }
 
 
-class TestParsing_FormADefault(TestParsing, TestHarness, unittest.TestCase):
+class TestParsing_FormA_HtmlErrorMain_Default(TestParsing, TestHarness, unittest.TestCase):
 
-    template = 'fixtures/form_email-A-default.mako'
+    template = 'fixtures/form_a-html_error_main-default.mako'
 
     # test_no_params
     # note the whitespace in the lines here!
@@ -332,19 +332,19 @@ class TestParsing_FormADefault(TestParsing, TestHarness, unittest.TestCase):
 }
 
 
-class TestParsing_FormAExplicit(TestParsing_FormADefault, TestParsing, TestHarness, unittest.TestCase):
+class TestParsing_FormA_HtmlErrorMain_Explicit(TestParsing_FormA_HtmlErrorMain_Default, TestParsing, TestHarness, unittest.TestCase):
     """
-    inherit from TestParsing_FormADefault
+    inherit from TestParsing_FormA_HtmlErrorMain_Default
     this should have the same exact output, but with a different template
     """
-    template = 'fixtures/form_email-A-explicit.mako'
+    template = 'fixtures/form_a-html_error_main-explicit.mako'
 
 
-class TestParsing_FormAAlt(TestParsing, TestHarness, unittest.TestCase):
+class TestParsing_FormA_HtmlErrorMain_Alt(TestParsing, TestHarness, unittest.TestCase):
     """
-    this behaves slightly differently than TestParsing_FormAExplicit
+    this behaves slightly differently than TestParsing_FormA_HtmlErrorMain_Explicit
     """
-    template = 'fixtures/form_email-A-alt.mako'
+    template = 'fixtures/form_a-html_error_main-alt.mako'
     error_main_key = 'Error_Alt'
 
     # test_no_params
@@ -437,11 +437,11 @@ class TestParsing_FormAAlt(TestParsing, TestHarness, unittest.TestCase):
 }
 
 
-class TestParsing_FormAAlt_ErrorFormatters(TestParsing, TestHarness, unittest.TestCase):
+class TestParsing_FormA_HtmlErrorMain_Alt_ErrorFormatters(TestParsing, TestHarness, unittest.TestCase):
     """
-    this behaves slightly differently than TestParsing_FormAAlt
+    this behaves slightly differently than TestParsing_FormA_HtmlErrorMain_Alt
     """
-    template = 'fixtures/form_email-A-alt.mako'
+    template = 'fixtures/form_a-html_error_main-alt.mako'
     error_main_key = 'Error_Alt'
 
     # test_no_params
@@ -540,8 +540,8 @@ class TestParsing_FormAAlt_ErrorFormatters(TestParsing, TestHarness, unittest.Te
 
 
 
-class TestParsing_FormB(TestParsing, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_email-B.mako'
+class TestParsing_FormA_HtmlErrorPlaceholder(TestParsing, TestHarness, unittest.TestCase):
+    template = 'fixtures/form_a-html_error_placeholder.mako'
 
     # test_no_params
     # note the whitespace in the lines here!
@@ -633,8 +633,8 @@ class TestParsing_FormB(TestParsing, TestHarness, unittest.TestCase):
 }
 
 
-class TestParsing_FormB_ErrorFormatters(TestParsing, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_email-B.mako'
+class TestParsing_FormA_HtmlErrorPlaceholder_ErrorFormatters(TestParsing, TestHarness, unittest.TestCase):
+    template = 'fixtures/form_a-html_error_placeholder.mako'
 
     # test_no_params
     # note the whitespace in the lines here!
