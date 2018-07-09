@@ -1,138 +1,116 @@
-v 0.2.0
-	simplified api
+## Current Recommended Version
 
-v 0.1.5
+`v 0.2.0 (2018.07.??)``
 
-a port of some classic pylons styling, but without much of the cruft that was not used often
+New Features:
 
-This allows for a very particular coding style that was popular with the Pylons framework, which I prefer.
+* simplified api
+* bug fixes, better integration
 
-As you can see below, 'methods' are broken into multiple parts:
+Backwards Compatible?
 
-- a callable dispatcher (login)
-- a private printer (_login_print)
-- a private submit processor (_login_submit)
-
-The formencode schema does not interact with the database.  it is used entirely for "lightweight" validation and cheap operations (length, presence, etc)
-
-The more involved operations occur in the submit processor.
-
-At any time, if an error is occured, a call to "form_reprint" can be made.  that function makes a subrequest and runs htmlfill on it.
-
-Custom errors can be set as well.
-
-If you want to set a "oh noes! message" for the form, pass in the `error_main` argument to validate, that will set an error in Error_Main, which will do one of two things:
-
-a-  formencode.htmlfill will replace this marking in your template
-        <form:error name="Error_Main"/>
-    with the follwing:
-        <span class="error-message">${error_main}</span><br/>
-
-    caveat:
-        <form:error name="Error_Main"/> will appear on valid documents, as htmlfill won't be called to strip it out
-        if you want to strip it out, you could do the following:
-
-            - pass your formStash into a template via the print mechanism
-            - test for form validity in the form ; the FormStash class has an is_error attribute which is set True on errors (and cleared when no errors exist)
+*  No. Some functionality switched between 0.1.x and 0.2.0 and light editing is required.  See `CHANGES.txt`
 
 
-b- if the marking is not in your template, it will be at the top of the document (before the html) as
+## What is this package?
+
+`pyramid_formencode_classic` is a port of some classic `Pylons` form validation concepts onto the `Pyramid` framework.
+
+Through the version `0.1.x` releases, this package sought to integrate the Pylons validation onto Pyramid so projects could be ported easier.
+
+Starting with version `0.2.0` strict backwards compatibility has been lost in favor of performance enhancements and streamlining the API. There were simply a handful of bugs and oddities which were not easily fixed.
+
+## How does this handle form validation?
+
+In the example below, form validation is broken into 4 components:
+
+* A `formencode` form schema
+* a callable dispatcher (`login`)
+* a private printer (`_login_print`)
+* a private submit processor (`_login_submit`)
+
+The formencode schema does not interact with the database. It is used only for "lightweight" validation and cheap operations (length, presence, etc).
+
+The more involved operations, such as checking a database within a transaction, can occur in the submit step.  
+
+In this pattern, if an error is encountered at any time, a `FormInvalid` error can be raised to trigger `form_reprint`.  That function will render the template using `Pyramid`'s mechanism and then run `formencode`'s `htmlfill` on it.
+
+If you want to set a global "oh noes!" message for the form, set an error on a special non-existent field like `Error_Main`.
+
+
+## Caveats, Oddities, Etc
+
+### Custom Errors, Custom Error Displays and Missing Fields
+
+#### Where are errors placed?  What about missing fields?
+
+`formencode.htmlfill` prefers to upgrade a html form element with the error information.
+
+If the html input for an error is missing, such as a custom `Error_Main` field, `formencode` will attempt to do two things:
+
+1. `formencode` will look for a custom `form:error` field, such as `<form:error name="Error_Main"/>`.
+2. If no fields are available, `formencode` will *PREPEND* the error messages to the document.  This can create problems if you are running the reprint on a full (not partial) html page.
+
+#### How are errors styled?
+
+`formencode` styles errors using two commandline arguments.
+
+* `auto_error_formatter` is a function that formats the error messages for fields which do not appear on the document and are pre-pended.
+* `error_formatters` is a dict of error formatters that can be passed into `htmlfill`.  if provided, these will be merged into the htmlfill defaults.
+
+`htmlfill` allows a bit of customization by supporting a `format` attribute in `<form:error/>` declarations, which will invoke the respective entry in the `error_formatters` dict.
+
+#### How can a "global" form error be handled?
+
+Handling a custom error can be achieved by reserving a special `error_main` key. By default, `pyramid_formencode_classic` uses `Error_Main`.
+
+Once you set that field as a form error,  `formencode.htmlfill` will replace this markup in your template
+
+    <form:error name="Error_Main"/>
+
+with the following html:
+
+    <!-- for: Error_Main -->
+	<span class="error-message">%(Error_Main)s</span><br/>
+
+In which the `Error_main` text has been run through `error_formatters['default']`
+
+There is a small caveat:
+
+In order for the text to appear in the form where you wish, you must write `<form:error name="Error_Main"/>` in the form.  Non-error views will contain that text in the html source, but not render it; error views will replace it with properly formatted errors.
+
+This package offers a convenience method to conditionally render that text:
+
+	<html><head></head><body><div>
+	<form action="/" method="POST">
+		<% form = request.pyramid_formencode_classic.get_form() %>
+		${form.html_error_placeholder()|n}
+		<input type="text" name="email" value="" />
+		<input type="text" name="username" value="" />
+	</form>
+	</div></body></html>
+
+
+If the marking is not in your template, it will be at the top of the document (before the html), after being run through the `auto_error_formatter`
+
     <!-- for: Error_Main -->
     <span class="error-message">${error_main}</span>
 
-As with all formencode implementaitons, you can control where an error message appears by placing an explicit <form:error name="${formfield}"/>
+
+# Examples
+
+## Usage Overview
 
 
-there is a trivial attempt at multiple form handling - a "form_stash" argument can be used, which will store different "FormStash" wrapped structures in the names provided.
-
-MAJOR CAVEATS
-    1. it doesn't support using a "render" on the form object -- it expects forms to be manually coded, and errors to be regexed out via htmlfill. live with it.
-    2. this REQUIRES one of the following two scenarios:
-
-        a-  the form methods return a response object via "pyramid.renderers.render_to_response"
-
-            your handlers would look like this
-
-                def test(self):
-                    if 'submit' in self.request.POST:
-                        return self._test_submit()
-                    return self._test_print()
-
-                def _test_print(self):
-                    return render_to_response("/test_form.mako", {}, self.request)
-
-                def _test_submit(self):
-                    try:
-                        (result,
-                         formStash
-                         ) = formhandling.form_validate(self.request,
-                         								schema=forms.FormLogin,
-                         								error_main="Error",
-                         								)
-                        if not result:
-                            raise formhandling.FormInvalid()
-                        userAccount= query_for_useraccount(formStash.results['email'])
-                        if not userAccount:
-                            formStash.set_error(field='email',
-                            					message='Invalid Login',
-                            					raise_FormInvalid=True,
-                            					)
-                        ...
-                    except formhandling.FormInvalid:
-                        # you could set a field manually too
-                        #formhandling.formerrors_set(field="email", message='missing this field')
-                        return formhandling.form_reprint(self.request,
-                        								 self._login_print,
-                        								 )
-
-        b- you use an action decorator
-
-            your handlers would look like this
-
-                @action(renderer='/test_form.mako')
-                def test(self):
-                    if 'submit' in self.request.POST:
-                        return self._test_submit()
-                    return self._test_print()
-
-                def _test_print(self):
-                    return {"project":"MyApp"}
-
-                def _test_submit(self):
-                    try:
-                        (result,
-                         formStash
-                         ) = formhandling.form_validate(self.request,
-                         								schema=forms.FormLogin,
-                         								error_main="Error",
-                         								)
-                        if not result:
-                            raise formhandling.FormInvalid()
-                        ...
-                    except formhandling.FormInvalid:
-                        # you could set a field manually too
-                        #formhandling.formerrors_set(self.request, field="field", message='missing this field')
-                        return formhandling.form_reprint(self.request
-                        								 None,
-                        								 render_view=self._test_print,
-                        								 render_view_template="/test_form.mako"
-                        								 )
-
-
-Needless to say: this is really nice and clean in the first scenario, and messy in the latter.
-
-
-80% of this code is adapted from Pylons, 20% is outright copy/pasted.
-
-
-define your form
-=================
+### define your form
 
     import formencode
+
 
     class _Schema_Base(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
+
 
     class FormLogin(_Schema_Base):
         email_address = formencode.validators.Email(not_empty=True)
@@ -140,10 +118,11 @@ define your form
         remember_me = formencode.validators.Bool()
 
 
-define your view/handler
-========================
+### define your view/handler
+
 
     import pyramid_formencode_classic as formhandling
+
 
     class WebLogin(base):
 
@@ -152,10 +131,8 @@ define your view/handler
                 return self._login_submit()
             return self._login_print()
 
-
         def _login_print(self):
             return render_to_response("web/account/login.mako", {}, self.request)
-
 
         def _login_submit(self):
 
@@ -173,28 +150,27 @@ define your view/handler
 
                 useraccount = model.find_user(results['email_address'])
                 if not useraccount:
+                	# set a custom error and raise an exception to reprint
                     formStash.set_error(field="email_address",
                     				    message="Email not registered",
                     				    raise_FormInvalid=True,
                     				    )
 
                 if not useraccount.verify_submitted_password(results['password']):
+                	# set a custom error and raise an exception to reprint
                     formStash.set_error(field="email_address",
                     					message="Wrong password",
                     					raise_FormInvalid=True,
                     					)
 
+				do_login()
+				return HTTPFound(location='/account/home')
+
             except formhandling.FormInvalid:
+                # our reprint logic
                 return formhandling.form_reprint(self.request,
                 								 self._login_print
                 								 )
-
-            except:
-                raise
-
-            # login via helper
-            h.do_login()
-            return HTTPFound(location='/account/home')
 
 
 Twitter Bootstrap Example
@@ -204,7 +180,7 @@ Twitter Bootstrap Example
 
         Mako:
             <% form= request.pyramid_formencode_classic.get_form() %>
-            ${form.html_error_main('Error_Main')|n}
+            ${form.html_error_placeholder()|n}
             <div class="control-group ${form.css_error('email_address')}">
                 <label class="control-label" for="email_address">Email</label>
                 <input id="email_address" name="email_address" placeholder="Email Address" size="30" type="text" />
@@ -231,5 +207,104 @@ Twitter Bootstrap Example
         4. I've included two methods of presenting field errors.  they are funtinoally the same.
         5. I've used an ErrorMain to show that there are issues on the form - not just a specific field.
 
+
+
+## Example Renderings
+
+there is a trivial attempt at multiple form handling - a "form_stash" argument can be used, which will store different "FormStash" wrapped structures in the names provided.
+
+MAJOR CAVEATS
+    1. it doesn't support using a "render" on the form object -- it expects forms to be manually coded, and errors to be regexed out via htmlfill. live with it.
+    2. this REQUIRES one of the following two scenarios:
+
+Needless to say: this is really nice and clean in the first scenario, and messy in the latter.
+
+
+### Example Rendering A - `render_to_response`
+
+The form methods always render a response object via `pyramid.renderers.render_to_response`
+
+	class MyView(handler):
+
+		def test(self):
+			if 'submit' in self.request.POST:
+				return self._test_submit()
+			return self._test_print()
+
+		def _test_print(self):
+			return render_to_response("/test_form.mako", {}, self.request)
+
+		def _test_submit(self):
+			try:
+				(result,
+				 formStash
+				 ) = formhandling.form_validate(self.request,
+												schema=forms.FormLogin,
+												error_main="Error",
+												)
+				if not result:
+					raise formhandling.FormInvalid()
+				userAccount= query_for_useraccount(formStash.results['email'])
+				if not userAccount:
+					formStash.set_error(field='email',
+										message='Invalid Login',
+										raise_FormInvalid=True,
+										)
+				...
+			except formhandling.FormInvalid:
+				# you could set a field manually too
+				#formhandling.formerrors_set(field="email", message='missing this field')
+				return formhandling.form_reprint(self.request,
+												 self._login_print,
+												 )
+
+
+### Example Rendering B - `view_config`
+
+The form methods use a pyramid renderer
+
+	class MyView(handler):
+
+		@view_config(renderer='/test_form.mako')
+		def test(self):
+			if 'submit' in self.request.POST:
+				return self._test_submit()
+			return self._test_print()
+
+		def _test_print(self):
+			return {"project":"MyApp"}
+
+		def _test_submit(self):
+			try:
+				(result,
+				 formStash
+				 ) = formhandling.form_validate(self.request,
+												schema=forms.FormLogin,
+												error_main="Error",
+												)
+				if not result:
+					raise formhandling.FormInvalid()
+				...
+			except formhandling.FormInvalid:
+				# you could set a field manually too
+				#formhandling.formerrors_set(self.request, field="field", message='missing this field')
+				return formhandling.form_reprint(self.request
+												 None,
+												 render_view=self._test_print,
+												 render_view_template="/test_form.mako"
+												 )
+
+
+# FAQs
+
+### Can multiple forms be present on a page?
+
+Yes, but you should give them each a unique 'name' and handle them independently.
+
+reprints of error forms do not work correctly with them, so the forms may need unique values.
+
+if possible, use partial forms and not entire html documents.
+
+80% of this code is adapted from Pylons, 20% is outright copy/pasted.
 
 released under the BSD license, as it incorporates some Pylons code (which was BSD)
