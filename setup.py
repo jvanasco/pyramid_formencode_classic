@@ -52,7 +52,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires = requires,
-    test_suite="tests",
+    test_suite="pyramid_formencode_classic.tests",
     classifiers=[
         "Intended Audience :: Developers",
         "Framework :: Pyramid",

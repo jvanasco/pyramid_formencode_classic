@@ -1,5 +1,47 @@
+0.2.0
+	2018.07.06
+	This release is focused on simplifying the API and some performance improvements
+	Many previously deprecated functions have been removed
+	Some utility functions have been removed as well
+	Your project may not be compatible without some simple modification, if so - peg to a release UNDER 0.2.0
+	
+	- removed deprecated methods	
+		FormStash.hasError  # use has_error
+		FormStash.cssError  # use css_error
+		FormStash.htmlError  # use html_error
+		FormStash.htmlErrorMain  # use html_error_main
+		FormStash.getError  # use get_error
+		FormStash.setError  # use set_error
+		FormStash.clearError  # use clear_error
+	- removed deprecated kwargs:
+		FormStash.html_error_main(section=)  # use field
+		FormStash.set_error(section=)  # use field
+		FormStash.set_error(raise_form_invalid=)  # use raise_FormInvalid
+		FormStash.set_error(raise_field_invalid=)  # use raise_FieldInvalid
+		FormStash.clear_error(section=)  # use field
+		formerrors_set(section=)  # use field
+		formerrors_set(raise_form_invalid=)  # use raise_FormInvalid
+		formerrors_set(raise_field_invalid=)  # use raise_FieldInvalid
+		form_validate(raise_form_invalid=)  # use raise_FormInvalid
+		form_validate(raise_field_invalid=)  # use raise_FieldInvalid
+	- nested logging under `if __debug__` for cpython optimization
+	- new
+		pyramid includeme configuration hook
+		formatter- formatter_hidden
+	- removed
+		set_form
+		get_form
+		_form_ensure
+	- deprecated
+		init_request  
+			use the pyramid includeme instead
+			the new version invokes the modern method
+		formerrors_set
+		formerrors_clear
+		
+
 0.1.10
-	2018.08.16
+	2017.08.16
 	- added `html_error_main_fillable` method to FormStash
 	
 0.1.9

@@ -3,7 +3,7 @@ log = logging.getLogger(__name__)
 
 # stdlib
 import cgi
-import pdb
+# import pdb
 import sys
 import types
 
@@ -20,10 +20,19 @@ from .exceptions import *
 from .formatters import *
 
 
+# warnings
+
+import warnings
+
+def warn_future(message):
+    warnings.warn(message, FutureWarning, stacklevel=2)
+
+
 # defaults
-__VERSION__ = '0.1.10'
+__VERSION__ = '0.2.0'
 
 DEFAULT_FORM_STASH = '_default'
+DEFAULT_ERROR_MAIN_KEY = 'Error_Main',
 
 DEPRECATION_WARNING = False
 
@@ -34,7 +43,8 @@ def determine_response_charset(response):
     charset = response.charset
     if charset is None:
         charset = sys.getdefaultencoding()
-    log.debug("Determined result charset to be: %s", charset)
+    if __debug__:
+        log.debug("Determined result charset to be: %s", charset)
     return charset
 
 
@@ -135,11 +145,8 @@ class FormStash(object):
             return '<input type="hidden" name="%s" />' % field
         return ''
 
-    def html_error_main(self, field=None, template=None, section=None):
+    def html_error_main(self, field=None, template=None):
         """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
-        if (section is not None) and (field is None):
-            log.debug("FormStash - `section` is being deprecated for `field`")
-            field = section
         error = None
         # look in the main error field specifically
         if field is None:
@@ -162,12 +169,9 @@ class FormStash(object):
     def set_error(self,
                   field = None,
                   message = "Error",
-                  raise_form_invalid = None,
-                  raise_field_invalid = None,
                   message_append = False,
                   message_prepend = False,
                   is_error_csrf = None,
-                  section = None,  # this is being deprecated out
                   raise_FormInvalid = None,
                   raise_FieldInvalid = None,
                   ):
@@ -175,8 +179,8 @@ class FormStash(object):
 
             `field`: the field in the form
             `message`: your error message
-            `raise_form_invalid`: default `False`. if `True` will raise `FormInvalid`
-            `raise_field_invalid`: default `False`. if `True` will raise `FieldInvalid`
+            `raise_FormInvalid`: default `False`. if `True` will raise `FormInvalid`
+            `raise_FieldInvalid`: default `False`. if `True` will raise `FieldInvalid`
             `message_append`: default `False`.  if true, will append the `message` argument to any existing argument in this `field`
             `message_prepend`: default `False`.  if true, will prepend the `message` argument to any existing argument in this `field`
 
@@ -186,19 +190,21 @@ class FormStash(object):
 
                 try:
                     except CaughtError, e:
-                        formStash.set_error(message="We encountered a `CaughtError`", raise_form_invalid=True)
+                        formStash.set_error(message="We encountered a `CaughtError`",
+                                            raise_FormInvalid=True,
+                                            )
                     ...
                 except formhandling.FormInvalid:
-                    formStash.set_error(field='Error_Main', message="There was an error with your form.", message_prepend=True)
+                    formStash.set_error(field='Error_Main',
+                                        message="There was an error with your form.",
+                                        message_prepend=True,
+                                        )
                     return formhandling.form_reprint(...)
 
             This would generate the following text for the `Error_Main` field:
 
                 There was an error with your form.  We encountered a `CaughtError`
         """
-        if (section is not None) and (field is None):
-            log.debug("FormStash - `section` is being deprecated for `field`")
-            field = section
         if field is None:
             field = self.error_main_key
         if message is None:
@@ -219,24 +225,13 @@ class FormStash(object):
         if self.errors:
             self.is_error = True
 
-        # deprecation helpers
-        if (raise_form_invalid is not None) or (raise_field_invalid is not None):
-            log.debug("FormStash - `raise_form_invalid` is being deprecated to `raise_FormInvalid`; `raise_field_invalid` is being deprecated to `raise_FieldInvalid`.")
-        if raise_FormInvalid is None:
-            raise_FormInvalid = raise_form_invalid
-        if raise_FieldInvalid is None:
-            raise_FieldInvalid = raise_field_invalid
-
         if raise_FormInvalid:
             raise FormInvalid()
         if raise_FieldInvalid:
             raise FieldInvalid()
 
-    def clear_error(self, field=None, section=None):
+    def clear_error(self, field=None):
         """clear the dict of errors"""
-        if (section is not None) and (field is None):
-            log.debug("FormStash - `section` is being deprecated for `field`")
-            field = section
         if self.errors:
             if field:
                 if field in self.errors:
@@ -248,109 +243,54 @@ class FormStash(object):
 
     def csrf_input_field(self, id="csrf_", name="csrf_", type="hidden", csrf_token='', htmlfill_ignore=True):
         return """<input id="%(id)s" type="%(type)s" name="%(name)s" value="%(csrf_token)s"%(htmlfill_ignore)s/>""" % \
-            {
-                'id': id,
-                'name': name,
-                'type': type,
-                'csrf_token': csrf_token,
-                'htmlfill_ignore': " data-formencode-ignore='1' " if htmlfill_ignore else '',
-            }
-
-    # --------------------------------------------------------------------------
-    # deprecation support
-
-    def hasError(self, field):
-        if DEPRECATION_WARNING:
-            log.debug("`hasError` is being deprecated to `has_error`")
-        return self.has_error(field)
-
-    def cssError(self, section, css_error=''):
-        if DEPRECATION_WARNING:
-            log.debug("`cssError` is being deprecated to `css_error`")
-        return self.css_error(section, css_error=css_error)
-
-    def htmlError(self, section, template=None):
-        if DEPRECATION_WARNING:
-            log.debug("`htmlError` is being deprecated to `html_error`")
-        return self.html_error(section, template=template)
-
-    def htmlErrorMain(self, section=None, template=None):
-        if DEPRECATION_WARNING:
-            log.debug("`htmlErrorMain` is being deprecated to `html_error_main`")
-        return self.html_error_main(section=section, template=template)
-
-    def getError(self, section):
-        if DEPRECATION_WARNING:
-            log.debug("`getError` is being deprecated to `get_error`")
-        return self.get_error(section)
-
-    def setError(self,
-                 section = None,
-                 message = "Error",
-                 raise_form_invalid = None,
-                 raise_field_invalid = None,
-                 is_error_csrf = None,
-                 ):
-        if DEPRECATION_WARNING:
-            log.debug("`setError` is being deprecated to `set_error`")
-        return self.set_error(section = section,
-                              message = message,
-                              raise_form_invalid = raise_form_invalid,
-                              raise_field_invalid = raise_field_invalid,
-                              is_error_csrf = is_error_csrf,
-                              )
-
-    def clearError(self, section=None):
-        if DEPRECATION_WARNING:
-            log.debug("`clearError` is being deprecated to `clear_error`")
-        return self.clear_error(section=section)
+            {'id': id,
+             'name': name,
+             'type': type,
+             'csrf_token': csrf_token,
+             'htmlfill_ignore': " data-formencode-ignore='1' " if htmlfill_ignore else '',
+             }
 
 
 class FormStashList(dict):
-    """dict for holding `FormStash`"""
-    pass
+    """
+    dict for holding multiple `FormStash`
+    this allows for more than one form to be processed on a request
+    this should be registered onto a request as
+    
+        `request.pyramid_formencode_classic = FormStashList()`
+    
+    the preferred mechanism is to use pyramid's `add_request_method`
+    """
 
-
-def init_request(request):
-    """helper function. ensures there is a `pyramid_formencode_classic` dict on the request"""
-    if not hasattr(request, 'pyramid_formencode_classic'):
-        setattr(request, 'pyramid_formencode_classic', FormStashList())
-
-
-def set_form(request, form_stash=DEFAULT_FORM_STASH, formObject=None):
-    init_request(request)
-    request.pyramid_formencode_classic[form_stash] = formObject
-
-
-def get_form(request, form_stash=DEFAULT_FORM_STASH, error_main_key=None):
-    """DEPRECATED.  helper function. to proxy FormStash object.  this is just wrapping _form_ensure."""
-    return _form_ensure(request, form_stash=form_stash, error_main_key=error_main_key)
-
-
-def _form_ensure(request, form_stash=DEFAULT_FORM_STASH, error_main_key=None):
-    """helper function. ensures there is a FormStash instance attached to the request"""
-    init_request(request)
-    if form_stash not in request.pyramid_formencode_classic:
-        request.pyramid_formencode_classic[form_stash] = FormStash(name=form_stash, error_main_key=error_main_key)
-    return request.pyramid_formencode_classic[form_stash]
-
-
-def formerrors_set(request, form_stash=DEFAULT_FORM_STASH, field=None, message='There was an error with your submission...', raise_form_invalid=None, raise_field_invalid=None, section=None, ):
+    def get_form(self, form_stash=DEFAULT_FORM_STASH, error_main_key=DEFAULT_ERROR_MAIN_KEY):
+        if form_stash not in self:
+            self[form_stash] = FormStash(name=form_stash, error_main_key=DEFAULT_ERROR_MAIN_KEY)
+        return self[form_stash]
+    
+    
+def formerrors_set(
+    request,
+    form_stash=DEFAULT_FORM_STASH,
+    field=None,
+    message='There was an error with your submission...',
+    raise_FormInvalid=None,
+    raise_FieldInvalid=None,
+):
     """helper function. to proxy FormStash object"""
-    if (section is not None) and (field is None):
-        log.debug("FormStash - `section` is being deprecated for `field`")
-        field = section
-    form = _form_ensure(request, form_stash=form_stash)
-    form.set_error(section=section, message=message, raise_form_invalid=raise_form_invalid, raise_field_invalid=raise_field_invalid)
+    warn_future("""`formerrors_set` is deprecated and will be removed""")
+    form = request.pyramid_formencode_classic[form_stash]
+    form.set_error(field=field,
+                   message=message,
+                   raise_FormInvalid=raise_FormInvalid,
+                   raise_FieldInvalid=raise_FieldInvalid,
+                   )
 
 
-def formerrors_clear(request, form_stash=DEFAULT_FORM_STASH, field=None, section=None):
+def formerrors_clear(request, form_stash=DEFAULT_FORM_STASH, field=None):
     """helper function. to proxy FormStash object"""
-    if (section is not None) and (field is None):
-        log.debug("FormStash - `section` is being deprecated for `field`")
-        field = section
-    form = _form_ensure(request, form_stash=form_stash)
-    form.clear_error(section=section)
+    warn_future("""`formerrors_clear` is deprecated and will be removed""")
+    form = request.pyramid_formencode_classic[form_stash]
+    form.clear_error(field=field)
 
 
 def form_validate(
@@ -366,11 +306,9 @@ def form_validate(
     list_char='-',
     state= None,
     error_main=None,
-    error_main_key='Error_Main',
+    error_main_key=DEFAULT_ERROR_MAIN_KEY,
     error_string_key='Error_String',
     return_stash= True,
-    raise_form_invalid = None,
-    raise_field_invalid = None,
     raise_FormInvalid = None,
     raise_FieldInvalid = None,
     csrf_name = 'csrf_',
@@ -452,7 +390,8 @@ def form_validate(
         passthrough to new `Form`
 
     """
-    log.debug("form_validate - starting...")
+    if __debug__:
+        log.debug("form_validate - starting...")
     errors = {}
     if form_stash_object is None:
         formStash = FormStash(error_main_key=error_main_key,
@@ -475,27 +414,33 @@ def form_validate(
             elif not validate_post and validate_get:
                 validate_params = request.GET
             elif not validate_post and not validate_get:
-                formStash.set_error(field=formStash.error_main_key, message="Nothing submitted.")
+                formStash.set_error(field=formStash.error_main_key,
+                                    message="Nothing submitted.",
+                                    )
                 raise ValidationStop('no `validate_params`')
 
         validate_params = validate_params.mixed()
 
         if variable_decode:
-            log.debug("form_validate - running variable_decode on params")
+            if __debug__:
+                log.debug("form_validate - running variable_decode on params")
             decoded_params = formencode.variabledecode.variable_decode(validate_params, dict_char, list_char)
         else:
             decoded_params = validate_params
 
         # if there are no params to validate against, then just stop
         if not decoded_params:
-            formStash.set_error(field=formStash.error_main_key, message="Nothing submitted.")
+            formStash.set_error(field=formStash.error_main_key,
+                                message="Nothing submitted.",
+                                )
             raise ValidationStop('no `decoded_params`')
 
         # initialize our results
         results = {}
 
         if schema:
-            log.debug("form_validate - validating against a schema")
+            if __debug__:
+                log.debug("form_validate - validating against a schema")
             try:
                 results = schema.to_python(decoded_params, state)
             except formencode.Invalid, e:
@@ -509,7 +454,8 @@ def form_validate(
         formStash.defaults = decoded_params
 
         if errors:
-            log.debug("form_validate - Errors found in validation")
+            if __debug__:
+                log.debug("form_validate - Errors found in validation")
             formStash.is_error = True
             if error_main:
                 # don't raise an error, because we have to stash the form
@@ -531,21 +477,14 @@ def form_validate(
                                         )
 
     except ValidationStop, e:
-        log.debug("form_validate - encountered a ValidationStop")
+        if __debug__:
+            log.debug("form_validate - encountered a ValidationStop")
         pass
         
     # save the form onto the request
-    set_form(request, form_stash=form_stash, formObject=formStash)
+    request.pyramid_formencode_classic[form_stash] = formStash
 
     if formStash.is_error:
-
-        # deprecation helpers
-        if (raise_form_invalid is not None) or (raise_field_invalid is not None):
-            log.debug("FormStash - `raise_form_invalid` is being deprecated to `raise_FormInvalid`; `raise_field_invalid` is being deprecated to `raise_FieldInvalid`.")
-        if raise_FormInvalid is None:
-            raise_FormInvalid = raise_form_invalid
-        if raise_FieldInvalid is None:
-            raise_FieldInvalid = raise_field_invalid
 
         # now raise
         if raise_FormInvalid:
@@ -577,7 +516,8 @@ def form_reprint(
             this is an htmlfill_kwargs, but we default to one without a br
         `**htmlfill_kwargs` -- passed on to htmlfill
     """
-    log.debug("form_reprint - starting...")
+    if __debug__:
+        log.debug("form_reprint - starting...")
 
     response = None
     if form_print_method:
@@ -593,17 +533,19 @@ def form_reprint(
     # # resposne.code != 200
     # # repsonse.code == 302 <-- http found
     if hasattr(response, 'exception'):
-        log.debug("form_reprint - response has exception, redirecting")
+        if __debug__:
+            log.debug("form_reprint - response has exception, redirecting")
         return response
 
-    formStash = get_form(request, form_stash=form_stash)
+    formStash = request.pyramid_formencode_classic[form_stash]
 
     form_content = response.text
 
     # Ensure htmlfill can safely combine the form_content, params and
     # errors variables (that they're all of the same string type)
     if not formStash.is_unicode_params:
-        log.debug("Raw string form params: ensuring the '%s' form and FormEncode errors are converted to raw strings for htmlfill", form_print_method)
+        if __debug__:
+            log.debug("Raw string form params: ensuring the '%s' form and FormEncode errors are converted to raw strings for htmlfill", form_print_method)
         encoding = determine_response_charset(response)
 
         if hasattr(response, 'errors'):
@@ -615,7 +557,8 @@ def form_reprint(
             response.errors = encode_formencode_errors({}, encoding, response.errors)
 
     elif not isinstance(form_content, unicode):
-        log.debug("Unicode form params: ensuring the '%s' form is converted to unicode for htmlfill", formStash)
+        if __debug__:
+            log.debug("Unicode form params: ensuring the '%s' form is converted to unicode for htmlfill", formStash)
         encoding = determine_response_charset(response)
         form_content = form_content.decode(encoding)
 
@@ -630,3 +573,37 @@ def form_reprint(
     )
     response.text = form_content
     return response
+
+
+def _new_request_FormStashList(request):
+    """
+    This is a modern version of `init_request` and sh
+    It is a memoized property via the pyramid `includeme` configuration hook
+    This merely creates a new FormStashList object
+    """
+    return FormStashList()
+
+
+def init_request(request):
+    """
+    DEPRECATED
+        helper function.
+        ensures there is a `pyramid_formencode_classic` dict on the request
+    Please use `includeme`
+    """
+    warn_future("""`init_request` is deprecated"""
+                """in favor of `includeme` and using a reified pyramid property""")
+    if not hasattr(request, 'pyramid_formencode_classic'):
+        formObj = _new_request_FormStashList(request)
+        setattr(request, 'pyramid_formencode_classic', formObj)
+    return request.pyramid_formencode_classic
+        
+
+def includeme(config):
+    """
+    pyramid hook for setting up a form method via the configurator
+    """
+    config.add_request_method(_new_request_FormStashList,
+                              'pyramid_formencode_classic',
+                              reify=True,
+                              )

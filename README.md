@@ -1,3 +1,6 @@
+v 0.2.0
+	simplified api
+
 v 0.1.5
 
 a port of some classic pylons styling, but without much of the cruft that was not used often
@@ -60,17 +63,27 @@ MAJOR CAVEATS
 
                 def _test_submit(self):
                     try:
-                        (result, formStash) = formhandling.form_validate(self.request, schema=forms.FormLogin, error_main="Error")
+                        (result,
+                         formStash
+                         ) = formhandling.form_validate(self.request,
+                         								schema=forms.FormLogin,
+                         								error_main="Error",
+                         								)
                         if not result:
                             raise formhandling.FormInvalid()
                         userAccount= query_for_useraccount(formStash.results['email'])
                         if not userAccount:
-                            formStash.set_error(section='email', message='Invalid', raise_form_invalid=True)
+                            formStash.set_error(field='email',
+                            					message='Invalid Login',
+                            					raise_FormInvalid=True,
+                            					)
                         ...
                     except formhandling.FormInvalid:
                         # you could set a field manually too
-                        #formhandling.formerrors_set(self.request, section="field", message='missing this field')
-                        return formhandling.form_reprint(self.request, self._login_print)
+                        #formhandling.formerrors_set(field="email", message='missing this field')
+                        return formhandling.form_reprint(self.request,
+                        								 self._login_print,
+                        								 )
 
         b- you use an action decorator
 
@@ -87,14 +100,23 @@ MAJOR CAVEATS
 
                 def _test_submit(self):
                     try:
-                        result = formhandling.form_validate(self.request, schema=forms.FormLogin, error_main="Error")
+                        (result,
+                         formStash
+                         ) = formhandling.form_validate(self.request,
+                         								schema=forms.FormLogin,
+                         								error_main="Error",
+                         								)
                         if not result:
                             raise formhandling.FormInvalid()
                         ...
                     except formhandling.FormInvalid:
                         # you could set a field manually too
-                        #formhandling.formerrors_set(self.request, section="field", message='missing this field')
-                        return formhandling.form_reprint(self.request, None, render_view=self._test_print, render_view_template="/test_form.mako")
+                        #formhandling.formerrors_set(self.request, field="field", message='missing this field')
+                        return formhandling.form_reprint(self.request
+                        								 None,
+                        								 render_view=self._test_print,
+                        								 render_view_template="/test_form.mako"
+                        								 )
 
 
 Needless to say: this is really nice and clean in the first scenario, and messy in the latter.
@@ -138,7 +160,12 @@ define your view/handler
         def _login_submit(self):
 
             try:
-                (result, formStash) = formhandling.form_validate(self.request, schema=forms.FormLogin, error_main="There was an error with your form.")
+                (result,
+                 formStash
+                 ) = formhandling.form_validate(self.request,
+                								schema=forms.FormLogin,
+                								error_main="There was an error with your form.",
+                								)
                 if not result:
                     raise formhandling.FormInvalid("Invalid Form")
 
@@ -146,13 +173,21 @@ define your view/handler
 
                 useraccount = model.find_user(results['email_address'])
                 if not useraccount:
-                    formStash.set_error(self.request, section="email_address", message="Email not registered", raise_form_invalid=True)
+                    formStash.set_error(field="email_address",
+                    				    message="Email not registered",
+                    				    raise_FormInvalid=True,
+                    				    )
 
                 if not useraccount.verify_submitted_password(results['password']):
-                    formStash.set_error(self.request, section="email_address", message="Wrong password", raise_form_invalid=True)
+                    formStash.set_error(field="email_address",
+                    					message="Wrong password",
+                    					raise_FormInvalid=True,
+                    					)
 
             except formhandling.FormInvalid:
-                return formhandling.form_reprint(self.request, self._login_print)
+                return formhandling.form_reprint(self.request,
+                								 self._login_print
+                								 )
 
             except:
                 raise
@@ -168,7 +203,7 @@ Twitter Bootstrap Example
     To handle  twitter bootstrap style errors, it's a bit more manual work -- but doable
 
         Mako:
-            <% form= formhandling.get_form(request) %>
+            <% form= request.pyramid_formencode_classic.get_form() %>
             ${form.html_error_main('Error_Main')|n}
             <div class="control-group ${form.css_error('email_address')}">
                 <label class="control-label" for="email_address">Email</label>
@@ -183,7 +218,10 @@ Twitter Bootstrap Example
 
 
         Pyramid:
-            text = formhandling.form_reprint(self.request, self._login_print, auto_error_formatter=formhandling.formatter_none)
+            text = formhandling.form_reprint(self.request,
+            								 self._login_print,
+            								 auto_error_formatter=formhandling.formatter_none,
+            								 )
 
     in the above example there are a few things to note:
 
