@@ -31,6 +31,8 @@
 	- new
 		pyramid includeme configuration hook
 		formatter- formatter_hidden
+		formatter- formatter_comment (was formatter_none)
+		formatter- formatter_empty_string
 	- removed
 		set_form
 		get_form
@@ -41,6 +43,7 @@
 			the new version invokes the modern method
 		formerrors_set
 		formerrors_clear
+		formatters.formatter_none
 		
 
 0.1.10

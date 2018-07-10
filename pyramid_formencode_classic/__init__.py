@@ -81,6 +81,8 @@ class FormStash(object):
     defaults = None
     css_error = 'error'
     error_main_key = 'Error_Main'
+    html_error_placeholder_template = '<form:error name="%s"/>'
+    html_error_placeholder_form_template = '<form:error name="%(field)s" data-formencode-form="%(form)s"/>'
     html_error_template = """<span class="help-inline">%(error)s</span>"""
     html_error_main_template = """<div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> %(error)s</span></div></div>"""
 
@@ -100,6 +102,22 @@ class FormStash(object):
     def set_css_error(self, css_error):
         """sets the css error field for the form"""
         self.css_error = css_error
+
+    def set_html_error_placeholder_template(self, html_error_placeholder_template):
+        """
+        sets the html error template field for the form
+        for example:
+            <form:error name="%s"/>
+        """
+        self.html_error_placeholder_template = html_error_placeholder_template
+
+    def set_html_error_placeholder_form_template(self, html_error_placeholder_form_template):
+        """
+        sets the html error template field for the form when data-formencode-form is needed
+        for example:
+            <form:error name="%(field)s" data-formencode-form="%(form)s"/>
+        """
+        self.html_error_placeholder_form_template = html_error_placeholder_form_template
 
     def set_html_error_template(self, html_error_template):
         """sets the html error template field for the form"""
@@ -137,7 +155,7 @@ class FormStash(object):
             return template % {'error': self.get_error(field)}
         return ''
     
-    def html_error_placeholder(self, field=None):
+    def html_error_placeholder(self, field=None, formencode_form=None):
         """If there are errors, returns a hidden input field for `Error_Main` or `field`.
            otherwise, returns an empty string.
            the htmlfill parser will update the hidden field to the template.
@@ -154,8 +172,11 @@ class FormStash(object):
         if self.has_errors():
             if field is None:
                 field = self.error_main_key
-            return '<form:error name="%s"/>' % field
-            # return '<input type="hidden" name="%s" />' % field
+            if formencode_form:
+                # default: '<form:error name="%s" data-formencode-form="%s"/>'
+                return self.html_error_placeholder_form_template % {'field': field, 'form': formencode_form, }
+            # default: '<form:error name="%s"/>'
+            return self.html_error_placeholder_template % field
         return ''
 
     # copy this method
@@ -593,19 +614,23 @@ def form_reprint(
         encoding = determine_response_charset(response)
         form_content = form_content.decode(encoding)
 
-    htmlfill_kwargs2 = htmlfill_kwargs.copy()
-    htmlfill_kwargs2.setdefault('encoding', request.charset)
+    # copy these because we don't want to overwrite a dict in place
+    _htmlfill_kwargs = htmlfill_kwargs.copy()
+    _htmlfill_kwargs.setdefault('encoding', request.charset)
     if error_formatters is not None:
         _error_formatters = dict(list(formencode.htmlfill.default_formatter_dict.items()) + list(error_formatters.items()))
-        htmlfill_kwargs2['error_formatters'] = _error_formatters
+        _htmlfill_kwargs['error_formatters'] = _error_formatters
 
+    # _form_content = form_content
     form_content = formencode.htmlfill.render(
         form_content,
         defaults = formStash.defaults,
         errors = formStash.errors,
         auto_error_formatter = auto_error_formatter,
-        **htmlfill_kwargs2
+        **_htmlfill_kwargs
     )
+    # import pdb
+    # pdb.set_trace()
     response.text = form_content
     return response
 

@@ -36,7 +36,7 @@ with open(
 
 requires = [
     "pyramid",
-    "FormEncode>=1.2.4",
+    "FormEncode>=2.0",
 ]
 
 setup(

@@ -1814,3 +1814,398 @@ class TestParsing_FormA_NoErrorMain_ErrorFormatters(TestParsing, TestHarness, un
                         raise_FormInvalid=True,
                         )
 """
+
+
+class TestCustomError(TestHarness, unittest.TestCase):
+    """
+
+    python -munittest pyramid_formencode_classic.tests.core.TestCustomError
+    """
+    error_main_key = None
+    template = 'fixtures/form_a-html_error_placeholder.mako'
+
+    def test_only_submit(self):
+
+        # set the submit
+        self.request.POST['submit'] = 'submit'
+
+        # custom formatter
+        def main_error_formatter(error):
+            TEMPLATE_FORMSTASH_ERRORS = """<div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="fa fa-exclamation-triangle"></i> %(error)s</span></div></div>"""
+            return (TEMPLATE_FORMSTASH_ERRORS % {'error': formencode.rewritingparser.html_quote(error)}) + "\n"
+
+        def alt_error_formatter(error):
+            ALT_ERROR = """<div class="error-alt">%(error)s</div>"""
+            return (ALT_ERROR % {'error': formencode.rewritingparser.html_quote(error)}) + "\n"
+
+        tests_completed = []
+        tests_fail = []
+        for test_name, test_data in self._test_only_submit__data.items():
+            _template = self.template
+            _response_text = test_data['response_text']
+            _reprint_kwargs = {'error_formatters': {}, }
+            if 'error_formatters_default' in test_data:
+                if test_data['error_formatters_default'] == 'main_error_formatter':
+                    _reprint_kwargs['error_formatters']['default'] = main_error_formatter
+            if 'error_formatters_alt' in test_data:
+                if test_data['error_formatters_alt'] == 'alt_error_formatter':
+                    _reprint_kwargs['error_formatters']['alt'] = alt_error_formatter
+
+            _validate_kwargs = {}
+            html_error_placeholder_template = test_data.get('html_error_placeholder_template', None)
+
+            def _print_form_simple():
+                rendered = render_to_response(_template, {'request': self.request})
+                return rendered
+
+            try:
+                (result,
+                 formStash
+                 ) = pyramid_formencode_classic.form_validate(self.request,
+                                                              schema=Form_EmailUsername,
+                                                              error_main="There was an error with your form.",
+                                                              **_validate_kwargs
+                                                              )
+                if html_error_placeholder_template:
+                    formStash.html_error_placeholder_template = html_error_placeholder_template
+                if not result:
+                    raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+                raise ValueError("`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`")
+            except pyramid_formencode_classic.FormInvalid:
+                rendered = pyramid_formencode_classic.form_reprint(self.request,
+                                                                   _print_form_simple,
+                                                                   **_reprint_kwargs
+                                                                   )
+                try:
+                    assert rendered.text == _response_text
+                except:
+                    if True:
+                        print "----------------"
+                        print "%s.test_only_submit" % self.__class__
+                        print test_name
+                        print rendered.text
+                    tests_fail.append(test_name)
+            tests_completed.append(test_name)
+
+        if tests_fail:
+            raise ValueError(tests_fail)
+            
+    _test_only_submit__data = {
+    'set_a_custom_error': {
+        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+        'error_formatters_default': 'main_error_formatter',
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="fa fa-exclamation-triangle"></i> There was an error with your form.</span></div></div>
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'set_a_custom_error_placeholder': {
+        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+        'error_formatters_default': 'main_error_formatter',
+        'error_formatters_alt': 'alt_error_formatter',
+        'html_error_placeholder_template': '<form:error name="%s" format="alt"/>',
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <div class="error-alt">There was an error with your form.</div>
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    }
+}
+
+
+class TestMultiForm(TestHarness, unittest.TestCase):
+    """
+
+    python -munittest pyramid_formencode_classic.tests.core.TestMultiForm
+    """
+    template = 'fixtures/form_b-multi.mako'
+
+    def test_render_simple(self):
+
+        _template = self.template
+        _response_text = self._test_data['response_text-test_render_simple']
+
+        def _print_form_simple():
+            rendered = render_to_response(_template, {'request': self.request})
+            return rendered
+
+        rendered = _print_form_simple()
+        try:
+            assert rendered.text == _response_text
+        except:
+            print "------------"
+            print rendered.text
+            print "------------"
+            raise
+    
+    def test_parse(self):
+
+        _template = self.template
+        _validate_kwargs = {}
+        _reprint_kwargs = {}
+        html_error_placeholder_template = None
+
+        def _print_form_simple():
+            rendered = render_to_response(_template, {'request': self.request})
+            return rendered
+
+        # render form A
+        try:
+            (result,
+             formStash
+             ) = pyramid_formencode_classic.form_validate(self.request,
+                                                          schema=Form_EmailUsername,
+                                                          form_stash='a',
+                                                          error_main="There was an error with your form.",
+                                                          **_validate_kwargs
+                                                          )
+            if html_error_placeholder_template:
+                formStash.html_error_placeholder_template = html_error_placeholder_template
+            if not result:
+                raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+            raise ValueError("`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`")
+        except pyramid_formencode_classic.FormInvalid:
+            rendered = pyramid_formencode_classic.form_reprint(self.request,
+                                                               _print_form_simple,
+                                                                form_stash='a',
+                                                               **_reprint_kwargs
+                                                               )
+            try:
+                assert rendered.text == self._test_data['response_text-test_parse-a']
+            except:
+                if True:
+                    print "----------------"
+                    print "%s.test_only_submit" % self.__class__
+                    print rendered.text
+                raise
+
+        # render form B
+        try:
+            (result,
+             formStash
+             ) = pyramid_formencode_classic.form_validate(self.request,
+                                                          schema=Form_EmailUsername,
+                                                          form_stash='b',
+                                                          error_main="There was an error with your form.",
+                                                          **_validate_kwargs
+                                                          )
+            if html_error_placeholder_template:
+                formStash.html_error_placeholder_template = html_error_placeholder_template
+            if not result:
+                raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+            raise ValueError("`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`")
+        except pyramid_formencode_classic.FormInvalid:
+            rendered = pyramid_formencode_classic.form_reprint(self.request,
+                                                               _print_form_simple,
+                                                                form_stash='b',
+                                                               **_reprint_kwargs
+                                                               )
+            try:
+                assert rendered.text == self._test_data['response_text-test_parse-b']
+            except:
+                if True:
+                    print "----------------"
+                    print "%s.test_only_submit" % self.__class__
+                    print rendered.text
+                raise
+
+
+    def test_parse_error(self):
+
+        # set the submit
+        self.request.POST['submit'] = 'submit'
+        self.request.POST['email'] = 'failmail'
+        self.request.POST['username'] = ''
+
+        _template = self.template
+        _validate_kwargs = {}
+        _reprint_kwargs = {}
+        html_error_placeholder_template = None
+
+        def _print_form_simple():
+            rendered = render_to_response(_template, {'request': self.request})
+            return rendered
+
+        # render form A
+        try:
+            (result,
+             formStash
+             ) = pyramid_formencode_classic.form_validate(self.request,
+                                                          schema=Form_EmailUsername,
+                                                          form_stash='a',
+                                                          error_main="There was an error with your form.",
+                                                          **_validate_kwargs
+                                                          )
+            if html_error_placeholder_template:
+                formStash.html_error_placeholder_template = html_error_placeholder_template
+            if not result:
+                raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+            raise ValueError("`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`")
+        except pyramid_formencode_classic.FormInvalid:
+            rendered = pyramid_formencode_classic.form_reprint(self.request,
+                                                               _print_form_simple,
+                                                               form_stash='a',
+                                                               data_formencode_form='a',
+                                                               **_reprint_kwargs
+                                                               )
+            try:
+                assert rendered.text == self._test_data['response_text-test_parse_error-a']
+            except:
+                if True:
+                    print "----------------"
+                    print "%s.test_only_submit" % self.__class__
+                    print rendered.text
+                raise
+
+        # render form B
+        try:
+            (result,
+             formStash
+             ) = pyramid_formencode_classic.form_validate(self.request,
+                                                          schema=Form_EmailUsername,
+                                                          form_stash='b',
+                                                          error_main="There was an error with your form.",
+                                                          **_validate_kwargs
+                                                          )
+            if html_error_placeholder_template:
+                formStash.html_error_placeholder_template = html_error_placeholder_template
+            if not result:
+                raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+            raise ValueError("`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`")
+        except pyramid_formencode_classic.FormInvalid:
+            rendered = pyramid_formencode_classic.form_reprint(self.request,
+                                                               _print_form_simple,
+                                                               form_stash='b',
+                                                               data_formencode_form='b',
+                                                               **_reprint_kwargs
+                                                               )
+            try:
+                assert rendered.text == self._test_data['response_text-test_parse_error-b']
+            except:
+                if True:
+                    print "----------------"
+                    print "%s.test_only_submit" % self.__class__
+                    print rendered.text
+                raise
+
+    
+    
+
+    _test_data = {
+        'response_text-test_render_simple': """\
+<html><head></head><body><div>
+<form action="/a" method="POST">
+    
+    
+    <input type="text" name="email" value="" data-formencode-form="a"/>
+    <input type="text" name="username" value="" data-formencode-form="a"/>
+</form>
+<form action="/b" method="POST">
+    
+    
+    <input type="text" name="email" value="" data-formencode-form="b"/>
+    <input type="text" name="username" value="" data-formencode-form="b"/>
+</form>
+</div></body></html>
+""",
+        'response_text-test_parse-a': """\
+<html><head></head><body><div>
+<form action="/a" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" data-formencode-form="a" />
+    <input type="text" name="username" value="" data-formencode-form="a" />
+</form>
+<form action="/b" method="POST">
+    
+    
+    <input type="text" name="email" value="" data-formencode-form="b" />
+    <input type="text" name="username" value="" data-formencode-form="b" />
+</form>
+</div></body></html>
+""",
+        'response_text-test_parse-b': """\
+<html><head></head><body><div>
+<form action="/a" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" data-formencode-form="a" />
+    <input type="text" name="username" value="" data-formencode-form="a" />
+</form>
+<form action="/b" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" data-formencode-form="b" />
+    <input type="text" name="username" value="" data-formencode-form="b" />
+</form>
+</div></body></html>
+""",
+        'response_text-test_parse_error-a': """\
+<html><head></head><body><div>
+<form action="/a" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">An email address must contain a single @</span>
+<input type="text" name="email" value="failmail" data-formencode-form="a" class="error" />
+    <!-- for: username -->
+<span class="error-message">Please enter a value</span>
+<input type="text" name="username" value="" data-formencode-form="a" class="error" />
+</form>
+<form action="/b" method="POST">
+    
+    
+    <input type="text" name="email" value="" data-formencode-form="b"/>
+    <input type="text" name="username" value="" data-formencode-form="b"/>
+</form>
+</div></body></html>
+""",
+        'response_text-test_parse_error-b': """\
+<html><head></head><body><div>
+<form action="/a" method="POST">
+    
+    <form:error name="Error_Main" data-formencode-form="a"/>
+    <input type="text" name="email" value="" data-formencode-form="a"/>
+    <input type="text" name="username" value="" data-formencode-form="a"/>
+</form>
+<form action="/b" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">An email address must contain a single @</span>
+<input type="text" name="email" value="failmail" data-formencode-form="b" class="error" />
+    <!-- for: username -->
+<span class="error-message">Please enter a value</span>
+<input type="text" name="username" value="" data-formencode-form="b" class="error" />
+</form>
+</div></body></html>
+""",
+    }
+
+

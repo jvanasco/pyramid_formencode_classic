@@ -232,9 +232,10 @@ Twitter Bootstrap Example
 
 there is a trivial attempt at multiple form handling - a "form_stash" argument can be used, which will store different "FormStash" wrapped structures in the names provided.
 
-MAJOR CAVEATS
-    1. it doesn't support using a "render" on the form object -- it expects forms to be manually coded, and errors to be regexed out via htmlfill. live with it.
-    2. this REQUIRES one of the following two scenarios:
+CAVEATS
+
+1. it doesn't support using a "render" on the form object -- it expects forms to be manually coded, and errors to be regexed out via htmlfill. live with it.
+2. this REQUIRES one of the following two example scenarios 
 
 Needless to say: this is really nice and clean in the first scenario, and messy in the latter.
 
@@ -314,13 +315,85 @@ The form methods use a pyramid renderer
 												 )
 
 
-# FAQs
+## Using multiple forms on a page?
 
-### Can multiple forms be present on a page?
+In order to handle multiple form reprints correctly you need:
 
-Yes, but you should give them each a unique 'name' and handle them independently.
+* pyramid_formencode_classic >= 0.2.0
+* formencode >= 2.0.0
 
-reprints of error forms do not work correctly with them, so the forms may need unique values.
+This functionality is dependent upon a PR which the formencode team was nice enough to accept in their 2.0.0 release.
+
+This can be done in earlier versions, but you must give them each field a unique 'name' and handle them independently.
+
+In earlier versions, reprints of error forms will not work correctly otherwise.
+
+The following example references a unit test for the new functionality which ships with this package
+
+### Multiple forms must be defined in html
+
+The specific forms must be explicitly invoked in the thml
+
+1. note the explicit `form_stash` argument in `request.pyramid_formencode_classic.get_form("a")`
+2. the main error placeholder must note the form. e.g. `form.html_error_placeholder(formencode_form="a")`
+3. the formfields must specify `data-formencode-form` e.g. `<input type="text" name="username" value="" data-formencode-form="a"/>`
+
+full html example
+
+	<html><head></head><body><div>
+	<form action="/a" method="POST">
+		<% form = request.pyramid_formencode_classic.get_form("a") %>
+		${form.html_error_placeholder(formencode_form="a")|n}
+		<input type="text" name="email" value="" data-formencode-form="a"/>
+		<input type="text" name="username" value="" data-formencode-form="a"/>
+	</form>
+	<form action="/b" method="POST">
+		<% form = request.pyramid_formencode_classic.get_form("b") %>
+		${form.html_error_placeholder(formencode_form="b")|n}
+		<input type="text" name="email" value="" data-formencode-form="b"/>
+		<input type="text" name="username" value="" data-formencode-form="b"/>
+	</form>
+	</div></body></html>
+
+### Multiple forms must be processed in Python
+
+the call to `form_validate` must specify the desired `form_stash`
+
+the call to `form_reprint` must specify *BOTH* the desired `form_stash` and `data_formencode_form` (which is used to handle the form attributes)
+
+full python example:
+
+        try:
+            (result,
+             formStash
+             ) = pyramid_formencode_classic.form_validate(self.request,
+                                                          schema=Form_EmailUsername,
+                                                          form_stash='b',
+                                                          error_main="There was an error with your form.",
+                                                          **_validate_kwargs
+                                                          )
+            if not result:
+                raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+        except pyramid_formencode_classic.FormInvalid:
+            rendered = pyramid_formencode_classic.form_reprint(self.request,
+                                                               _print_form_simple,
+                                                               form_stash='b',
+                                                               data_formencode_form='b',
+                                                               **_reprint_kwargs
+                                                               )
+            return rendered
+
+#### How does it work?
+
+The `form_stash` argument represents the unique `FormStash` object on the `request` (when it is not explicitly provided, it defaults to `_default`)
+
+The `data_formencode_form` argument is passed from `form_reprint` to `formencode.htmlfill`; when provided, `formencode` will ignore tags which don't match the active formencode form's elements.
+
+The HTML form elements are associated with a form via the attribute `data-formencode-form`
+
+
+
+# Misc
 
 if possible, use partial forms and not entire html documents.
 
