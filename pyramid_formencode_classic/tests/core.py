@@ -68,7 +68,8 @@ class TestRenderSimple(object):
     python -munittest pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorMain_Default \
                       pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorMain_Explicit \
                       pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorMain_Alt \
-                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorPlaceholder
+                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorPlaceholder \
+                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_NoErrorMain
     """
 
     template = None
@@ -100,7 +101,12 @@ class TestParsing(object):
     python -munittest pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorMain_Default \
                       pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorMain_Explicit \
                       pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorMain_Alt \
-                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorPlaceholder
+                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorPlaceholder \
+                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorMain_Alt_ErrorFormatters \
+                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorPlaceholder \
+                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorPlaceholder_ErrorFormatters \
+                      pyramid_formencode_classic.tests.core.TestParsing_FormA_NoErrorMain \
+                      pyramid_formencode_classic.tests.core.TestParsing_FormA_NoErrorMain_ErrorFormatters
     """
     error_main_key = None
     template = None
@@ -211,7 +217,7 @@ class TestParsing(object):
             raise ValueError(tests_fail)
 
 
-class TestBasic(TestHarness, unittest.TestCase):
+class TestSetup(TestHarness, unittest.TestCase):
 
     def test_pyramid_setup(self):
         """test the request property worked"""

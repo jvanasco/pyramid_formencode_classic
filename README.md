@@ -1,6 +1,6 @@
 ## Current Recommended Version
 
-`v 0.2.0 (2018.07.??)``
+`v 0.2.0 (2018.07.10)`
 
 New Features:
 
@@ -9,7 +9,7 @@ New Features:
 
 Backwards Compatible?
 
-*  No. Some functionality switched between 0.1.x and 0.2.0 and light editing is required.  See `CHANGES.txt`
+*  No. Some functionality switched between `0.1.x` and `0.2.0` and light editing is required.  See `CHANGES.txt`
 
 
 ## What is this package?
@@ -36,6 +36,25 @@ The more involved operations, such as checking a database within a transaction, 
 In this pattern, if an error is encountered at any time, a `FormInvalid` error can be raised to trigger `form_reprint`.  That function will render the template using `Pyramid`'s mechanism and then run `formencode`'s `htmlfill` on it.
 
 If you want to set a global "oh noes!" message for the form, set an error on a special non-existent field like `Error_Main`.
+
+
+## Pyramid Integration
+
+Just do this...
+
+	config.include('pyramid_formencode_classic')
+	
+Which will invoke `Pyramid`'s `add_request_method` to add a new attribute to your request.
+
+`request.pyramid_formencode_classic` will be a per-request instance of `pyramid_formencode_classic.FormStashList`.
+
+Parsing a form will manage the formdata in `request.pyramid_formencode_classic['_default']` the default form stash.
+
+If you want to specify a particular stash, because you use multiple forms on a page or have other needs:
+
+* `request.pyramid_formencode_classic.get_form(...)` accepts a `form_stash` kwarg, which defaults to `_default`
+* `form_validate(...)` accepts a `form_stash` kwarg, which defaults to `_default`
+* `form_reprint(...)` accepts a `form_stash` kwarg, which defaults to `_default`
 
 
 ## Caveats, Oddities, Etc
@@ -308,3 +327,8 @@ if possible, use partial forms and not entire html documents.
 80% of this code is adapted from Pylons, 20% is outright copy/pasted.
 
 released under the BSD license, as it incorporates some Pylons code (which was BSD)
+
+
+### Are there tests?
+
+Yes. The `0.2.0` release includes a full test suite to ensure forms print as expected.

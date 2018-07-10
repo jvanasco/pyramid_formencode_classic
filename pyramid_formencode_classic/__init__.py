@@ -542,6 +542,9 @@ def form_reprint(
         ``frorm_stash`` (pyramid_formencode_classic.DEFAULT_FORM_STASH = _default) -- specify a stash
         ``auto_error_formatter`` (formatter_nobr) -- specify a formatter for rendering errors
             this is an htmlfill_kwargs, but we default to one without a br
+        ``error_formatters`` (default None) is a dict of error formatters to be passed into htmlfill.
+            in order to ensure compatibilty, this dict will be merged with a copy of the htmlfill defaults,
+            allowing you to override them or add extras.
         `**htmlfill_kwargs` -- passed on to htmlfill
     """
     if __debug__:
