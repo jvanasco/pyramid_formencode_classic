@@ -1,6 +1,6 @@
 ## Current Recommended Version
 
-`v 0.2.0 (2018.07.11)`
+`v 0.2.2 (2018.07.11)`
 
 New Features:
 
@@ -10,6 +10,14 @@ New Features:
 Backwards Compatible?
 
 *  No. Some functionality switched between `0.1.10` and `0.2.0` and light editing is required.  See `CHANGES.txt` for full details.  Also see the migration guide below.
+
+
+## Installation
+
+This requires the 2.0 branch of formencode, which has still been an alpha release since Aug 9, 2016
+
+	pip install formencode==2.0.0a1
+	pip install pyramid_formencode_classic
 
 
 ## What is this package?

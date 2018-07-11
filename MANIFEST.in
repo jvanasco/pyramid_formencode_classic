@@ -1,1 +1,1 @@
-include CHANGES.txt README.md pyramid_formencode_classic/tests/fixtures/*
+include CHANGES.txt README.md pyramid_formencode_classic/tests/fixtures/* pyramid_formencode_classic/debugtoolbar/panels/templates/*
