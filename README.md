@@ -1,6 +1,6 @@
 ## Current Recommended Version
 
-`v 0.2.0 (2018.07.10)`
+`v 0.2.0 (2018.07.11)`
 
 New Features:
 
@@ -9,7 +9,7 @@ New Features:
 
 Backwards Compatible?
 
-*  No. Some functionality switched between `0.1.x` and `0.2.0` and light editing is required.  See `CHANGES.txt`
+*  No. Some functionality switched between `0.1.10` and `0.2.0` and light editing is required.  See `CHANGES.txt` for full details.  Also see the migration guide below.
 
 
 ## What is this package?
@@ -405,3 +405,26 @@ released under the BSD license, as it incorporates some Pylons code (which was B
 ### Are there tests?
 
 Yes. The `0.2.0` release includes a full test suite to ensure forms print as expected.
+
+
+## Migration Guide
+
+### v0.1.x to v0.2.0
+
+There are some slight changes:
+
+`formStash.html_error_main()` was implemented poorly and rendered the actual template.  a new, better, approach is to use `formStash.html_error_placeholder()`.  if you want the previous behavior, use `formStash.render_html_error_main()`
+
+instead of manually adding a form object, you now can/should use `config.include('pyramid_formencode_classic')` in your app's initialization.
+
+several functions and kwargs were removed, CHANGES provides a full list but highlights include:
+
+* camelCase methods have been removed.
+* `section` no longer works as a kwarg. use `field` instead.
+* the kwarg `raise_field_invalid` is removed in favor of `raise_FieldInvalid`
+* the kwarg `raise_form_invalid` is removed in favor of `raise_FormInvalid`
+
+The new setup makes invoking error formatters for htmlfill much easier.
+
+
+`

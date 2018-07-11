@@ -101,29 +101,29 @@ class FormStash(object):
         """sets the css error field for the form"""
         self.css_error = css_error
 
-    def set_html_error_placeholder_template(self, html_error_placeholder_template):
+    def set_html_error_placeholder_template(self, template):
         """
         sets the html error template field for the form
         for example:
             <form:error name="%s"/>
         """
-        self.html_error_placeholder_template = html_error_placeholder_template
+        self.html_error_placeholder_template = template
 
-    def set_html_error_placeholder_form_template(self, html_error_placeholder_form_template):
+    def set_html_error_placeholder_form_template(self, template):
         """
         sets the html error template field for the form when data-formencode-form is needed
         for example:
             <form:error name="%(field)s" data-formencode-form="%(form)s"/>
         """
-        self.html_error_placeholder_form_template = html_error_placeholder_form_template
+        self.html_error_placeholder_form_template = template
 
-    def set_html_error_template(self, html_error_template):
+    def set_html_error_template(self, template):
         """sets the html error template field for the form"""
-        self.html_error_template = html_error_template
+        self.html_error_template = template
 
-    def set_html_error_main_template(self, html_error_main_template):
+    def set_html_error_main_template(self, template):
         """sets the html error template MAIN field for the form.  useful for alerting the entire form is bad."""
-        self.html_error_main_template = html_error_main_template
+        self.html_error_main_template = template
 
     def has_error(self, field):
         """Returns True or False if there is an error in `field`.  Does not return the value of the error field, because the value could be False."""
@@ -235,7 +235,7 @@ class FormStash(object):
             consider this code:
 
                 try:
-                    except CaughtError, e:
+                    except CaughtError as e:
                         formStash.set_error(message="We encountered a `CaughtError`",
                                             raise_FormInvalid=True,
                                             )
@@ -489,7 +489,7 @@ def form_validate(
                 log.debug("form_validate - validating against a schema")
             try:
                 results = schema.to_python(decoded_params, state)
-            except formencode.Invalid, e:
+            except formencode.Invalid as e:
                 errors = e.unpack_errors(variable_decode, dict_char, list_char)
                 if isinstance(errors, types.StringTypes):
                     errors = {error_string_key: errors}
@@ -522,7 +522,7 @@ def form_validate(
                                         is_error_csrf = True,
                                         )
 
-    except ValidationStop, e:
+    except ValidationStop as e:
         if __debug__:
             log.debug("form_validate - encountered a ValidationStop")
         pass

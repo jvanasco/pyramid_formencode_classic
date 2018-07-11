@@ -7,7 +7,22 @@
 	
 	- replaced `html_error_main`:
 		legacy functionality is via `render_html_error_main`
-	
+	- nested logging under `if __debug__` for cpython optimization
+	- new
+		includeme pyramid configuration hook
+		formatter- formatter_empty_string
+		formatter- formatter_hidden
+		formatter- formatter_comment (was formatter_none)
+		FormStash.set_html_error_placeholder_template
+		FormStash.set_html_error_placeholder_form_template
+		FormStash.html_error_placeholder()
+		FormStash.render_html_error_main() was FormStash.html_error_main()
+		form_reprint now accepts 'error_formatters' kwarg
+
+	- removed functions
+		set_form
+		get_form
+		_form_ensure
 	- removed deprecated methods	
 		FormStash.hasError  # use has_error
 		FormStash.cssError  # use css_error
@@ -27,23 +42,18 @@
 		formerrors_set(raise_field_invalid=)  # use raise_FieldInvalid
 		form_validate(raise_form_invalid=)  # use raise_FormInvalid
 		form_validate(raise_field_invalid=)  # use raise_FieldInvalid
-	- nested logging under `if __debug__` for cpython optimization
-	- new
-		pyramid includeme configuration hook
-		formatter- formatter_hidden
-		formatter- formatter_comment (was formatter_none)
-		formatter- formatter_empty_string
-	- removed
-		set_form
-		get_form
-		_form_ensure
-	- deprecated
+	- marked as deprecated
 		init_request  
 			use the pyramid includeme instead
 			the new version invokes the modern method
 		formerrors_set
 		formerrors_clear
 		formatters.formatter_none
+		FormStash.html_error_main()
+			use either:
+				* FormStash.html_error_placeholder()
+				* FormStash.render_html_error_main()
+					  
 		
 
 0.1.10
