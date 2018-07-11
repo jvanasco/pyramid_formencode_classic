@@ -1,5 +1,12 @@
+debugtoolbar support!
+---------------------
+
+0.2.01
+	2018.07.11
+	added debugtoolbar support
+
 0.2.0
-	2018.07.06
+	2018.07.10
 	This release is focused on simplifying the API and some performance improvements
 	Many previously deprecated functions have been removed
 	Some utility functions have been removed as well

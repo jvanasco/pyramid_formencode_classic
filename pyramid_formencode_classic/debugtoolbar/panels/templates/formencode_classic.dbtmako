@@ -1,0 +1,135 @@
+<%def name="atable(adict)">
+	% if not adict:
+		{}
+	% else:
+		<table class="table table-striped table-condensed">
+			% for k,v in adict.items():
+				<tr>
+					<th>${k}</th>
+					<td>${v}</td>
+				</tr>
+			% endfor
+		</table>
+	% endif
+</%def>
+
+
+% if not forms:
+	<p>No forms were set-up or parsed on this request</p>
+% else:
+	<%
+		len_forms = len(forms)
+		active_forms = []
+		for fname, form in forms.items():
+			if form.is_parsed:
+				active_forms.append(fname)
+	%>
+	<p>Found <span class="badge">${len_forms}</span> forms set-up on this request.</p>
+	% if not active_forms:
+		<p>no forms were parsed on this request</p>
+	% else:
+		<p>The following forms were parsed on this request:
+			<ul>
+				% for fname in active_forms:
+					<li><code>${fname}</code></li>
+				% endfor
+			</ul>
+		</p>
+	% endif
+	
+	<h3>All Forms:</h3>
+	
+	% for form_name in  forms:
+		<% form = forms[form_name] %>
+		<h4>form: <code>${form_name}</code></h4>
+		<table class="table table-striped table-condensed">
+			<thead>
+				<tr>
+					<th colspan="2">Form Details</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th>form_stash</th>
+					<td><code>${form.name}</code></td>
+				</tr>
+				<tr>
+					<th>schema</th>
+					<td>${form.schema or 'no schema detected; this form was probably set-up but not processed'}</td>
+				</tr>
+			</tbody>
+			<tr><td colspan="2"></td></tr>
+
+			<thead>
+				<tr>
+					<th colspan="2">Form Config</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th>error_main_key</th>
+					<td><code>${form.error_main_key}</code></td>
+				</tr>
+				<tr>
+					<th>html_error_main_template</th>
+					<td><code>${form.html_error_main_template}</code></td>
+				</tr>
+				<tr>
+					<th>html_error_placeholder_form_template</th>
+					<td><code>${form.html_error_placeholder_form_template}</code></td>
+				</tr>
+				<tr>
+					<th>html_error_placeholder_template</th>
+					<td><code>${form.html_error_placeholder_template}</code></td>
+				</tr>
+			</tbody>
+			<tr><td colspan="2"></td></tr>
+
+			<thead>
+				<tr>
+					<th colspan="2">Form Processing</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th>is_parsed</th>
+					<td><code>${form.is_parsed}</code></td>
+				</tr>
+				<tr>
+					<th>is_error</th>
+					<td><code>${form.is_error}</code></td>
+				</tr>
+				<tr>
+					<th>is_unicode_params</th>
+					<td><code>${form.is_unicode_params}</code></td>
+				</tr>
+			</tbody>
+			<tr><td colspan="2"></td></tr>
+
+			<thead>
+				<tr>
+					<th colspan="2">Form Results</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th>defaults</th>
+					<td>${atable(form.defaults)}</code></td>
+				</tr>
+				<tr>
+					<th>errors</th>
+					<td>${atable(form.errors)}</code></td>
+				</tr>
+				<tr>
+					<th>results</th>
+					<td>${atable(form.results)}</code></td>
+				</tr>
+			</tbody>
+			<tr><td colspan="2"></td></tr>
+
+		</table>
+		<hr/>
+	% endfor
+
+% endif
+

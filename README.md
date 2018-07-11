@@ -402,9 +402,26 @@ if possible, use partial forms and not entire html documents.
 released under the BSD license, as it incorporates some Pylons code (which was BSD)
 
 
+## Debugtoolbar Support?
+
+Yep. just add to your development.ini
+
+	debugtoolbar.includes = pyramid_formencode_classic_.debugtoolbar
+
+The debugtoolbar will now have a `FormencodeClassic` panel.
+
+The panel shows information such as:
+
+* which forms were processed/setup
+* form results (errors, defaults, actual results)
+* form schema
+* form parsing status
+* form configuration
+
+
 ### Are there tests?
 
-Yes. The `0.2.0` release includes a full test suite to ensure forms print as expected.
+Yes. Starting with the `0.2.0` release, there is a full test suite to ensure forms render as expected.
 
 
 ## Migration Guide
