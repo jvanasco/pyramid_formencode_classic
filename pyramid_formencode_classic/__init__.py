@@ -2,10 +2,10 @@ import logging
 log = logging.getLogger(__name__)
 
 # stdlib
-import cgi
 # import pdb
 import sys
 import types
+import warnings
 
 
 # pypi
@@ -20,12 +20,10 @@ from .exceptions import *
 from .formatters import *
 
 
-# warnings
-
-import warnings
-
+# define warnings
 def warn_future(message):
     warnings.warn(message, FutureWarning, stacklevel=2)
+
 
 def warn_user(message):
     warnings.warn(message, UserWarning, stacklevel=2)
@@ -154,20 +152,20 @@ class FormStash(object):
                 template = self.html_error_template
             return template % {'error': self.get_error(field)}
         return ''
-    
-    def html_error_placeholder(self, field=None, formencode_form=None):
-        """If there are errors, returns a hidden input field for `Error_Main` or `field`.
-           otherwise, returns an empty string.
-           the htmlfill parser will update the hidden field to the template.
-           this function is used to create a placeholder in forms
 
-                <form action="/" method="POST">
-                    <% form = request.pyramid_formencode_classic.get_form() %>
-                    ${form.html_error_placeholder("Error_Main")|n}
-                    <input type="text" name="email" value="" />
-                    <input type="text" name="username" value="" />
-                </form>
-           
+    def html_error_placeholder(self, field=None, formencode_form=None):
+        """
+        If there are errors, returns a hidden input field for `Error_Main` or `field`.
+        otherwise, returns an empty string.
+        the htmlfill parser will update the hidden field to the template.
+        this function is used to create a placeholder in forms
+
+             <form action="/" method="POST">
+                 <% form = request.pyramid_formencode_classic.get_form() %>
+                 ${form.html_error_placeholder("Error_Main")|n}
+                 <input type="text" name="email" value="" />
+                 <input type="text" name="username" value="" />
+             </form>
         """
         if self.has_errors():
             if field is None:
@@ -189,7 +187,7 @@ class FormStash(object):
                   "legacy functionality is available via `render_html_error_main`."
                   )
         return self.html_error_placeholder(field=field)
-    
+
     def render_html_error_main(self, field=None, template=None):
         """
         Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`
@@ -304,9 +302,9 @@ class FormStashList(dict):
     dict for holding multiple `FormStash`
     this allows for more than one form to be processed on a request
     this should be registered onto a request as
-    
+
         `request.pyramid_formencode_classic = FormStashList()`
-    
+
     the preferred mechanism is to use pyramid's `add_request_method`
     """
 
@@ -314,8 +312,8 @@ class FormStashList(dict):
         if form_stash not in self:
             self[form_stash] = FormStash(name=form_stash, error_main_key=DEFAULT_ERROR_MAIN_KEY)
         return self[form_stash]
-    
-    
+
+
 def formerrors_set(
     request,
     form_stash=DEFAULT_FORM_STASH,
@@ -528,7 +526,7 @@ def form_validate(
         if __debug__:
             log.debug("form_validate - encountered a ValidationStop")
         pass
-        
+
     # save the form onto the request
     request.pyramid_formencode_classic[form_stash] = formStash
 
@@ -657,7 +655,7 @@ def init_request(request):
         formObj = _new_request_FormStashList(request)
         setattr(request, 'pyramid_formencode_classic', formObj)
     return request.pyramid_formencode_classic
-        
+
 
 def includeme(config):
     """

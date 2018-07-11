@@ -26,7 +26,7 @@ def formatter_hidden(error):
 def formatter_nobr(error):
     """
     This is a variant of the htmlfill `default_formatter`, in which a trailing <br/> is not included
-    
+
     Formatter that escapes the error, wraps the error in a span with
     class ``error-message``, and doesn't add a ``<br>``
     """
@@ -40,7 +40,7 @@ def formatter_comment(error):
     It outputs an html comment just so you don't go insane debugging.
     """
     return '<!-- formatter_comment (%s)-->' % cgi.escape(error)
-    
+
 
 def formatter_none(error):
     warnings.warn("`formatter_none` is deprecated and will be removed", FutureWarning, stacklevel=2)
