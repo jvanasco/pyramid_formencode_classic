@@ -372,8 +372,36 @@ class TestParsing_FormA_HtmlErrorMain_Default(TestParsing, TestHarness, unittest
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
         'response_text': """\
 <html><head></head><body><div>
 <form action="/" method="POST">
@@ -399,7 +427,7 @@ class TestParsing_FormA_HtmlErrorMain_Default(TestParsing, TestHarness, unittest
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
     _test_only_submit__data = {
@@ -460,6 +488,22 @@ class TestParsing_FormA_HtmlErrorMain_Default(TestParsing, TestHarness, unittest
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (There was an error with your form.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'error_formatters': {'default': formatters.formatter_none, },
@@ -467,11 +511,11 @@ class TestParsing_FormA_HtmlErrorMain_Default(TestParsing, TestHarness, unittest
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <!-- formatter_none (There was an error with your form.)-->
+    <!-- formatter_comment (There was an error with your form.)-->
     <!-- for: email -->
-<!-- formatter_none (Missing value)--><input type="text" name="email" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<!-- formatter_none (Missing value)--><input type="text" name="username" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
 """,
@@ -495,6 +539,22 @@ class TestParsing_FormA_HtmlErrorMain_Default(TestParsing, TestHarness, unittest
 </div></body></html>
 """,
     },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_hidden': {
         'auto_error_formatter': formatters.formatter_hidden,
         'error_formatters': {'default': formatters.formatter_hidden, },
@@ -513,7 +573,7 @@ class TestParsing_FormA_HtmlErrorMain_Default(TestParsing, TestHarness, unittest
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
 
@@ -591,8 +651,36 @@ class TestParsing_FormA_HtmlErrorMain_Alt(TestParsing, TestHarness, unittest.Tes
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
         'response_text': """\
 <html><head></head><body><div>
 <form action="/" method="POST">
@@ -618,7 +706,7 @@ class TestParsing_FormA_HtmlErrorMain_Alt(TestParsing, TestHarness, unittest.Tes
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
     _test_only_submit__data = {
@@ -679,6 +767,22 @@ class TestParsing_FormA_HtmlErrorMain_Alt(TestParsing, TestHarness, unittest.Tes
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (There was an error with your form.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'error_formatters': {'default': formatters.formatter_none, },
@@ -686,11 +790,11 @@ class TestParsing_FormA_HtmlErrorMain_Alt(TestParsing, TestHarness, unittest.Tes
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <!-- formatter_none (There was an error with your form.)-->
+    <!-- formatter_comment (There was an error with your form.)-->
     <!-- for: email -->
-<!-- formatter_none (Missing value)--><input type="text" name="email" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<!-- formatter_none (Missing value)--><input type="text" name="username" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
 """,
@@ -714,6 +818,22 @@ class TestParsing_FormA_HtmlErrorMain_Alt(TestParsing, TestHarness, unittest.Tes
 </div></body></html>
 """,
     },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_hidden': {
         'auto_error_formatter': formatters.formatter_hidden,
         'error_formatters': {'default': formatters.formatter_hidden, },
@@ -732,7 +852,7 @@ class TestParsing_FormA_HtmlErrorMain_Alt(TestParsing, TestHarness, unittest.Tes
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
 
@@ -806,6 +926,20 @@ class TestParsing_FormA_HtmlErrorMain_Alt_ErrorFormatters(TestParsing, TestHarne
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (Nothing submitted.)-->
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'error_formatters': {'default': formatters.formatter_none, },
@@ -813,7 +947,21 @@ class TestParsing_FormA_HtmlErrorMain_Alt_ErrorFormatters(TestParsing, TestHarne
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <!-- formatter_none (Nothing submitted.)-->
+    <!-- formatter_comment (Nothing submitted.)-->
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
@@ -834,7 +982,7 @@ class TestParsing_FormA_HtmlErrorMain_Alt_ErrorFormatters(TestParsing, TestHarne
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
     _test_only_submit__data = {
@@ -895,6 +1043,22 @@ class TestParsing_FormA_HtmlErrorMain_Alt_ErrorFormatters(TestParsing, TestHarne
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (There was an error with your form.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'error_formatters': {'default': formatters.formatter_none, },
@@ -902,11 +1066,11 @@ class TestParsing_FormA_HtmlErrorMain_Alt_ErrorFormatters(TestParsing, TestHarne
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <!-- formatter_none (There was an error with your form.)-->
+    <!-- formatter_comment (There was an error with your form.)-->
     <!-- for: email -->
-<!-- formatter_none (Missing value)--><input type="text" name="email" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<!-- formatter_none (Missing value)--><input type="text" name="username" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
 """,
@@ -930,6 +1094,22 @@ class TestParsing_FormA_HtmlErrorMain_Alt_ErrorFormatters(TestParsing, TestHarne
 </div></body></html>
 """,
     },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_hidden': {
         'auto_error_formatter': formatters.formatter_hidden,
         'error_formatters': {'default': formatters.formatter_hidden, },
@@ -948,7 +1128,7 @@ class TestParsing_FormA_HtmlErrorMain_Alt_ErrorFormatters(TestParsing, TestHarne
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
 
@@ -1014,8 +1194,36 @@ class TestParsing_FormA_HtmlErrorPlaceholder(TestParsing, TestHarness, unittest.
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
         'response_text': """\
 <html><head></head><body><div>
 <form action="/" method="POST">
@@ -1041,7 +1249,7 @@ class TestParsing_FormA_HtmlErrorPlaceholder(TestParsing, TestHarness, unittest.
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
     _test_only_submit__data = {
@@ -1102,6 +1310,22 @@ class TestParsing_FormA_HtmlErrorPlaceholder(TestParsing, TestHarness, unittest.
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (There was an error with your form.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'error_formatters': {'default': formatters.formatter_none, },
@@ -1109,11 +1333,11 @@ class TestParsing_FormA_HtmlErrorPlaceholder(TestParsing, TestHarness, unittest.
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <!-- formatter_none (There was an error with your form.)-->
+    <!-- formatter_comment (There was an error with your form.)-->
     <!-- for: email -->
-<!-- formatter_none (Missing value)--><input type="text" name="email" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<!-- formatter_none (Missing value)--><input type="text" name="username" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
 """,
@@ -1137,6 +1361,22 @@ class TestParsing_FormA_HtmlErrorPlaceholder(TestParsing, TestHarness, unittest.
 </div></body></html>
 """,
     },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_hidden': {
         'auto_error_formatter': formatters.formatter_hidden,
         'error_formatters': {'default': formatters.formatter_hidden, },
@@ -1155,7 +1395,7 @@ class TestParsing_FormA_HtmlErrorPlaceholder(TestParsing, TestHarness, unittest.
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
 
@@ -1225,6 +1465,20 @@ class TestParsing_FormA_HtmlErrorPlaceholder_ErrorFormatters(TestParsing, TestHa
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (Nothing submitted.)-->
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'error_formatters': {'default': formatters.formatter_none, },
@@ -1232,7 +1486,21 @@ class TestParsing_FormA_HtmlErrorPlaceholder_ErrorFormatters(TestParsing, TestHa
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <!-- formatter_none (Nothing submitted.)-->
+    <!-- formatter_comment (Nothing submitted.)-->
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
@@ -1253,7 +1521,7 @@ class TestParsing_FormA_HtmlErrorPlaceholder_ErrorFormatters(TestParsing, TestHa
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
     _test_only_submit__data = {
@@ -1314,6 +1582,22 @@ class TestParsing_FormA_HtmlErrorPlaceholder_ErrorFormatters(TestParsing, TestHa
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (There was an error with your form.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'error_formatters': {'default': formatters.formatter_none, },
@@ -1321,11 +1605,11 @@ class TestParsing_FormA_HtmlErrorPlaceholder_ErrorFormatters(TestParsing, TestHa
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <!-- formatter_none (There was an error with your form.)-->
+    <!-- formatter_comment (There was an error with your form.)-->
     <!-- for: email -->
-<!-- formatter_none (Missing value)--><input type="text" name="email" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<!-- formatter_none (Missing value)--><input type="text" name="username" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
 """,
@@ -1349,6 +1633,22 @@ class TestParsing_FormA_HtmlErrorPlaceholder_ErrorFormatters(TestParsing, TestHa
 </div></body></html>
 """,
     },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_hidden': {
         'auto_error_formatter': formatters.formatter_hidden,
         'error_formatters': {'default': formatters.formatter_hidden, },
@@ -1367,7 +1667,7 @@ class TestParsing_FormA_HtmlErrorPlaceholder_ErrorFormatters(TestParsing, TestHa
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
 
@@ -1442,11 +1742,37 @@ class TestParsing_FormA_NoErrorMain(TestParsing, TestHarness, unittest.TestCase)
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'response_text': """\
+<!-- for: Error_Main -->
+<!-- formatter_comment (Nothing submitted.)--><html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'response_text': """\
 <!-- for: Error_Main -->
-<!-- formatter_none (Nothing submitted.)--><html><head></head><body><div>
+<!-- formatter_comment (Nothing submitted.)--><html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'response_text': """\
+<!-- for: Error_Main -->
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     <input type="text" name="email" value="" />
@@ -1468,7 +1794,7 @@ class TestParsing_FormA_NoErrorMain(TestParsing, TestHarness, unittest.TestCase)
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
     _test_only_submit__data = {
@@ -1526,17 +1852,32 @@ class TestParsing_FormA_NoErrorMain(TestParsing, TestHarness, unittest.TestCase)
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'response_text': """\
+<!-- for: Error_Main -->
+<!-- formatter_comment (There was an error with your form.)--><html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'response_text': """\
 <!-- for: Error_Main -->
-<!-- formatter_none (There was an error with your form.)--><html><head></head><body><div>
+<!-- formatter_comment (There was an error with your form.)--><html><head></head><body><div>
 <form action="/" method="POST">
     
     <!-- for: email -->
-<!-- formatter_none (Missing value)--><input type="text" name="email" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<!-- formatter_none (Missing value)--><input type="text" name="username" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
 """,
@@ -1559,6 +1900,21 @@ class TestParsing_FormA_NoErrorMain(TestParsing, TestHarness, unittest.TestCase)
 </div></body></html>
 """,
     },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'response_text': """\
+<!-- for: Error_Main -->
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_hidden': {
         'auto_error_formatter': formatters.formatter_hidden,
         'response_text': """\
@@ -1576,7 +1932,7 @@ class TestParsing_FormA_NoErrorMain(TestParsing, TestHarness, unittest.TestCase)
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
 
@@ -1658,12 +2014,40 @@ class TestParsing_FormA_NoErrorMain_ErrorFormatters(TestParsing, TestHarness, un
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<!-- for: Error_Main -->
+<!-- formatter_comment (Nothing submitted.)--><html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'error_formatters': {'default': formatters.formatter_none, },
         'response_text': """\
 <!-- for: Error_Main -->
-<!-- formatter_none (Nothing submitted.)--><html><head></head><body><div>
+<!-- formatter_comment (Nothing submitted.)--><html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<!-- for: Error_Main -->
+<html><head></head><body><div>
 <form action="/" method="POST">
     
     <input type="text" name="email" value="" />
@@ -1686,7 +2070,7 @@ class TestParsing_FormA_NoErrorMain_ErrorFormatters(TestParsing, TestHarness, un
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
     _test_only_submit__data = {
@@ -1747,18 +2131,34 @@ class TestParsing_FormA_NoErrorMain_ErrorFormatters(TestParsing, TestHarness, un
 </div></body></html>
 """,
     },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<!-- for: Error_Main -->
+<!-- formatter_comment (There was an error with your form.)--><html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_none': {
         'auto_error_formatter': formatters.formatter_none,
         'error_formatters': {'default': formatters.formatter_none, },
         'response_text': """\
 <!-- for: Error_Main -->
-<!-- formatter_none (There was an error with your form.)--><html><head></head><body><div>
+<!-- formatter_comment (There was an error with your form.)--><html><head></head><body><div>
 <form action="/" method="POST">
     
     <!-- for: email -->
-<!-- formatter_none (Missing value)--><input type="text" name="email" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<!-- formatter_none (Missing value)--><input type="text" name="username" value="" class="error" />
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
 """,
@@ -1782,6 +2182,22 @@ class TestParsing_FormA_NoErrorMain_ErrorFormatters(TestParsing, TestHarness, un
 </div></body></html>
 """,
     },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<!-- for: Error_Main -->
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
     'formatter_hidden': {
         'auto_error_formatter': formatters.formatter_hidden,
         'error_formatters': {'default': formatters.formatter_hidden, },
@@ -1800,7 +2216,7 @@ class TestParsing_FormA_NoErrorMain_ErrorFormatters(TestParsing, TestHarness, un
 </form>
 </div></body></html>
 """,
-    }
+    },
 }
 
 
