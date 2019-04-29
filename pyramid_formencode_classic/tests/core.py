@@ -1,3 +1,12 @@
+from __future__ import print_function
+"""
+IMPORTANT
+
+whitespace in the this file IS SIGNIFICANT AND IMPORTANT.
+the test-cases check for specific whitespace
+"""
+
+
 import pyramid_formencode_classic
 import formencode
 from pyramid_formencode_classic import formatters
@@ -7,13 +16,18 @@ import unittest
 
 # pyramid testing requirements
 from pyramid import testing
-from pyramid.renderers import render
+# from pyramid.renderers import render
 from pyramid.renderers import render_to_response
 from pyramid.interfaces import IRequestExtensions
 
 
 # testing needs
 from webob.multidict import MultiDict
+
+
+DEBUG_PRINT = True
+
+# ==============================================================================
 
 
 class _Schema_Base(formencode.Schema):
@@ -28,6 +42,9 @@ class Form_Email(_Schema_Base):
 class Form_EmailUsername(_Schema_Base):
     email = formencode.validators.Email(not_empty=True)
     username = formencode.validators.UnicodeString(not_empty=True)
+
+
+# ==============================================================================
 
 
 class DummyRequest(testing.DummyRequest):
@@ -65,11 +82,10 @@ class TestRenderSimple(object):
     mixin class
     subclass and define a dict of test/values
 
-    python -munittest pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorMain_Default \
-                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorMain_Explicit \
-                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorMain_Alt \
-                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorPlaceholder \
-                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_NoErrorMain
+    python -munittest pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorPlaceholder_Default \
+                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorPlaceholder_Explicit \
+                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorPlaceholder_Alt \
+                      pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorPlaceholder_None
     """
 
     template = None
@@ -87,9 +103,10 @@ class TestRenderSimple(object):
         try:
             assert rendered.text == _response_text
         except:
-            print "------------"
-            print rendered.text
-            print "------------"
+            if DEBUG_PRINT:
+                print("------------")
+                print(rendered.text)
+                print("------------")
             raise
 
 
@@ -98,15 +115,14 @@ class TestParsing(object):
     mixin class
     subclass and define a dict of test/values
 
-    python -munittest pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorMain_Default \
-                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorMain_Explicit \
-                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorMain_Alt \
+    python -munittest pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorPlaceholder_Explicit \
+                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorPlaceholder_Alt \
                       pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorPlaceholder \
-                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorMain_Alt_ErrorFormatters \
                       pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorPlaceholder \
-                      pyramid_formencode_classic.tests.core.TestParsing_FormA_HtmlErrorPlaceholder_ErrorFormatters \
                       pyramid_formencode_classic.tests.core.TestParsing_FormA_NoErrorMain \
-                      pyramid_formencode_classic.tests.core.TestParsing_FormA_NoErrorMain_ErrorFormatters
+                      pyramid_formencode_classic.tests.core.TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder \
+                      pyramid_formencode_classic.tests.core.TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt \
+                      pyramid_formencode_classic.tests.core.TestParsingErrorFormatters_FormA_NoErrorMain
     """
     error_main_key = None
     template = None
@@ -151,11 +167,11 @@ class TestParsing(object):
                 try:
                     assert rendered.text == _response_text
                 except:
-                    if True:
-                        print "----------------"
-                        print "%s.test_no_params" % self.__class__
-                        print test_name
-                        print rendered.text
+                    if DEBUG_PRINT:
+                        print("------------")
+                        print("%s.test_no_params" % self.__class__)
+                        print(test_name)
+                        print(rendered.text)
                     tests_fail.append(test_name)
             tests_completed.append(test_name)
 
@@ -205,11 +221,11 @@ class TestParsing(object):
                 try:
                     assert rendered.text == _response_text
                 except:
-                    if True:
-                        print "----------------"
-                        print "%s.test_only_submit" % self.__class__
-                        print test_name
-                        print rendered.text
+                    if DEBUG_PRINT:
+                        print("------------")
+                        print("%s.test_only_submit" % self.__class__)
+                        print(test_name)
+                        print(rendered.text)
                     tests_fail.append(test_name)
             tests_completed.append(test_name)
 
@@ -225,8 +241,8 @@ class TestSetup(TestHarness, unittest.TestCase):
         self.assertTrue('pyramid_formencode_classic' in exts.descriptors)
 
 
-class TestRenderSimple_FormA_HtmlErrorMain_Alt(TestRenderSimple, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_a-html_error_main-alt.mako'
+class TestRenderSimple_FormA_HtmlErrorPlaceholder_Alt(TestRenderSimple, TestHarness, unittest.TestCase):
+    template = 'fixtures/form_a-html_error_placeholder-alt.mako'
 
     _test_render_simple__data = {
         'response_text': """\
@@ -242,8 +258,8 @@ class TestRenderSimple_FormA_HtmlErrorMain_Alt(TestRenderSimple, TestHarness, un
     }
 
 
-class TestRenderSimple_FormA_HtmlErrorMain_Default(TestRenderSimple, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_a-html_error_main-default.mako'
+class TestRenderSimple_FormA_HtmlErrorPlaceholder_Explicit(TestRenderSimple, TestHarness, unittest.TestCase):
+    template = 'fixtures/form_a-html_error_placeholder-explicit.mako'
 
     _test_render_simple__data = {
         'response_text': """\
@@ -259,8 +275,8 @@ class TestRenderSimple_FormA_HtmlErrorMain_Default(TestRenderSimple, TestHarness
     }
 
 
-class TestRenderSimple_FormA_HtmlErrorMain_Explicit(TestRenderSimple, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_a-html_error_main-explicit.mako'
+class TestRenderSimple_FormA_HtmlErrorPlaceholder_Default(TestRenderSimple, TestHarness, unittest.TestCase):
+    template = 'fixtures/form_a-html_error_placeholder-default.mako'
 
     _test_render_simple__data = {
         'response_text': """\
@@ -276,25 +292,8 @@ class TestRenderSimple_FormA_HtmlErrorMain_Explicit(TestRenderSimple, TestHarnes
     }
 
 
-class TestRenderSimple_FormA_HtmlErrorPlaceholder(TestRenderSimple, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_a-html_error_placeholder.mako'
-
-    _test_render_simple__data = {
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    }
-
-
-class TestRenderSimple_FormA_NoErrorMain(TestRenderSimple, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_a-no_error_main.mako'
+class TestRenderSimple_FormA_ErrorPlaceholder_None(TestRenderSimple, TestHarness, unittest.TestCase):
+    template = 'fixtures/form_a-html_error_placeholder-none.mako'
 
     _test_render_simple__data = {
         'response_text': """\
@@ -309,9 +308,8 @@ class TestRenderSimple_FormA_NoErrorMain(TestRenderSimple, TestHarness, unittest
     }
 
 
-class TestParsing_FormA_HtmlErrorMain_Default(TestParsing, TestHarness, unittest.TestCase):
-
-    template = 'fixtures/form_a-html_error_main-default.mako'
+class TestParsing_FormA_HtmlErrorPlaceholder_Default(TestParsing, TestHarness, unittest.TestCase):
+    template = 'fixtures/form_a-html_error_placeholder-default.mako'
 
     # test_no_params
     # note the whitespace in the lines here!
@@ -374,20 +372,6 @@ class TestParsing_FormA_HtmlErrorMain_Default(TestParsing, TestHarness, unittest
     },
     'formatter_comment': {
         'auto_error_formatter': formatters.formatter_comment,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
         'response_text': """\
 <html><head></head><body><div>
 <form action="/" method="POST">
@@ -504,22 +488,6 @@ class TestParsing_FormA_HtmlErrorMain_Default(TestParsing, TestHarness, unittest
 </div></body></html>
 """,
     },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
-        'error_formatters': {'default': formatters.formatter_none, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (There was an error with your form.)-->
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
     'formatter_help_inline': {
         'auto_error_formatter': formatters.formatter_help_inline,
         'error_formatters': {'default': formatters.formatter_help_inline, },
@@ -577,1111 +545,25 @@ class TestParsing_FormA_HtmlErrorMain_Default(TestParsing, TestHarness, unittest
 }
 
 
-class TestParsing_FormA_HtmlErrorMain_Explicit(TestParsing_FormA_HtmlErrorMain_Default, TestParsing, TestHarness, unittest.TestCase):
+class TestParsing_FormA_HtmlErrorPlaceholder_Explicit(TestParsing_FormA_HtmlErrorPlaceholder_Default, TestParsing, TestHarness, unittest.TestCase):
     """
-    inherit from TestParsing_FormA_HtmlErrorMain_Default
+    inherit from TestParsing_FormA_HtmlErrorPlaceholder_Default
     this should have the same exact output, but with a different template
     """
-    template = 'fixtures/form_a-html_error_main-explicit.mako'
+    template = 'fixtures/form_a-html_error_placeholder-explicit.mako'
 
 
-class TestParsing_FormA_HtmlErrorMain_Alt(TestParsing, TestHarness, unittest.TestCase):
-    """
-    this behaves slightly differently than TestParsing_FormA_HtmlErrorMain_Explicit
-    """
-    template = 'fixtures/form_a-html_error_main-alt.mako'
-    error_main_key = 'Error_Alt'
-
-    # test_no_params
-    # note the whitespace in the lines here!
-    _test_no_params__data = {
-    'test_formatter_default': {
-        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_is_none': {
-        'auto_error_formatter': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_nobr': {
-        'auto_error_formatter': formatters.formatter_nobr,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_help_inline': {
-        'auto_error_formatter': formatters.formatter_help_inline,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_comment': {
-        'auto_error_formatter': formatters.formatter_comment,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_empty_string': {
-        'auto_error_formatter': formatters.formatter_empty_string,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_hidden': {
-        'auto_error_formatter': formatters.formatter_hidden,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-}
-
-    _test_only_submit__data = {
-    'test_formatter_default': {
-        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
-        'error_formatters': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">There was an error with your form.</span><br />
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_nobr': {
-        'auto_error_formatter': formatters.formatter_nobr,
-        'error_formatters': {'default': formatters.formatter_nobr, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">There was an error with your form.</span>
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_is_none': {
-        'auto_error_formatter': None,
-        'error_formatters': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">There was an error with your form.</span><br />
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span><br />
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span><br />
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_comment': {
-        'auto_error_formatter': formatters.formatter_comment,
-        'error_formatters': {'default': formatters.formatter_comment, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (There was an error with your form.)-->
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
-        'error_formatters': {'default': formatters.formatter_none, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (There was an error with your form.)-->
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_help_inline': {
-        'auto_error_formatter': formatters.formatter_help_inline,
-        'error_formatters': {'default': formatters.formatter_help_inline, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="help-inline">There was an error with your form.</span>
-
-    <!-- for: email -->
-<span class="help-inline">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="help-inline">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_empty_string': {
-        'auto_error_formatter': formatters.formatter_empty_string,
-        'error_formatters': {'default': formatters.formatter_empty_string, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    
-    <!-- for: email -->
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_hidden': {
-        'auto_error_formatter': formatters.formatter_hidden,
-        'error_formatters': {'default': formatters.formatter_hidden, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <input type="hidden" name="There was an error with your form." />
-
-    <!-- for: email -->
-<input type="hidden" name="Missing value" />
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<input type="hidden" name="Missing value" />
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-}
-
-
-class TestParsing_FormA_HtmlErrorMain_Alt_ErrorFormatters(TestParsing, TestHarness, unittest.TestCase):
-    """
-    this behaves slightly differently than TestParsing_FormA_HtmlErrorMain_Alt
-    """
-    template = 'fixtures/form_a-html_error_main-alt.mako'
-    error_main_key = 'Error_Alt'
-
-    # test_no_params
-    # note the whitespace in the lines here!
-    _test_no_params__data = {
-    'test_formatter_default': {
-        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
-        'error_formatters': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_is_none': {
-        'auto_error_formatter': None,
-        'error_formatters': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_nobr': {
-        'auto_error_formatter': formatters.formatter_nobr,
-        'error_formatters': {'default': formatters.formatter_nobr, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span>
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_help_inline': {
-        'auto_error_formatter': formatters.formatter_help_inline,
-        'error_formatters': {'default': formatters.formatter_help_inline, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="help-inline">Nothing submitted.</span>
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_comment': {
-        'auto_error_formatter': formatters.formatter_comment,
-        'error_formatters': {'default': formatters.formatter_comment, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (Nothing submitted.)-->
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
-        'error_formatters': {'default': formatters.formatter_none, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (Nothing submitted.)-->
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_empty_string': {
-        'auto_error_formatter': formatters.formatter_empty_string,
-        'error_formatters': {'default': formatters.formatter_empty_string, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_hidden': {
-        'auto_error_formatter': formatters.formatter_hidden,
-        'error_formatters': {'default': formatters.formatter_hidden, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <input type="hidden" name="Nothing submitted." />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-}
-
-    _test_only_submit__data = {
-    'test_formatter_default': {
-        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
-        'error_formatters': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">There was an error with your form.</span><br />
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_nobr': {
-        'auto_error_formatter': formatters.formatter_nobr,
-        'error_formatters': {'default': formatters.formatter_nobr, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">There was an error with your form.</span>
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_is_none': {
-        'auto_error_formatter': None,
-        'error_formatters': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">There was an error with your form.</span><br />
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span><br />
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span><br />
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_comment': {
-        'auto_error_formatter': formatters.formatter_comment,
-        'error_formatters': {'default': formatters.formatter_comment, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (There was an error with your form.)-->
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
-        'error_formatters': {'default': formatters.formatter_none, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (There was an error with your form.)-->
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_help_inline': {
-        'auto_error_formatter': formatters.formatter_help_inline,
-        'error_formatters': {'default': formatters.formatter_help_inline, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="help-inline">There was an error with your form.</span>
-
-    <!-- for: email -->
-<span class="help-inline">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="help-inline">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_empty_string': {
-        'auto_error_formatter': formatters.formatter_empty_string,
-        'error_formatters': {'default': formatters.formatter_empty_string, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    
-    <!-- for: email -->
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_hidden': {
-        'auto_error_formatter': formatters.formatter_hidden,
-        'error_formatters': {'default': formatters.formatter_hidden, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <input type="hidden" name="There was an error with your form." />
-
-    <!-- for: email -->
-<input type="hidden" name="Missing value" />
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<input type="hidden" name="Missing value" />
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-}
-
-
-class TestParsing_FormA_HtmlErrorPlaceholder(TestParsing, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_a-html_error_placeholder.mako'
-
-    # test_no_params
-    # note the whitespace in the lines here!
-    _test_no_params__data = {
-    'test_formatter_default': {
-        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_is_none': {
-        'auto_error_formatter': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_nobr': {
-        'auto_error_formatter': formatters.formatter_nobr,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_help_inline': {
-        'auto_error_formatter': formatters.formatter_help_inline,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_comment': {
-        'auto_error_formatter': formatters.formatter_comment,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_empty_string': {
-        'auto_error_formatter': formatters.formatter_empty_string,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_hidden': {
-        'auto_error_formatter': formatters.formatter_hidden,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-}
-
-    _test_only_submit__data = {
-    'test_formatter_default': {
-        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
-        'error_formatters': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">There was an error with your form.</span><br />
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_nobr': {
-        'auto_error_formatter': formatters.formatter_nobr,
-        'error_formatters': {'default': formatters.formatter_nobr, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">There was an error with your form.</span>
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_is_none': {
-        'auto_error_formatter': None,
-        'error_formatters': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">There was an error with your form.</span><br />
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span><br />
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span><br />
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_comment': {
-        'auto_error_formatter': formatters.formatter_comment,
-        'error_formatters': {'default': formatters.formatter_comment, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (There was an error with your form.)-->
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
-        'error_formatters': {'default': formatters.formatter_none, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (There was an error with your form.)-->
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_help_inline': {
-        'auto_error_formatter': formatters.formatter_help_inline,
-        'error_formatters': {'default': formatters.formatter_help_inline, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="help-inline">There was an error with your form.</span>
-
-    <!-- for: email -->
-<span class="help-inline">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="help-inline">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_empty_string': {
-        'auto_error_formatter': formatters.formatter_empty_string,
-        'error_formatters': {'default': formatters.formatter_empty_string, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    
-    <!-- for: email -->
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_hidden': {
-        'auto_error_formatter': formatters.formatter_hidden,
-        'error_formatters': {'default': formatters.formatter_hidden, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <input type="hidden" name="There was an error with your form." />
-
-    <!-- for: email -->
-<input type="hidden" name="Missing value" />
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<input type="hidden" name="Missing value" />
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-}
-
-
-class TestParsing_FormA_HtmlErrorPlaceholder_ErrorFormatters(TestParsing, TestHarness, unittest.TestCase):
-    template = 'fixtures/form_a-html_error_placeholder.mako'
-
-    # test_no_params
-    # note the whitespace in the lines here!
-    _test_no_params__data = {
-    'test_formatter_default': {
-        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
-        'error_formatters': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_is_none': {
-        'auto_error_formatter': None,
-        'error_formatters': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span><br />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_nobr': {
-        'auto_error_formatter': formatters.formatter_nobr,
-        'error_formatters': {'default': formatters.formatter_nobr, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">Nothing submitted.</span>
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_help_inline': {
-        'auto_error_formatter': formatters.formatter_help_inline,
-        'error_formatters': {'default': formatters.formatter_help_inline, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="help-inline">Nothing submitted.</span>
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_comment': {
-        'auto_error_formatter': formatters.formatter_comment,
-        'error_formatters': {'default': formatters.formatter_comment, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (Nothing submitted.)-->
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
-        'error_formatters': {'default': formatters.formatter_none, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (Nothing submitted.)-->
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_empty_string': {
-        'auto_error_formatter': formatters.formatter_empty_string,
-        'error_formatters': {'default': formatters.formatter_empty_string, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_hidden': {
-        'auto_error_formatter': formatters.formatter_hidden,
-        'error_formatters': {'default': formatters.formatter_hidden, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <input type="hidden" name="Nothing submitted." />
-
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-}
-
-    _test_only_submit__data = {
-    'test_formatter_default': {
-        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
-        'error_formatters': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">There was an error with your form.</span><br />
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_nobr': {
-        'auto_error_formatter': formatters.formatter_nobr,
-        'error_formatters': {'default': formatters.formatter_nobr, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">There was an error with your form.</span>
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'test_formatter_is_none': {
-        'auto_error_formatter': None,
-        'error_formatters': None,
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">There was an error with your form.</span><br />
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span><br />
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span><br />
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_comment': {
-        'auto_error_formatter': formatters.formatter_comment,
-        'error_formatters': {'default': formatters.formatter_comment, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (There was an error with your form.)-->
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
-        'error_formatters': {'default': formatters.formatter_none, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (There was an error with your form.)-->
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_help_inline': {
-        'auto_error_formatter': formatters.formatter_help_inline,
-        'error_formatters': {'default': formatters.formatter_help_inline, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="help-inline">There was an error with your form.</span>
-
-    <!-- for: email -->
-<span class="help-inline">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="help-inline">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_empty_string': {
-        'auto_error_formatter': formatters.formatter_empty_string,
-        'error_formatters': {'default': formatters.formatter_empty_string, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    
-    <!-- for: email -->
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_hidden': {
-        'auto_error_formatter': formatters.formatter_hidden,
-        'error_formatters': {'default': formatters.formatter_hidden, },
-        'response_text': """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <input type="hidden" name="There was an error with your form." />
-
-    <!-- for: email -->
-<input type="hidden" name="Missing value" />
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<input type="hidden" name="Missing value" />
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-}
-
-
-class TestParsing_FormA_NoErrorMain(TestParsing, TestHarness, unittest.TestCase):
+class TestParsing_FormA_ErrorPlaceholder_None(TestParsing, TestHarness, unittest.TestCase):
     """
     Tests:
         the parsing sets an error, but does not include a field.
-    Expected behavior: 
+    Expected behavior:
         the error should be prepended to the HTML, and should be encoded with the right AutoFormatter
-    
+
     python -munittest pyramid_formencode_classic.tests.core.TestParsing_FormA_NoErrorMain
     """
 
-    template = 'fixtures/form_a-no_error_main.mako'
+    template = 'fixtures/form_a-html_error_placeholder-none.mako'
 
     # test_no_params
     # note the whitespace in the lines here!
@@ -1744,19 +626,6 @@ class TestParsing_FormA_NoErrorMain(TestParsing, TestHarness, unittest.TestCase)
     },
     'formatter_comment': {
         'auto_error_formatter': formatters.formatter_comment,
-        'response_text': """\
-<!-- for: Error_Main -->
-<!-- formatter_comment (Nothing submitted.)--><html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
         'response_text': """\
 <!-- for: Error_Main -->
 <!-- formatter_comment (Nothing submitted.)--><html><head></head><body><div>
@@ -1854,21 +723,6 @@ class TestParsing_FormA_NoErrorMain(TestParsing, TestHarness, unittest.TestCase)
     },
     'formatter_comment': {
         'auto_error_formatter': formatters.formatter_comment,
-        'response_text': """\
-<!-- for: Error_Main -->
-<!-- formatter_comment (There was an error with your form.)--><html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
         'response_text': """\
 <!-- for: Error_Main -->
 <!-- formatter_comment (There was an error with your form.)--><html><head></head><body><div>
@@ -1936,20 +790,748 @@ class TestParsing_FormA_NoErrorMain(TestParsing, TestHarness, unittest.TestCase)
 }
 
 
+class TestParsing_FormA_HtmlErrorPlaceholder_Alt(TestParsing, TestHarness, unittest.TestCase):
+    """
+    this behaves slightly differently than TestParsing_FormA_HtmlErrorPlaceholder_Explicit
+    """
+    template = 'fixtures/form_a-html_error_placeholder-alt.mako'
+    error_main_key = 'Error_Alt'
 
-class TestParsing_FormA_NoErrorMain_ErrorFormatters(TestParsing, TestHarness, unittest.TestCase):
+    # test_no_params
+    # note the whitespace in the lines here!
+    _test_no_params__data = {
+    'test_formatter_default': {
+        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'test_formatter_is_none': {
+        'auto_error_formatter': None,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'test_formatter_nobr': {
+        'auto_error_formatter': formatters.formatter_nobr,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_help_inline': {
+        'auto_error_formatter': formatters.formatter_help_inline,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_hidden': {
+        'auto_error_formatter': formatters.formatter_hidden,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+}
+
+    _test_only_submit__data = {
+    'test_formatter_default': {
+        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+        'error_formatters': None,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'test_formatter_nobr': {
+        'auto_error_formatter': formatters.formatter_nobr,
+        'error_formatters': {'default': formatters.formatter_nobr, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span>
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'test_formatter_is_none': {
+        'auto_error_formatter': None,
+        'error_formatters': None,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (There was an error with your form.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_help_inline': {
+        'auto_error_formatter': formatters.formatter_help_inline,
+        'error_formatters': {'default': formatters.formatter_help_inline, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="help-inline">There was an error with your form.</span>
+
+    <!-- for: email -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_hidden': {
+        'auto_error_formatter': formatters.formatter_hidden,
+        'error_formatters': {'default': formatters.formatter_hidden, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="hidden" name="There was an error with your form." />
+
+    <!-- for: email -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+}
+
+
+class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt(TestParsing, TestHarness, unittest.TestCase):
+    """
+    this behaves slightly differently than TestParsing_FormA_HtmlErrorPlaceholder_Alt
+    """
+    template = 'fixtures/form_a-html_error_placeholder-alt.mako'
+    error_main_key = 'Error_Alt'
+
+    # test_no_params
+    # note the whitespace in the lines here!
+    _test_no_params__data = {
+    'test_formatter_default': {
+        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+        'error_formatters': None,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'test_formatter_is_none': {
+        'auto_error_formatter': None,
+        'error_formatters': None,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'test_formatter_nobr': {
+        'auto_error_formatter': formatters.formatter_nobr,
+        'error_formatters': {'default': formatters.formatter_nobr, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span>
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_help_inline': {
+        'auto_error_formatter': formatters.formatter_help_inline,
+        'error_formatters': {'default': formatters.formatter_help_inline, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="help-inline">Nothing submitted.</span>
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (Nothing submitted.)-->
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_hidden': {
+        'auto_error_formatter': formatters.formatter_hidden,
+        'error_formatters': {'default': formatters.formatter_hidden, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="hidden" name="Nothing submitted." />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+}
+
+    _test_only_submit__data = {
+    'test_formatter_default': {
+        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+        'error_formatters': None,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'test_formatter_nobr': {
+        'auto_error_formatter': formatters.formatter_nobr,
+        'error_formatters': {'default': formatters.formatter_nobr, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span>
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'test_formatter_is_none': {
+        'auto_error_formatter': None,
+        'error_formatters': None,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (There was an error with your form.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_help_inline': {
+        'auto_error_formatter': formatters.formatter_help_inline,
+        'error_formatters': {'default': formatters.formatter_help_inline, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="help-inline">There was an error with your form.</span>
+
+    <!-- for: email -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_hidden': {
+        'auto_error_formatter': formatters.formatter_hidden,
+        'error_formatters': {'default': formatters.formatter_hidden, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="hidden" name="There was an error with your form." />
+
+    <!-- for: email -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+}
+
+
+class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Default(TestParsing, TestHarness, unittest.TestCase):
+    template = 'fixtures/form_a-html_error_placeholder-default.mako'
+
+    # test_no_params
+    # note the whitespace in the lines here!
+    _test_no_params__data = {
+    'test_formatter_default': {
+        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+        'error_formatters': None,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'test_formatter_is_none': {
+        'auto_error_formatter': None,
+        'error_formatters': None,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'test_formatter_nobr': {
+        'auto_error_formatter': formatters.formatter_nobr,
+        'error_formatters': {'default': formatters.formatter_nobr, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">Nothing submitted.</span>
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_help_inline': {
+        'auto_error_formatter': formatters.formatter_help_inline,
+        'error_formatters': {'default': formatters.formatter_help_inline, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="help-inline">Nothing submitted.</span>
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (Nothing submitted.)-->
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_hidden': {
+        'auto_error_formatter': formatters.formatter_hidden,
+        'error_formatters': {'default': formatters.formatter_hidden, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="hidden" name="Nothing submitted." />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+""",
+    },
+}
+
+    _test_only_submit__data = {
+    'test_formatter_default': {
+        # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+        'error_formatters': None,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'test_formatter_nobr': {
+        'auto_error_formatter': formatters.formatter_nobr,
+        'error_formatters': {'default': formatters.formatter_nobr, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span>
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'test_formatter_is_none': {
+        'auto_error_formatter': None,
+        'error_formatters': None,
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_comment': {
+        'auto_error_formatter': formatters.formatter_comment,
+        'error_formatters': {'default': formatters.formatter_comment, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (There was an error with your form.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_help_inline': {
+        'auto_error_formatter': formatters.formatter_help_inline,
+        'error_formatters': {'default': formatters.formatter_help_inline, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="help-inline">There was an error with your form.</span>
+
+    <!-- for: email -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_empty_string': {
+        'auto_error_formatter': formatters.formatter_empty_string,
+        'error_formatters': {'default': formatters.formatter_empty_string, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+    'formatter_hidden': {
+        'auto_error_formatter': formatters.formatter_hidden,
+        'error_formatters': {'default': formatters.formatter_hidden, },
+        'response_text': """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="hidden" name="There was an error with your form." />
+
+    <!-- for: email -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+    },
+}
+
+
+class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(TestParsing, TestHarness, unittest.TestCase):
     """
     Tests:
         the parsing sets an error, but does not include a field.
         This variant specifies ErrorFormatters
-    Expected behavior: 
+    Expected behavior:
         the error should be prepended to the HTML, and should be encoded with the right AutoFormatter
         The ErrorFormatters should be ignored.
-    
+
     python -munittest pyramid_formencode_classic.tests.core.TestParsing_FormA_NoErrorMain
     """
 
-    template = 'fixtures/form_a-no_error_main.mako'
+    template = 'fixtures/form_a-html_error_placeholder-none.mako'
 
     # test_no_params
     # note the whitespace in the lines here!
@@ -2017,20 +1599,6 @@ class TestParsing_FormA_NoErrorMain_ErrorFormatters(TestParsing, TestHarness, un
     'formatter_comment': {
         'auto_error_formatter': formatters.formatter_comment,
         'error_formatters': {'default': formatters.formatter_comment, },
-        'response_text': """\
-<!-- for: Error_Main -->
-<!-- formatter_comment (Nothing submitted.)--><html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <input type="text" name="email" value="" />
-    <input type="text" name="username" value="" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
-        'error_formatters': {'default': formatters.formatter_none, },
         'response_text': """\
 <!-- for: Error_Main -->
 <!-- formatter_comment (Nothing submitted.)--><html><head></head><body><div>
@@ -2134,22 +1702,6 @@ class TestParsing_FormA_NoErrorMain_ErrorFormatters(TestParsing, TestHarness, un
     'formatter_comment': {
         'auto_error_formatter': formatters.formatter_comment,
         'error_formatters': {'default': formatters.formatter_comment, },
-        'response_text': """\
-<!-- for: Error_Main -->
-<!-- formatter_comment (There was an error with your form.)--><html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-    },
-    'formatter_none': {
-        'auto_error_formatter': formatters.formatter_none,
-        'error_formatters': {'default': formatters.formatter_none, },
         'response_text': """\
 <!-- for: Error_Main -->
 <!-- formatter_comment (There was an error with your form.)--><html><head></head><body><div>
@@ -2238,7 +1790,7 @@ class TestCustomError(TestHarness, unittest.TestCase):
     python -munittest pyramid_formencode_classic.tests.core.TestCustomError
     """
     error_main_key = None
-    template = 'fixtures/form_a-html_error_placeholder.mako'
+    template = 'fixtures/form_a-html_error_placeholder-default.mako'
 
     def test_only_submit(self):
 
@@ -2295,17 +1847,17 @@ class TestCustomError(TestHarness, unittest.TestCase):
                 try:
                     assert rendered.text == _response_text
                 except:
-                    if True:
-                        print "----------------"
-                        print "%s.test_only_submit" % self.__class__
-                        print test_name
-                        print rendered.text
+                    if DEBUG_PRINT:
+                        print("------------")
+                        print("%s.test_only_submit" % self.__class__)
+                        print(test_name)
+                        print(rendered.text)
                     tests_fail.append(test_name)
             tests_completed.append(test_name)
 
         if tests_fail:
             raise ValueError(tests_fail)
-            
+
     _test_only_submit__data = {
     'set_a_custom_error': {
         # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
@@ -2370,11 +1922,12 @@ class TestMultiForm(TestHarness, unittest.TestCase):
         try:
             assert rendered.text == _response_text
         except:
-            print "------------"
-            print rendered.text
-            print "------------"
+            if DEBUG_PRINT:
+                print("------------")
+                print(rendered.text)
+                print("------------")
             raise
-    
+
     def test_parse(self):
 
         _template = self.template
@@ -2404,16 +1957,16 @@ class TestMultiForm(TestHarness, unittest.TestCase):
         except pyramid_formencode_classic.FormInvalid:
             rendered = pyramid_formencode_classic.form_reprint(self.request,
                                                                _print_form_simple,
-                                                                form_stash='a',
+                                                               form_stash='a',
                                                                **_reprint_kwargs
                                                                )
             try:
                 assert rendered.text == self._test_data['response_text-test_parse-a']
             except:
-                if True:
-                    print "----------------"
-                    print "%s.test_only_submit" % self.__class__
-                    print rendered.text
+                if DEBUG_PRINT:
+                    print("----------------")
+                    print("%s.test_only_submit" % self.__class__)
+                    print(rendered.text)
                 raise
 
         # render form B
@@ -2434,18 +1987,17 @@ class TestMultiForm(TestHarness, unittest.TestCase):
         except pyramid_formencode_classic.FormInvalid:
             rendered = pyramid_formencode_classic.form_reprint(self.request,
                                                                _print_form_simple,
-                                                                form_stash='b',
+                                                               form_stash='b',
                                                                **_reprint_kwargs
                                                                )
             try:
                 assert rendered.text == self._test_data['response_text-test_parse-b']
             except:
-                if True:
-                    print "----------------"
-                    print "%s.test_only_submit" % self.__class__
-                    print rendered.text
+                if DEBUG_PRINT:
+                    print("----------------")
+                    print("%s.test_only_submit" % self.__class__)
+                    print(rendered.text)
                 raise
-
 
     def test_parse_error(self):
 
@@ -2488,10 +2040,10 @@ class TestMultiForm(TestHarness, unittest.TestCase):
             try:
                 assert rendered.text == self._test_data['response_text-test_parse_error-a']
             except:
-                if True:
-                    print "----------------"
-                    print "%s.test_only_submit" % self.__class__
-                    print rendered.text
+                if DEBUG_PRINT:
+                    print("----------------")
+                    print("%s.test_only_submit" % self.__class__)
+                    print(rendered.text)
                 raise
 
         # render form B
@@ -2519,14 +2071,11 @@ class TestMultiForm(TestHarness, unittest.TestCase):
             try:
                 assert rendered.text == self._test_data['response_text-test_parse_error-b']
             except:
-                if True:
-                    print "----------------"
-                    print "%s.test_only_submit" % self.__class__
-                    print rendered.text
+                if DEBUG_PRINT:
+                    print("----------------")
+                    print("%s.test_only_submit" % self.__class__)
+                    print(rendered.text)
                 raise
-
-    
-    
 
     _test_data = {
         'response_text-test_render_simple': """\
@@ -2623,5 +2172,3 @@ class TestMultiForm(TestHarness, unittest.TestCase):
 </div></body></html>
 """,
     }
-
-

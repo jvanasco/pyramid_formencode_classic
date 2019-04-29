@@ -4,7 +4,6 @@ log = logging.getLogger(__name__)
 # stdlib
 # import pdb
 import sys
-import types
 import warnings
 
 
@@ -13,6 +12,7 @@ import formencode
 import formencode.htmlfill
 from pyramid.response import Response as PyramidResponse
 from pyramid.renderers import render as pyramid_render
+import six
 
 
 # local
@@ -20,6 +20,8 @@ from .exceptions import *
 from .formatters import *
 
 
+# no warnings in 0.3.0
+'''
 # define warnings
 def warn_future(message):
     warnings.warn(message, FutureWarning, stacklevel=2)
@@ -27,10 +29,11 @@ def warn_future(message):
 
 def warn_user(message):
     warnings.warn(message, UserWarning, stacklevel=2)
+'''
 
 
 # defaults
-__VERSION__ = '0.2.2'
+__VERSION__ = '0.3.0.rc1'
 
 DEFAULT_FORM_STASH = '_default'
 DEFAULT_ERROR_MAIN_KEY = 'Error_Main'
@@ -52,17 +55,24 @@ def determine_response_charset(response):
 def encode_formencode_errors(errors, encoding, encoding_errors='strict'):
     """FROM PYLONS -- Encode any unicode values contained in a FormEncode errors dict
     to raw strings of the specified encoding"""
-    if errors is None or isinstance(errors, str):
-        # None or Just incase this is FormEncode<=0.7
-        pass
-    elif isinstance(errors, unicode):
+    if (errors is None):
+        return errors
+    
+    if six.PY2:
+        if isinstance(errors, str):
+            # FormEncode<=0.7 has a Python2-String, not Python2-Unicode
+            return errors
+            
+    if isinstance(errors, six.text_type):  # Py2=unicode, PY3=str
         errors = errors.encode(encoding, encoding_errors)
     elif isinstance(errors, dict):
-        for key, value in errors.iteritems():
+        for key, value in list(errors.items()):
             errors[key] = encode_formencode_errors(value, encoding, encoding_errors)
     else:
         # Fallback to an iterable (a list)
-        errors = [encode_formencode_errors(error, encoding, encoding_errors) for error in errors]
+        errors = [encode_formencode_errors(error, encoding, encoding_errors)
+                  for error in errors
+                  ]
     return errors
 
 
@@ -86,6 +96,8 @@ class FormStash(object):
 
     csrf_error_string = """We're worried about the security of your form submission. Please reload this page and try again. It would be best to highlight the URL in your web-browser and hit 'return'."""
     csrf_error_field = csrf_error_section = 'Error_Main'
+    
+    _reprints = None  # internal use for debugging
 
     def __init__(self, error_main_key=None, name=None, is_unicode_params=None):
         self.errors = {}
@@ -96,6 +108,7 @@ class FormStash(object):
         if name:
             self.name = name
         self.is_unicode_params = is_unicode_params
+        self._reprints = []
 
     def set_css_error(self, css_error):
         """sets the css error field for the form"""
@@ -180,13 +193,6 @@ class FormStash(object):
     # copy this method
     # it should be deprecated. this was a mistake.
     html_error_main_fillable = html_error_placeholder
-
-    def html_error_main(self, field=None, template=None):
-        warn_user("`html_error_main` is deprecated for a major functionality change; "
-                  "it now proxies `html_error_placeholder`; "
-                  "legacy functionality is available via `render_html_error_main`."
-                  )
-        return self.html_error_placeholder(field=field)
 
     def render_html_error_main(self, field=None, template=None):
         """
@@ -312,31 +318,6 @@ class FormStashList(dict):
         if form_stash not in self:
             self[form_stash] = FormStash(name=form_stash, error_main_key=DEFAULT_ERROR_MAIN_KEY)
         return self[form_stash]
-
-
-def formerrors_set(
-    request,
-    form_stash=DEFAULT_FORM_STASH,
-    field=None,
-    message='There was an error with your submission...',
-    raise_FormInvalid=None,
-    raise_FieldInvalid=None,
-):
-    """helper function. to proxy FormStash object"""
-    warn_future("""`formerrors_set` is deprecated and will be removed""")
-    form = request.pyramid_formencode_classic[form_stash]
-    form.set_error(field=field,
-                   message=message,
-                   raise_FormInvalid=raise_FormInvalid,
-                   raise_FieldInvalid=raise_FieldInvalid,
-                   )
-
-
-def formerrors_clear(request, form_stash=DEFAULT_FORM_STASH, field=None):
-    """helper function. to proxy FormStash object"""
-    warn_future("""`formerrors_clear` is deprecated and will be removed""")
-    form = request.pyramid_formencode_classic[form_stash]
-    form.clear_error(field=field)
 
 
 def form_validate(
@@ -491,7 +472,7 @@ def form_validate(
                 results = schema.to_python(decoded_params, state)
             except formencode.Invalid as e:
                 errors = e.unpack_errors(variable_decode, dict_char, list_char)
-                if isinstance(errors, types.StringTypes):
+                if isinstance(errors, six.string_types):
                     errors = {error_string_key: errors}
             formStash.is_parsed = True
 
@@ -588,6 +569,15 @@ def form_reprint(
         return response
 
     formStash = request.pyramid_formencode_classic[form_stash]
+    
+    if __debug__:
+        _debug = {'print_method': str(form_print_method),
+                  'render_view': str(render_view),
+                  'render_view_template': str(render_view_template),
+                  'auto_error_formatter': str(auto_error_formatter),
+                  'error_formatters': str(error_formatters),
+                  }
+        formStash._reprints.append(_debug)
 
     form_content = response.text
 
@@ -599,16 +589,18 @@ def form_reprint(
         encoding = determine_response_charset(response)
 
         if hasattr(response, 'errors'):
-            # WSGIResponse's content may (unlikely) be unicode
-            if isinstance(form_content, unicode):
-                form_content = form_content.encode(encoding, response.errors)
+            # WSGIResponse's content may (unlikely) be unicode in Python2
+            if six.PY2:
+                if isinstance(form_content, six.text_type):  # PY2=unicode()
+                    form_content = form_content.encode(encoding, response.errors)
 
             # FormEncode>=0.7 errors are unicode (due to being localized via ugettext). Convert any of the possible formencode unpack_errors formats to contain raw strings
             response.errors = encode_formencode_errors({}, encoding, response.errors)
 
-    elif not isinstance(form_content, unicode):
+    elif not isinstance(form_content, six.text_type):  # PY2=unicode()
         if __debug__:
             log.debug("Unicode form params: ensuring the '%s' form is converted to unicode for htmlfill", formStash)
+        # py3 - test
         encoding = determine_response_charset(response)
         form_content = form_content.decode(encoding)
 
@@ -635,26 +627,11 @@ def form_reprint(
 
 def _new_request_FormStashList(request):
     """
-    This is a modern version of `init_request` and sh
+    This is a modern version of `init_request` from the .1 branch
     It is a memoized property via the pyramid `includeme` configuration hook
     This merely creates a new FormStashList object
     """
     return FormStashList()
-
-
-def init_request(request):
-    """
-    DEPRECATED
-        helper function.
-        ensures there is a `pyramid_formencode_classic` dict on the request
-    Please use `includeme`
-    """
-    warn_future("""`init_request` is deprecated"""
-                """in favor of `includeme` and using a reified pyramid property""")
-    if not hasattr(request, 'pyramid_formencode_classic'):
-        formObj = _new_request_FormStashList(request)
-        setattr(request, 'pyramid_formencode_classic', formObj)
-    return request.pyramid_formencode_classic
 
 
 def includeme(config):

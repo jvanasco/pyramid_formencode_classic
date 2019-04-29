@@ -37,6 +37,7 @@ with open(
 requires = [
     "pyramid",
     "formencode>=2.0.0a",
+    "six",
 ]
 
 setup(
@@ -57,6 +58,8 @@ setup(
         "Intended Audience :: Developers",
         "Framework :: Pyramid",
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
         "License :: OSI Approved :: BSD License",
     ],
 )

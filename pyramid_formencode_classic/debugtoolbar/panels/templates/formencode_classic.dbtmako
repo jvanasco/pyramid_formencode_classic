@@ -127,6 +127,24 @@
 			</tbody>
 			<tr><td colspan="2"></td></tr>
 
+			<thead>
+				<tr>
+					<th colspan="2">Form Reprints</th>
+				</tr>
+			</thead>
+			<tbody>
+				% for (idx, reprint) in enumerate(form._reprints):
+					<tr>
+						<th>${idx}</th>
+						<td>
+							${atable(reprint)}
+						</td>
+					</tr>
+				% endfor
+			</tbody>
+			<tr><td colspan="2"></td></tr>
+
+
 		</table>
 		<hr/>
 	% endfor

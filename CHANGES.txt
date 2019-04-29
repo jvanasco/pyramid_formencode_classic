@@ -2,6 +2,28 @@ debugtoolbar support!
 ---------------------
 
 
+0.3.0
+	Python3
+	removed deprecated functions
+	
+	* FormStash.html_error_main
+	* formerrors_set
+	* formerrors_clear
+	* init_request
+	
+        warn_user("`html_error_main` is deprecated for a major functionality change; "
+                  "it now proxies `html_error_placeholder`; "
+                  "legacy functionality is available via `render_html_error_main`."
+                  )
+        return self.html_error_placeholder(field=field)
+	* formatter_none
+
+
+0.2.3
+	Unreleased
+	Tracking form_reprint calls in __debug__ environment. TODO- make this a global config option
+
+
 0.2.2
 	2018.07.11
 	packaging fixes:
