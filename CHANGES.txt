@@ -17,6 +17,8 @@ debugtoolbar support!
                   )
         return self.html_error_placeholder(field=field)
 	* formatter_none
+	
+	updated how debugtoolbar panel is added
 
 
 0.2.3
