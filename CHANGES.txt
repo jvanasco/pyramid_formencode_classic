@@ -1,6 +1,10 @@
 debugtoolbar support!
 ---------------------
 
+0.3.1
+	* introduced kwarg `foreach_defense=True` to `form_validate`. enabled by default, this defends against
+	  situations where a `ForEach` implementation creates a list of errors instead of a single error.
+
 
 0.3.0
 	Python3

@@ -33,7 +33,7 @@ def warn_user(message):
 
 
 # defaults
-__VERSION__ = '0.3.0'
+__VERSION__ = '0.3.1'
 
 DEFAULT_FORM_STASH = '_default'
 DEFAULT_ERROR_MAIN_KEY = 'Error_Main'
@@ -341,6 +341,7 @@ def form_validate(
     csrf_name = 'csrf_',
     csrf_token = None,
     is_unicode_params=None,
+    foreach_defense=True,
 ):
     """form validation only: returns True/False ; sets up Errors ;
 
@@ -416,6 +417,11 @@ def form_validate(
     ``is_unicode_params`` (None)
         passthrough to new `Form`
 
+
+    ``foreach_defense`` (True)
+        Implementing `ForEach` in FormEncode (such as dealing with checkboxes) can generate a LIST of errors instead of a single error.
+        When `True`, this is detected and consolidated into a single error.
+
     """
     if __debug__:
         log.debug("form_validate - starting...")
@@ -479,11 +485,16 @@ def form_validate(
         formStash.results = results
         formStash.errors = errors
         formStash.defaults = decoded_params
-
+        
         if errors:
             if __debug__:
                 log.debug("form_validate - Errors found in validation")
             formStash.is_error = True
+            if foreach_defense:
+                for _error_key in errors:
+                    if isinstance(errors[_error_key], list):
+                        _error_condensed = ', '.join([i for i in errors[_error_key] if i]) or 'error'
+                        errors[_error_key] = _error_condensed
             if error_main:
                 # don't raise an error, because we have to stash the form
                 formStash.set_error(field=formStash.error_main_key,
@@ -491,7 +502,6 @@ def form_validate(
                                     raise_FormInvalid=False,
                                     raise_FieldInvalid=False,
                                     )
-
         else:
             if csrf_token is not None:
                 if request.params.get(csrf_name) != csrf_token:
