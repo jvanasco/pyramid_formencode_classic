@@ -1,15 +1,18 @@
 ## Current Recommended Version
 
-`v 0.2.2 (2018.07.11)`
+`v 0.3.1 (2019.09.03)`
 
 New Features:
 
 * simplified api
 * bug fixes, better integration
+* python3 support
+* pyramid debugtoolbar support
+* automatic handling of edge cases with ForEach validator errors
 
 Backwards Compatible?
-
-*  No. Some functionality switched between `0.1.10` and `0.2.0` and light editing is required.  See `CHANGES.txt` for full details.  Also see the migration guide below.
+* `0.2.x` Yes.
+* `0.1.x` No. Some functionality switched between `0.1.10` and `0.2.0` and light editing is required.  See `CHANGES.txt` for full details.  Also see the migration guide below.
 
 
 ## Installation
