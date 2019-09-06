@@ -13,6 +13,7 @@ from pyramid_formencode_classic import formatters
 
 # core testing facility
 import unittest
+import pdb
 
 # pyramid testing requirements
 from pyramid import testing
@@ -131,6 +132,7 @@ class TestParsing(object):
 
         tests_completed = []
         tests_fail = []
+
         for test_name, test_data in self._test_no_params__data.items():
             _template = self.template
             _response_text = test_data['response_text']
@@ -157,9 +159,12 @@ class TestParsing(object):
                                                               **_validate_kwargs
                                                               )
                 if not result:
-                    raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+                    raise pyramid_formencode_classic.FormInvalid()
+
                 raise ValueError("`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`")
-            except pyramid_formencode_classic.FormInvalid:
+
+            except pyramid_formencode_classic.FormInvalid as exc:
+                formStash.register_error_main_exception(exc)
                 rendered = pyramid_formencode_classic.form_reprint(self.request,
                                                                    _print_form_simple,
                                                                    **_reprint_kwargs
@@ -178,14 +183,14 @@ class TestParsing(object):
         if tests_fail:
             raise ValueError(tests_fail)
 
-    def test_only_submit(self):
+    def test_submit(self):
 
         # set the submit
         self.request.POST['submit'] = 'submit'
 
         tests_completed = []
         tests_fail = []
-        for test_name, test_data in self._test_only_submit__data.items():
+        for test_name, test_data in self._test_submit__data.items():
             _template = self.template
             _response_text = test_data['response_text']
             _reprint_kwargs = {}
@@ -211,9 +216,12 @@ class TestParsing(object):
                                                               **_validate_kwargs
                                                               )
                 if not result:
-                    raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+                    raise pyramid_formencode_classic.FormInvalid()
+
                 raise ValueError("`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`")
-            except pyramid_formencode_classic.FormInvalid:
+
+            except pyramid_formencode_classic.FormInvalid as exc:
+                formStash.register_error_main_exception(exc)
                 rendered = pyramid_formencode_classic.form_reprint(self.request,
                                                                    _print_form_simple,
                                                                    **_reprint_kwargs
@@ -223,7 +231,7 @@ class TestParsing(object):
                 except:
                     if DEBUG_PRINT:
                         print("------------")
-                        print("%s.test_only_submit" % self.__class__)
+                        print("%s.test_submit" % self.__class__)
                         print(test_name)
                         print(rendered.text)
                     tests_fail.append(test_name)
@@ -414,7 +422,7 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Default(TestParsing, TestHarness, u
     },
 }
 
-    _test_only_submit__data = {
+    _test_submit__data = {
     'test_formatter_default': {
         # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
         'error_formatters': None,
@@ -666,7 +674,7 @@ class TestParsing_FormA_ErrorPlaceholder_None(TestParsing, TestHarness, unittest
     },
 }
 
-    _test_only_submit__data = {
+    _test_submit__data = {
     'test_formatter_default': {
         # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
         'response_text': """\
@@ -900,7 +908,7 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Alt(TestParsing, TestHarness, unitt
     },
 }
 
-    _test_only_submit__data = {
+    _test_submit__data = {
     'test_formatter_default': {
         # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
         'error_formatters': None,
@@ -1146,7 +1154,7 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt(TestParsing, Tes
     },
 }
 
-    _test_only_submit__data = {
+    _test_submit__data = {
     'test_formatter_default': {
         # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
         'error_formatters': None,
@@ -1388,7 +1396,7 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Default(TestParsing,
     },
 }
 
-    _test_only_submit__data = {
+    _test_submit__data = {
     'test_formatter_default': {
         # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
         'error_formatters': None,
@@ -1641,7 +1649,7 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(TestParsing, TestHa
     },
 }
 
-    _test_only_submit__data = {
+    _test_submit__data = {
     'test_formatter_default': {
         # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
         'error_formatters': None,
@@ -1792,7 +1800,7 @@ class TestCustomError(TestHarness, unittest.TestCase):
     error_main_key = None
     template = 'fixtures/form_a-html_error_placeholder-default.mako'
 
-    def test_only_submit(self):
+    def test_submit(self):
 
         # set the submit
         self.request.POST['submit'] = 'submit'
@@ -1808,7 +1816,7 @@ class TestCustomError(TestHarness, unittest.TestCase):
 
         tests_completed = []
         tests_fail = []
-        for test_name, test_data in self._test_only_submit__data.items():
+        for test_name, test_data in self._test_submit__data.items():
             _template = self.template
             _response_text = test_data['response_text']
             _reprint_kwargs = {'error_formatters': {}, }
@@ -1836,10 +1844,14 @@ class TestCustomError(TestHarness, unittest.TestCase):
                                                               )
                 if html_error_placeholder_template:
                     formStash.html_error_placeholder_template = html_error_placeholder_template
+
                 if not result:
-                    raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+                    raise pyramid_formencode_classic.FormInvalid()
+
                 raise ValueError("`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`")
-            except pyramid_formencode_classic.FormInvalid:
+
+            except pyramid_formencode_classic.FormInvalid as exc:
+                formStash.register_error_main_exception(exc)
                 rendered = pyramid_formencode_classic.form_reprint(self.request,
                                                                    _print_form_simple,
                                                                    **_reprint_kwargs
@@ -1849,7 +1861,7 @@ class TestCustomError(TestHarness, unittest.TestCase):
                 except:
                     if DEBUG_PRINT:
                         print("------------")
-                        print("%s.test_only_submit" % self.__class__)
+                        print("%s.test_submit" % self.__class__)
                         print(test_name)
                         print(rendered.text)
                     tests_fail.append(test_name)
@@ -1858,7 +1870,7 @@ class TestCustomError(TestHarness, unittest.TestCase):
         if tests_fail:
             raise ValueError(tests_fail)
 
-    _test_only_submit__data = {
+    _test_submit__data = {
     'set_a_custom_error': {
         # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
         'error_formatters_default': 'main_error_formatter',
@@ -1951,10 +1963,14 @@ class TestMultiForm(TestHarness, unittest.TestCase):
                                                           )
             if html_error_placeholder_template:
                 formStash.html_error_placeholder_template = html_error_placeholder_template
+
             if not result:
-                raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+                raise pyramid_formencode_classic.FormInvalid()
+
             raise ValueError("`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`")
-        except pyramid_formencode_classic.FormInvalid:
+
+        except pyramid_formencode_classic.FormInvalid as exc:
+            formStash.register_error_main_exception(exc)
             rendered = pyramid_formencode_classic.form_reprint(self.request,
                                                                _print_form_simple,
                                                                form_stash='a',
@@ -1965,7 +1981,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
             except:
                 if DEBUG_PRINT:
                     print("----------------")
-                    print("%s.test_only_submit" % self.__class__)
+                    print("%s.test_submit" % self.__class__)
                     print(rendered.text)
                 raise
 
@@ -1981,10 +1997,14 @@ class TestMultiForm(TestHarness, unittest.TestCase):
                                                           )
             if html_error_placeholder_template:
                 formStash.html_error_placeholder_template = html_error_placeholder_template
+
             if not result:
-                raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+                raise pyramid_formencode_classic.FormInvalid()
+
             raise ValueError("`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`")
-        except pyramid_formencode_classic.FormInvalid:
+
+        except pyramid_formencode_classic.FormInvalid as exc:
+            formStash.register_error_main_exception(exc)
             rendered = pyramid_formencode_classic.form_reprint(self.request,
                                                                _print_form_simple,
                                                                form_stash='b',
@@ -1995,7 +2015,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
             except:
                 if DEBUG_PRINT:
                     print("----------------")
-                    print("%s.test_only_submit" % self.__class__)
+                    print("%s.test_submit" % self.__class__)
                     print(rendered.text)
                 raise
 
@@ -2027,10 +2047,14 @@ class TestMultiForm(TestHarness, unittest.TestCase):
                                                           )
             if html_error_placeholder_template:
                 formStash.html_error_placeholder_template = html_error_placeholder_template
+
             if not result:
-                raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+                raise pyramid_formencode_classic.FormInvalid()
+
             raise ValueError("`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`")
-        except pyramid_formencode_classic.FormInvalid:
+
+        except pyramid_formencode_classic.FormInvalid as exc:
+            formStash.register_error_main_exception(exc)
             rendered = pyramid_formencode_classic.form_reprint(self.request,
                                                                _print_form_simple,
                                                                form_stash='a',
@@ -2042,7 +2066,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
             except:
                 if DEBUG_PRINT:
                     print("----------------")
-                    print("%s.test_only_submit" % self.__class__)
+                    print("%s.test_submit" % self.__class__)
                     print(rendered.text)
                 raise
 
@@ -2058,10 +2082,14 @@ class TestMultiForm(TestHarness, unittest.TestCase):
                                                           )
             if html_error_placeholder_template:
                 formStash.html_error_placeholder_template = html_error_placeholder_template
+
             if not result:
-                raise pyramid_formencode_classic.FormInvalid("Invalid Form")
+                raise pyramid_formencode_classic.FormInvalid()
+
             raise ValueError("`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`")
-        except pyramid_formencode_classic.FormInvalid:
+
+        except pyramid_formencode_classic.FormInvalid as exc:
+            formStash.register_error_main_exception(exc)
             rendered = pyramid_formencode_classic.form_reprint(self.request,
                                                                _print_form_simple,
                                                                form_stash='b',
@@ -2073,7 +2101,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
             except:
                 if DEBUG_PRINT:
                     print("----------------")
-                    print("%s.test_only_submit" % self.__class__)
+                    print("%s.test_submit" % self.__class__)
                     print(rendered.text)
                 raise
 
@@ -2172,3 +2200,6 @@ class TestMultiForm(TestHarness, unittest.TestCase):
 </div></body></html>
 """,
     }
+
+
+# test clear/errors with error main

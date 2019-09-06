@@ -403,6 +403,48 @@ The `data_formencode_form` argument is passed from `form_reprint` to `formencode
 The HTML form elements are associated with a form via the attribute `data-formencode-form`
 
 
+## Dealing with unicode markers in errors (Python2)
+
+There is an issue with formencode under Python2, where an error message shows a unicode marker (see https://github.com/formencode/formencode/issues/132) and may appear like `Value must be one of: a; b (not u'c')` instead of `Value must be one of: a; b (not 'c')`.
+
+After much testing, the simplest way to handle this is to detect it in errors and replace it.  A better method would need to be implemented in formencode itself.
+	
+A quick way to handle this is to define your own implementation of `form_validate` and just use that throughout your project.
+
+For example:
+
+	import pyramid_formencode_classic
+	from six import PY2
+
+	def form_validate(request, **kwargs):
+		"""
+		kwargs
+			things of interest...
+			is_unicode_params - webob 1.x+ transfers to unicode.
+		"""
+		if 'is_unicode_params' not in kwargs:
+			kwargs['is_unicode_params'] = True
+		(result,
+		 formStash
+		 ) = pyramid_formencode_classic.form_validate(
+			request,
+			**kwargs
+		)
+		formStash.html_error_main_template = TEMPLATE_FORMSTASH_ERRORS
+		formStash.html_error_placeholder_template = '<form:error name="%s" format="main"/>'
+		formStash.html_error_placeholder_form_template = '<form:error name="%(field)s" format="main" data-formencode-form="%(form)s"/>'
+		if not result:
+			if PY2:
+				# there is an issue in formencode under Python2 
+				# see: https://github.com/formencode/formencode/issues/132
+				for (k, v) in formStash.errors.items():
+					if " (not u'" in v:
+						formStash.errors[k] = v.replace( " (not u'",  " (not '")
+		return (result,
+				formStash
+				)
+
+
 
 # Misc
 

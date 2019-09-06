@@ -4,11 +4,15 @@
 
 class BaseException(Exception):
     """base exception class"""
+    
+    errors = None
+    form = None
 
-    def __init__(self, message='', errors=None):
+    def __init__(self, message='', errors=None, form=None):
         self.message = message
-        if errors:
-            self.errors = errors
+        self.errors = errors
+        self.form = form
+        self.args = (message, errors, form)  # standardize to `Exception` usage
 
     def __str__(self):
         return repr(self.message)
@@ -16,7 +20,10 @@ class BaseException(Exception):
 
 class FormInvalid(BaseException):
     """Raise in your code when a form is invalid"""
-    pass
+
+    def __init__(self, message='', errors=None, form=None):
+        super(FormInvalid, self).__init__(message=message, errors=errors, form=form)
+    
 
 
 class FieldInvalid(BaseException):
