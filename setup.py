@@ -9,19 +9,15 @@ from setuptools import find_packages
 
 # store version in the init.py
 with open(
-        os.path.join(
-            os.path.dirname(__file__),
-            'pyramid_formencode_classic', '__init__.py')) as v_file:
-    VERSION = re.compile(
-        r".*__VERSION__ = '(.*?)'",
-        re.S).match(v_file.read()).group(1)
+    os.path.join(os.path.dirname(__file__), "pyramid_formencode_classic", "__init__.py")
+) as v_file:
+    VERSION = re.compile(r'''.*__VERSION__ = "(.*?)"''', re.S).match(v_file.read()).group(1)
 
 
-requires = [
-    "pyramid",
-    "formencode>=2.0.0a",
-    "six",
-]
+requires = ["pyramid",
+            "formencode>=2.0.0a",
+            "six",
+            ]
 
 setup(
     name="pyramid_formencode_classic",
@@ -35,7 +31,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires = requires,
+    install_requires=requires,
     test_suite="pyramid_formencode_classic.tests",
     classifiers=[
         "Intended Audience :: Developers",

@@ -3,6 +3,7 @@ debugtoolbar support!
 
 0.4.0
 	* streamline api
+	* new : `FormStash.register_error_main_exception`
 
 
 0.3.1

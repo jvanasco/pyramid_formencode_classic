@@ -8,10 +8,11 @@ _ = lambda x: x
 class FormencodeClassicDebugPanel(DebugPanel):
     """
     """
-    name = 'FormencodeClassic'
+
+    name = "FormencodeClassic"
     has_content = None
-    template = 'pyramid_formencode_classic.debugtoolbar.panels:templates/formencode_classic.dbtmako'
-    
+    template = "pyramid_formencode_classic.debugtoolbar.panels:templates/formencode_classic.dbtmako"
+
     def __init__(self, request):
         self.data = {}
 
@@ -20,13 +21,13 @@ class FormencodeClassicDebugPanel(DebugPanel):
         self.request = request
 
     def process_response(self, response):
-        if 'pyramid_formencode_classic' in self.request.__dict__.keys():
+        if "pyramid_formencode_classic" in self.request.__dict__.keys():
             self.has_content = True
             forms = {}
             for form_stash in self.request.pyramid_formencode_classic.keys():
                 forms[form_stash] = self.request.pyramid_formencode_classic[form_stash]
-            self.data['forms'] = forms
-        
+            self.data["forms"] = forms
+
     @property
     def nav_title(self):
         return _(self.name)
