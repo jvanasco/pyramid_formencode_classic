@@ -133,6 +133,8 @@ class TestParsing(object):
 
     error_main_key = None
     template = None
+    _test_submit__data = None  # placeholder
+    _test_no_params__data = None  # placeholder
 
     def test_no_params(self):
 
@@ -190,6 +192,8 @@ class TestParsing(object):
 
         if tests_fail:
             raise ValueError(tests_fail)
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     def test_submit(self):
 
@@ -1990,6 +1994,8 @@ class TestMultiForm(TestHarness, unittest.TestCase):
                 print("------------")
             raise
 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     def test_parse(self):
 
         _template = self.template
@@ -2070,6 +2076,8 @@ class TestMultiForm(TestHarness, unittest.TestCase):
                     print("%s.test_submit" % self.__class__)
                     print(rendered.text)
                 raise
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     def test_parse_error(self):
 
@@ -2266,4 +2274,1045 @@ class TestMultiForm(TestHarness, unittest.TestCase):
     }
 
 
-# test clear/errors with error main
+class TestParsingApi040(object):
+    """
+
+    python -munittest pyramid_formencode_classic.tests.core.TestParsingApi040_FormA_HtmlErrorPlaceholder_Default
+    """
+
+    error_main_key = None
+    template = None
+
+    _test_manual_error_append__data = None  # placeholder
+    _test_manual_error_prepend__data = None  # placeholder
+    _test_manual_error_default__data = None  # placeholder
+    _test_fatal_form__data = None  # placeholder
+    _test_fatal_field__data = None  # placeholder
+    _test_raise_form_aware__data = None  # placeholder
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    def test_manual_error_default(self):
+
+        # set the submit
+        self.request.POST["submit"] = "submit"
+
+        tests_completed = []
+        tests_fail = []
+        for test_name, test_data in self._test_manual_error_default__data.items():
+            _template = self.template
+            _response_text = test_data["response_text"]
+            _reprint_kwargs = {}
+            if "auto_error_formatter" in test_data:
+                _reprint_kwargs["auto_error_formatter"] = test_data[
+                    "auto_error_formatter"
+                ]
+            if "error_formatters" in test_data:
+                if test_data["error_formatters"] is not None:
+                    _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
+            _validate_kwargs = {}
+            if self.error_main_key is not None:
+                _validate_kwargs["error_main_key"] = self.error_main_key
+
+            def _print_form_simple():
+                rendered = render_to_response(_template, {"request": self.request})
+                return rendered
+
+            try:
+                (result, formStash) = pyramid_formencode_classic.form_validate(
+                    self.request,
+                    schema=Form_EmailUsername,
+                    error_main="There was an error with your form.",
+                    **_validate_kwargs
+                )
+                if not result:
+                    raise pyramid_formencode_classic.FormInvalid("OVERRIDE MESSAGE.")
+
+                raise ValueError(
+                    "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
+                )
+
+            except pyramid_formencode_classic.FormInvalid as exc:
+                formStash.register_error_main_exception(exc)
+                rendered = pyramid_formencode_classic.form_reprint(
+                    self.request, _print_form_simple, **_reprint_kwargs
+                )
+                try:
+                    assert rendered.text == _response_text
+                except:
+                    if DEBUG_PRINT:
+                        print("------------")
+                        print("%s.test_submit" % self.__class__)
+                        print(test_name)
+                        print(rendered.text)
+                    tests_fail.append(test_name)
+            tests_completed.append(test_name)
+
+        if tests_fail:
+            raise ValueError(tests_fail)
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    def test_manual_error_append(self):
+
+        # set the submit
+        self.request.POST["submit"] = "submit"
+
+        tests_completed = []
+        tests_fail = []
+        for test_name, test_data in self._test_manual_error_append__data.items():
+            _template = self.template
+            _response_text = test_data["response_text"]
+            _reprint_kwargs = {}
+            if "auto_error_formatter" in test_data:
+                _reprint_kwargs["auto_error_formatter"] = test_data[
+                    "auto_error_formatter"
+                ]
+            if "error_formatters" in test_data:
+                if test_data["error_formatters"] is not None:
+                    _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
+            _validate_kwargs = {}
+            if self.error_main_key is not None:
+                _validate_kwargs["error_main_key"] = self.error_main_key
+
+            def _print_form_simple():
+                rendered = render_to_response(_template, {"request": self.request})
+                return rendered
+
+            try:
+                (result, formStash) = pyramid_formencode_classic.form_validate(
+                    self.request,
+                    schema=Form_EmailUsername,
+                    error_main="There was an error with your form.",
+                    **_validate_kwargs
+                )
+                if not result:
+                    raise pyramid_formencode_classic.FormInvalid("OVERRIDE MESSAGE.")
+
+                raise ValueError(
+                    "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
+                )
+
+            except pyramid_formencode_classic.FormInvalid as exc:
+                formStash.register_error_main_exception(
+                    exc, message_append=True, message_prepend=False
+                )
+                rendered = pyramid_formencode_classic.form_reprint(
+                    self.request, _print_form_simple, **_reprint_kwargs
+                )
+                try:
+                    assert rendered.text == _response_text
+                except:
+                    if DEBUG_PRINT:
+                        print("------------")
+                        print("%s.test_submit" % self.__class__)
+                        print(test_name)
+                        print(rendered.text)
+                    tests_fail.append(test_name)
+            tests_completed.append(test_name)
+
+        if tests_fail:
+            raise ValueError(tests_fail)
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    def test_manual_error_prepend(self):
+
+        # set the submit
+        self.request.POST["submit"] = "submit"
+
+        tests_completed = []
+        tests_fail = []
+        for test_name, test_data in self._test_manual_error_prepend__data.items():
+            _template = self.template
+            _response_text = test_data["response_text"]
+            _reprint_kwargs = {}
+            if "auto_error_formatter" in test_data:
+                _reprint_kwargs["auto_error_formatter"] = test_data[
+                    "auto_error_formatter"
+                ]
+            if "error_formatters" in test_data:
+                if test_data["error_formatters"] is not None:
+                    _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
+            _validate_kwargs = {}
+            if self.error_main_key is not None:
+                _validate_kwargs["error_main_key"] = self.error_main_key
+
+            def _print_form_simple():
+                rendered = render_to_response(_template, {"request": self.request})
+                return rendered
+
+            try:
+                (result, formStash) = pyramid_formencode_classic.form_validate(
+                    self.request,
+                    schema=Form_EmailUsername,
+                    error_main="There was an error with your form.",
+                    **_validate_kwargs
+                )
+                if not result:
+                    raise pyramid_formencode_classic.FormInvalid("OVERRIDE MESSAGE.")
+
+                raise ValueError(
+                    "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
+                )
+
+            except pyramid_formencode_classic.FormInvalid as exc:
+                formStash.register_error_main_exception(
+                    exc, message_append=False, message_prepend=True
+                )
+                rendered = pyramid_formencode_classic.form_reprint(
+                    self.request, _print_form_simple, **_reprint_kwargs
+                )
+                try:
+                    assert rendered.text == _response_text
+                except:
+                    if DEBUG_PRINT:
+                        print("------------")
+                        print("%s.test_submit" % self.__class__)
+                        print(test_name)
+                        print(rendered.text)
+                    tests_fail.append(test_name)
+            tests_completed.append(test_name)
+
+        if tests_fail:
+            raise ValueError(tests_fail)
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    def test_fatal_form(self):
+
+        # set the submit
+        self.request.POST["submit"] = "submit"
+
+        tests_completed = []
+        tests_fail = []
+        for test_name, test_data in self._test_fatal_form__data.items():
+            _template = self.template
+            _response_text = test_data["response_text"]
+            _reprint_kwargs = {}
+            if "auto_error_formatter" in test_data:
+                _reprint_kwargs["auto_error_formatter"] = test_data[
+                    "auto_error_formatter"
+                ]
+            if "error_formatters" in test_data:
+                if test_data["error_formatters"] is not None:
+                    _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
+            _validate_kwargs = {}
+            if self.error_main_key is not None:
+                _validate_kwargs["error_main_key"] = self.error_main_key
+
+            def _print_form_simple():
+                rendered = render_to_response(_template, {"request": self.request})
+                return rendered
+
+            try:
+                (result, formStash) = pyramid_formencode_classic.form_validate(
+                    self.request,
+                    schema=Form_EmailUsername,
+                    error_main="There was an error with your form.",
+                    **_validate_kwargs
+                )
+                formStash.fatal_form(message="FATAL FORM.")
+
+                raise ValueError(
+                    "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
+                )
+
+            except pyramid_formencode_classic.FormInvalid as exc:
+                rendered = pyramid_formencode_classic.form_reprint(
+                    self.request, _print_form_simple, **_reprint_kwargs
+                )
+                try:
+                    assert rendered.text == _response_text
+                except:
+                    if DEBUG_PRINT:
+                        print("------------")
+                        print("%s.test_submit" % self.__class__)
+                        print(test_name)
+                        print(rendered.text)
+                    tests_fail.append(test_name)
+            tests_completed.append(test_name)
+
+        if tests_fail:
+            raise ValueError(tests_fail)
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    def test_fatal_field(self):
+
+        # set the submit
+        self.request.POST["submit"] = "submit"
+
+        tests_completed = []
+        tests_fail = []
+        for test_name, test_data in self._test_fatal_field__data.items():
+            _template = self.template
+            _response_text = test_data["response_text"]
+            _reprint_kwargs = {}
+            if "auto_error_formatter" in test_data:
+                _reprint_kwargs["auto_error_formatter"] = test_data[
+                    "auto_error_formatter"
+                ]
+            if "error_formatters" in test_data:
+                if test_data["error_formatters"] is not None:
+                    _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
+            _validate_kwargs = {}
+            if self.error_main_key is not None:
+                _validate_kwargs["error_main_key"] = self.error_main_key
+
+            def _print_form_simple():
+                rendered = render_to_response(_template, {"request": self.request})
+                return rendered
+
+            try:
+                (result, formStash) = pyramid_formencode_classic.form_validate(
+                    self.request,
+                    schema=Form_EmailUsername,
+                    error_main="There was an error with your form.",
+                    **_validate_kwargs
+                )
+                formStash.fatal_field(
+                    field="email", message="THIS FIELD CAUSED A FATAL ERROR."
+                )
+
+                raise ValueError(
+                    "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
+                )
+
+            except pyramid_formencode_classic.FormInvalid as exc:
+                rendered = pyramid_formencode_classic.form_reprint(
+                    self.request, _print_form_simple, **_reprint_kwargs
+                )
+                try:
+                    assert rendered.text == _response_text
+                except:
+                    if DEBUG_PRINT:
+                        print("------------")
+                        print("%s.test_submit" % self.__class__)
+                        print(test_name)
+                        print(rendered.text)
+                    tests_fail.append(test_name)
+            tests_completed.append(test_name)
+
+        if tests_fail:
+            raise ValueError(tests_fail)
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    def test_raise_form_aware(self):
+
+        # set the submit
+        self.request.POST["submit"] = "submit"
+
+        tests_completed = []
+        tests_fail = []
+        for test_name, test_data in self._test_raise_form_aware__data.items():
+            _template = self.template
+            _response_text = test_data["response_text"]
+            _reprint_kwargs = {}
+            if "auto_error_formatter" in test_data:
+                _reprint_kwargs["auto_error_formatter"] = test_data[
+                    "auto_error_formatter"
+                ]
+            if "error_formatters" in test_data:
+                if test_data["error_formatters"] is not None:
+                    _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
+            _validate_kwargs = {}
+            if self.error_main_key is not None:
+                _validate_kwargs["error_main_key"] = self.error_main_key
+
+            def _print_form_simple():
+                rendered = render_to_response(_template, {"request": self.request})
+                return rendered
+
+            try:
+                (result, formStash) = pyramid_formencode_classic.form_validate(
+                    self.request,
+                    schema=Form_EmailUsername,
+                    error_main="There was an error with your form.",
+                    **_validate_kwargs
+                )
+                if not result:
+                    raise pyramid_formencode_classic.FormInvalid(
+                        "OVERRIDE MESSAGE.", form=formStash
+                    )
+
+                raise ValueError(
+                    "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
+                )
+
+            except pyramid_formencode_classic.FormInvalid as exc:
+                rendered = pyramid_formencode_classic.form_reprint(
+                    self.request, _print_form_simple, **_reprint_kwargs
+                )
+                try:
+                    assert rendered.text == _response_text
+                except:
+                    if DEBUG_PRINT:
+                        print("------------")
+                        print("%s.test_submit" % self.__class__)
+                        print(test_name)
+                        print(rendered.text)
+                    tests_fail.append(test_name)
+            tests_completed.append(test_name)
+
+        if tests_fail:
+            raise ValueError(tests_fail)
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
+    TestParsingApi040, TestHarness, unittest.TestCase
+):
+    template = "fixtures/form_a-html_error_placeholder-default.mako"
+
+    _test_manual_error_append__data = {
+        "test_formatter_default": {
+            # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form. OVERRIDE MESSAGE.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "test_formatter_nobr": {
+            "auto_error_formatter": formatters.formatter_nobr,
+            "error_formatters": {"default": formatters.formatter_nobr},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form. OVERRIDE MESSAGE.</span>
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "test_formatter_is_none": {
+            "auto_error_formatter": None,
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form. OVERRIDE MESSAGE.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_comment": {
+            "auto_error_formatter": formatters.formatter_comment,
+            "error_formatters": {"default": formatters.formatter_comment},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (There was an error with your form. OVERRIDE MESSAGE.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_help_inline": {
+            "auto_error_formatter": formatters.formatter_help_inline,
+            "error_formatters": {"default": formatters.formatter_help_inline},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="help-inline">There was an error with your form. OVERRIDE MESSAGE.</span>
+
+    <!-- for: email -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_empty_string": {
+            "auto_error_formatter": formatters.formatter_empty_string,
+            "error_formatters": {"default": formatters.formatter_empty_string},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_hidden": {
+            "auto_error_formatter": formatters.formatter_hidden,
+            "error_formatters": {"default": formatters.formatter_hidden},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="hidden" name="There was an error with your form. OVERRIDE MESSAGE." />
+
+    <!-- for: email -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+    }
+    _test_manual_error_prepend__data = {
+        "test_formatter_default": {
+            # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">OVERRIDE MESSAGE. There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "test_formatter_nobr": {
+            "auto_error_formatter": formatters.formatter_nobr,
+            "error_formatters": {"default": formatters.formatter_nobr},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">OVERRIDE MESSAGE. There was an error with your form.</span>
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "test_formatter_is_none": {
+            "auto_error_formatter": None,
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">OVERRIDE MESSAGE. There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_comment": {
+            "auto_error_formatter": formatters.formatter_comment,
+            "error_formatters": {"default": formatters.formatter_comment},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (OVERRIDE MESSAGE. There was an error with your form.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_help_inline": {
+            "auto_error_formatter": formatters.formatter_help_inline,
+            "error_formatters": {"default": formatters.formatter_help_inline},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="help-inline">OVERRIDE MESSAGE. There was an error with your form.</span>
+
+    <!-- for: email -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_empty_string": {
+            "auto_error_formatter": formatters.formatter_empty_string,
+            "error_formatters": {"default": formatters.formatter_empty_string},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_hidden": {
+            "auto_error_formatter": formatters.formatter_hidden,
+            "error_formatters": {"default": formatters.formatter_hidden},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="hidden" name="OVERRIDE MESSAGE. There was an error with your form." />
+
+    <!-- for: email -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+    }
+    _test_manual_error_default__data = _test_manual_error_append__data
+    _test_fatal_form__data = {
+        "test_formatter_default": {
+            # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form. FATAL FORM.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "test_formatter_nobr": {
+            "auto_error_formatter": formatters.formatter_nobr,
+            "error_formatters": {"default": formatters.formatter_nobr},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form. FATAL FORM.</span>
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "test_formatter_is_none": {
+            "auto_error_formatter": None,
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form. FATAL FORM.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_comment": {
+            "auto_error_formatter": formatters.formatter_comment,
+            "error_formatters": {"default": formatters.formatter_comment},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (There was an error with your form. FATAL FORM.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_help_inline": {
+            "auto_error_formatter": formatters.formatter_help_inline,
+            "error_formatters": {"default": formatters.formatter_help_inline},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="help-inline">There was an error with your form. FATAL FORM.</span>
+
+    <!-- for: email -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_empty_string": {
+            "auto_error_formatter": formatters.formatter_empty_string,
+            "error_formatters": {"default": formatters.formatter_empty_string},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_hidden": {
+            "auto_error_formatter": formatters.formatter_hidden,
+            "error_formatters": {"default": formatters.formatter_hidden},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="hidden" name="There was an error with your form. FATAL FORM." />
+
+    <!-- for: email -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+    }
+    _test_fatal_field__data = {
+        "test_formatter_default": {
+            # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value THIS FIELD CAUSED A FATAL ERROR.</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "test_formatter_nobr": {
+            "auto_error_formatter": formatters.formatter_nobr,
+            "error_formatters": {"default": formatters.formatter_nobr},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span>
+
+    <!-- for: email -->
+<span class="error-message">Missing value THIS FIELD CAUSED A FATAL ERROR.</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "test_formatter_is_none": {
+            "auto_error_formatter": None,
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value THIS FIELD CAUSED A FATAL ERROR.</span><br />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_comment": {
+            "auto_error_formatter": formatters.formatter_comment,
+            "error_formatters": {"default": formatters.formatter_comment},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (There was an error with your form.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value THIS FIELD CAUSED A FATAL ERROR.)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_help_inline": {
+            "auto_error_formatter": formatters.formatter_help_inline,
+            "error_formatters": {"default": formatters.formatter_help_inline},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="help-inline">There was an error with your form.</span>
+
+    <!-- for: email -->
+<span class="help-inline">Missing value THIS FIELD CAUSED A FATAL ERROR.</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_empty_string": {
+            "auto_error_formatter": formatters.formatter_empty_string,
+            "error_formatters": {"default": formatters.formatter_empty_string},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_hidden": {
+            "auto_error_formatter": formatters.formatter_hidden,
+            "error_formatters": {"default": formatters.formatter_hidden},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="hidden" name="There was an error with your form." />
+
+    <!-- for: email -->
+<input type="hidden" name="Missing value THIS FIELD CAUSED A FATAL ERROR." />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+    }
+    _test_raise_form_aware__data = {
+        "test_formatter_default": {
+            # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form. OVERRIDE MESSAGE.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "test_formatter_nobr": {
+            "auto_error_formatter": formatters.formatter_nobr,
+            "error_formatters": {"default": formatters.formatter_nobr},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form. OVERRIDE MESSAGE.</span>
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "test_formatter_is_none": {
+            "auto_error_formatter": None,
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form. OVERRIDE MESSAGE.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_comment": {
+            "auto_error_formatter": formatters.formatter_comment,
+            "error_formatters": {"default": formatters.formatter_comment},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (There was an error with your form. OVERRIDE MESSAGE.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_help_inline": {
+            "auto_error_formatter": formatters.formatter_help_inline,
+            "error_formatters": {"default": formatters.formatter_help_inline},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="help-inline">There was an error with your form. OVERRIDE MESSAGE.</span>
+
+    <!-- for: email -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_empty_string": {
+            "auto_error_formatter": formatters.formatter_empty_string,
+            "error_formatters": {"default": formatters.formatter_empty_string},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_hidden": {
+            "auto_error_formatter": formatters.formatter_hidden,
+            "error_formatters": {"default": formatters.formatter_hidden},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="hidden" name="There was an error with your form. OVERRIDE MESSAGE." />
+
+    <!-- for: email -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="hidden" name="Missing value" />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+    }
+
+
+# TODO: test clear/errors with error main

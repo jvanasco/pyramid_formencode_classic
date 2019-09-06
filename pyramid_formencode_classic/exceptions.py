@@ -21,8 +21,19 @@ class BaseException(Exception):
 class FormInvalid(BaseException):
     """Raise in your code when a form is invalid"""
 
-    def __init__(self, message="", errors=None, form=None):
+    def __init__(
+        self,
+        message="",
+        errors=None,
+        form=None,
+        message_append=True,
+        message_prepend=False,
+    ):
         super(FormInvalid, self).__init__(message=message, errors=errors, form=form)
+        if form:
+            form.register_error_main_exception(
+                self, message_append=message_append, message_prepend=message_prepend
+            )
 
 
 class FieldInvalid(BaseException):

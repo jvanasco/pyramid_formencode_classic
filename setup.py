@@ -11,13 +11,12 @@ from setuptools import find_packages
 with open(
     os.path.join(os.path.dirname(__file__), "pyramid_formencode_classic", "__init__.py")
 ) as v_file:
-    VERSION = re.compile(r'''.*__VERSION__ = "(.*?)"''', re.S).match(v_file.read()).group(1)
+    VERSION = (
+        re.compile(r'''.*__VERSION__ = "(.*?)"''', re.S).match(v_file.read()).group(1)
+    )
 
 
-requires = ["pyramid",
-            "formencode>=2.0.0a",
-            "six",
-            ]
+requires = ["pyramid", "formencode>=2.0.0a", "six"]
 
 setup(
     name="pyramid_formencode_classic",

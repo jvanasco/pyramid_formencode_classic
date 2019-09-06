@@ -331,20 +331,24 @@ class FormStash(object):
         if self.errors:
             self.is_error = True
 
-    def fatal_error(
-        self, field=None, message=None, message_append=None, message_prepend=None
-    ):
-        raise NotImplemented()
-        if field is None:
-            field = self.error_main_key
+    def fatal_form(self, message=None, message_append=True, message_prepend=False):
+        _kwargs = {}
+        if message_append is not None:
+            _kwargs["message_append"] = message_append
+        if message_prepend is not None:
+            _kwargs["message_prepend"] = message_prepend
+        self.set_error(field=self.error_main_key, message=message, **_kwargs)
+        raise FormInvalid()
 
-        if message:
-            kwargs = {}
-            if message_append is not None:
-                kwargs["message_append"] = message_append
-            if message_prepend is not None:
-                kwargs["message_prepend"] = message_append
-            self.set_error(field=field, message=message, **kwargs)
+    def fatal_field(
+        self, field=None, message=None, message_append=True, message_prepend=False
+    ):
+        _kwargs = {}
+        if message_append is not None:
+            _kwargs["message_append"] = message_append
+        if message_prepend is not None:
+            _kwargs["message_prepend"] = message_prepend
+        self.set_error(field=field, message=message, **_kwargs)
         raise FormInvalid()
 
     def register_error_main_exception(
