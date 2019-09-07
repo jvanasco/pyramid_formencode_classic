@@ -496,5 +496,6 @@ several functions and kwargs were removed, CHANGES provides a full list but high
 
 The new setup makes invoking error formatters for htmlfill much easier.
 
+### v0.3.x to v0.4.x
 
-`
+

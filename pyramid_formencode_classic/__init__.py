@@ -105,6 +105,7 @@ class FormStash(object):
     csrf_error_field = csrf_error_section = "Error_Main"
 
     _reprints = None  # internal use for debugging
+    _exceptions_integrated = None
 
     def __init__(
         self,
@@ -338,7 +339,7 @@ class FormStash(object):
         if message_prepend is not None:
             _kwargs["message_prepend"] = message_prepend
         self.set_error(field=self.error_main_key, message=message, **_kwargs)
-        raise FormInvalid()
+        self._raise_unique_FormInvalid()
 
     def fatal_field(
         self, field=None, message=None, message_append=True, message_prepend=False
@@ -349,14 +350,25 @@ class FormStash(object):
         if message_prepend is not None:
             _kwargs["message_prepend"] = message_prepend
         self.set_error(field=field, message=message, **_kwargs)
-        raise FormInvalid()
+        self._raise_unique_FormInvalid()
+    
+    def _raise_unique_FormInvalid(self):
+        """
+        this is used to defend against integrating an exception multiple times
+        via `register_error_main_exception` after being created in
+        `fatal_form` or `fatal_field`.
+        """
+        _FormInvalid = FormInvalid()
+        if self._exceptions_integrated is None:
+            self._exceptions_integrated = []
+        self._exceptions_integrated.append(_FormInvalid)
+        raise _FormInvalid
 
     def register_error_main_exception(
         self, exc, message_append=True, message_prepend=False
     ):
         """
         This is a convenience method to replace this common use pattern:
-
         ------------------------------------------------------------------------
             try:
                 ...
@@ -378,14 +390,22 @@ class FormStash(object):
         ------------------------------------------------------------------------
         """
         if isinstance(exc, FormInvalid):
-            if exc.message:
-                self.set_error(
-                    field=self.error_main_key,
-                    message=exc.message,
-                    raise_FormInvalid=False,
-                    message_append=message_append,
-                    message_prepend=message_prepend,
-                )
+
+            if self._exceptions_integrated is None:
+                self._exceptions_integrated = []
+
+            if exc not in self._exceptions_integrated:
+                self._exceptions_integrated.append(exc)
+                if exc.message:
+                    self.set_error(
+                        field=self.error_main_key,
+                        message=exc.message,
+                        raise_FormInvalid=False,
+                        message_append=message_append,
+                        message_prepend=message_prepend,
+                    )
+            else:
+                log.debug("exception already integrated")
 
     def csrf_input_field(
         self,

@@ -2038,7 +2038,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
             except:
                 if DEBUG_PRINT:
                     print("----------------")
-                    print("%s.test_submit" % self.__class__)
+                    print("%s.test_parse" % self.__class__)
                     print(rendered.text)
                 raise
 
@@ -2073,7 +2073,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
             except:
                 if DEBUG_PRINT:
                     print("----------------")
-                    print("%s.test_submit" % self.__class__)
+                    print("%s.test_parse" % self.__class__)
                     print(rendered.text)
                 raise
 
@@ -2132,7 +2132,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
             except:
                 if DEBUG_PRINT:
                     print("----------------")
-                    print("%s.test_submit" % self.__class__)
+                    print("%s.test_parse_error" % self.__class__)
                     print(rendered.text)
                 raise
 
@@ -2173,7 +2173,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
             except:
                 if DEBUG_PRINT:
                     print("----------------")
-                    print("%s.test_submit" % self.__class__)
+                    print("%s.test_parse_error" % self.__class__)
                     print(rendered.text)
                 raise
 
@@ -2334,6 +2334,7 @@ class TestParsingApi040(object):
 
             except pyramid_formencode_classic.FormInvalid as exc:
                 formStash.register_error_main_exception(exc)
+                formStash.register_error_main_exception(exc)  # this can be repeated because we defend against it
                 rendered = pyramid_formencode_classic.form_reprint(
                     self.request, _print_form_simple, **_reprint_kwargs
                 )
@@ -2342,7 +2343,7 @@ class TestParsingApi040(object):
                 except:
                     if DEBUG_PRINT:
                         print("------------")
-                        print("%s.test_submit" % self.__class__)
+                        print("%s.test_manual_error_default" % self.__class__)
                         print(test_name)
                         print(rendered.text)
                     tests_fail.append(test_name)
@@ -2397,6 +2398,7 @@ class TestParsingApi040(object):
                 formStash.register_error_main_exception(
                     exc, message_append=True, message_prepend=False
                 )
+                formStash.register_error_main_exception(exc)  # this can be repeated because we defend against it
                 rendered = pyramid_formencode_classic.form_reprint(
                     self.request, _print_form_simple, **_reprint_kwargs
                 )
@@ -2405,7 +2407,7 @@ class TestParsingApi040(object):
                 except:
                     if DEBUG_PRINT:
                         print("------------")
-                        print("%s.test_submit" % self.__class__)
+                        print("%s.test_manual_error_append" % self.__class__)
                         print(test_name)
                         print(rendered.text)
                     tests_fail.append(test_name)
@@ -2460,6 +2462,7 @@ class TestParsingApi040(object):
                 formStash.register_error_main_exception(
                     exc, message_append=False, message_prepend=True
                 )
+                formStash.register_error_main_exception(exc)  # this can be repeated because we defend against it
                 rendered = pyramid_formencode_classic.form_reprint(
                     self.request, _print_form_simple, **_reprint_kwargs
                 )
@@ -2468,7 +2471,7 @@ class TestParsingApi040(object):
                 except:
                     if DEBUG_PRINT:
                         print("------------")
-                        print("%s.test_submit" % self.__class__)
+                        print("%s.test_manual_error_prepend" % self.__class__)
                         print(test_name)
                         print(rendered.text)
                     tests_fail.append(test_name)
@@ -2527,10 +2530,26 @@ class TestParsingApi040(object):
                 except:
                     if DEBUG_PRINT:
                         print("------------")
-                        print("%s.test_submit" % self.__class__)
+                        print("%s.test_fatal_form" % self.__class__)
                         print(test_name)
                         print(rendered.text)
                     tests_fail.append(test_name)
+
+                # oh hey, do it again after integrating the error
+                formStash.register_error_main_exception(exc)  # this can be repeated because we defend against it
+                rendered_alt = pyramid_formencode_classic.form_reprint(
+                    self.request, _print_form_simple, **_reprint_kwargs
+                )
+                try:
+                    assert rendered_alt.text == _response_text
+                except:
+                    if DEBUG_PRINT:
+                        print("------------")
+                        print("alt, %s.test_fatal_form" % self.__class__)
+                        print(test_name)
+                        print(rendered.text)
+                    tests_fail.append("alt, %s" % test_name)
+
             tests_completed.append(test_name)
 
         if tests_fail:
@@ -2588,10 +2607,26 @@ class TestParsingApi040(object):
                 except:
                     if DEBUG_PRINT:
                         print("------------")
-                        print("%s.test_submit" % self.__class__)
+                        print("%s.test_fatal_field" % self.__class__)
                         print(test_name)
                         print(rendered.text)
                     tests_fail.append(test_name)
+
+                # oh hey, do it again after integrating the error
+                formStash.register_error_main_exception(exc)  # this can be repeated because we defend against it
+                rendered_alt = pyramid_formencode_classic.form_reprint(
+                    self.request, _print_form_simple, **_reprint_kwargs
+                )
+                try:
+                    assert rendered_alt.text == _response_text
+                except:
+                    if DEBUG_PRINT:
+                        print("------------")
+                        print("alt, %s.test_fatal_field" % self.__class__)
+                        print(test_name)
+                        print(rendered.text)
+                    tests_fail.append("alt, %s" % test_name)
+
             tests_completed.append(test_name)
 
         if tests_fail:
@@ -2650,7 +2685,7 @@ class TestParsingApi040(object):
                 except:
                     if DEBUG_PRINT:
                         print("------------")
-                        print("%s.test_submit" % self.__class__)
+                        print("%s.test_raise_form_aware" % self.__class__)
                         print(test_name)
                         print(rendered.text)
                     tests_fail.append(test_name)
