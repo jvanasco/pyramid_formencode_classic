@@ -472,6 +472,19 @@ The panel shows information such as:
 Yes. Starting with the `0.2.0` release, there is a full test suite to ensure forms render as expected.
 
 
+### Versioning Policy
+
+This project using a Semantic Versioning Policy: `Major.Minor.Patch`.
+
+`Major`: significant API changes
+`Minor`: backwards incompatible API changes
+`Patch`: backwards compatible API changes and bugfixes
+
+The recommended usage is to pin versioning within the `Major.Minor` range:
+
+	pyramid_formencode_classic >=0.4.0, <0.5.0
+
+
 ## Migration Guide
 
 ### v0.1.x to v0.2.0

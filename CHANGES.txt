@@ -13,7 +13,7 @@ debugtoolbar support!
 	* new : `FormStash.register_error_main_exception`
 	* new : `FormStash.fatal_form()`
 	* new : `FormStash.fatal_field()`
-	
+	* new versioning policy
 
 
 0.3.1

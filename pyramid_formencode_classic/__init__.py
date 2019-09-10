@@ -332,10 +332,10 @@ class FormStash(object):
                     formStash.set_error(message="We encountered a `CaughtError`",
                                         )
                 ...
-            except formhandling.FormInvalid:
+            except formhandling.FormInvalid as exc:
                 formStash.set_error(field='Error_Main',
                                     message="There was an error with your form.",
-                                    message_append=True,
+                                    message_prepend=True,
                                     )
                 return formhandling.form_reprint(...)
 
