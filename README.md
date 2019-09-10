@@ -1,6 +1,6 @@
 ## Current Recommended Version
 
-`v 0.3.1 (2019.09.03)`
+`v 0.4.1 (2019.09.10)`
 
 New Features:
 
@@ -10,7 +10,14 @@ New Features:
 * pyramid debugtoolbar support
 * automatic handling of edge cases with ForEach validator errors
 
-Backwards Compatible?
+### Backwards Compatible?
+
+### 0.4.0
+
+* `0.3.x` No
+
+### 0.3.0
+
 * `0.2.x` Yes.
 * `0.1.x` No. Some functionality switched between `0.1.10` and `0.2.0` and light editing is required.  See `CHANGES.txt` for full details.  Also see the migration guide below.
 
@@ -174,19 +181,22 @@ If the marking is not in your template, it will be at the top of the document (b
                 								error_main="There was an error with your form.",
                 								)
                 if not result:
-                    raise formhandling.FormInvalid("Invalid Form")
+                    # `formStash.fatal_form(message)` will raise `formhandling.FormInvalid(message)`
+                    formStash.fatal_form("Invalid Form")
 
-                results= formStash.results
+                results = formStash.results
 
                 useraccount = model.find_user(results['email_address'])
                 if not useraccount:
                 	# set a custom error and raise an exception to reprint
+                    # `formStash.fatal_field(` will raise `formhandling.FormInvalid(`
                     formStash.fatal_field(field="email_address",
 										  message="Email not registered",
 										  )
 
                 if not useraccount.verify_submitted_password(results['password']):
                 	# set a custom error and raise an exception to reprint
+                    # `formStash.fatal_field(` will raise `formhandling.FormInvalid(`
                     formStash.fatal_field(field="email_address",
 										  message="Wrong password",
 										  )
@@ -483,7 +493,7 @@ This project using a Semantic Versioning Policy: `Major.Minor.Patch`.
 The recommended usage is to pin versioning within the `Major.Minor` range:
 
 	pyramid_formencode_classic >=0.4.0, <0.5.0
-
+            
 
 ## Migration Guide
 

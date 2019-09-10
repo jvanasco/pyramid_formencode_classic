@@ -273,10 +273,10 @@ class FormStash(object):
             if message_append or message_prepend:
                 _message_existing = self.errors[field] if (field in self.errors) else ""
                 if _message_existing != message:  # don't duplicate the error
-                    _message_existing = [_message_existing]
-                    if message_append:
+                    _message_existing = [_message_existing] if _message_existing else []
+                    if message_append and message:
                         _message_existing.append(message)
-                    elif message_prepend:
+                    elif message_prepend and message:
                         _message_existing.insert(0, message)
                     message = " ".join(_message_existing)
 

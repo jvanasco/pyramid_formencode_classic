@@ -1,6 +1,9 @@
 debugtoolbar support!
 ---------------------
 
+0.4.1
+	* addressed a regression from 0.4.0 where a leading space character could appear in error printing.
+	
 0.4.0
 	backwards compatible? NO.
 		* `FieldInvalid` renamed to `FormFieldInvalid`
