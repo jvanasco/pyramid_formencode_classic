@@ -36,15 +36,13 @@ class FormInvalid(BaseException):
             )
 
 
-class FieldInvalid(BaseException):
-    """Raise in your code when a formfield is invalid"""
-
+class FormFieldInvalid(FormInvalid):
+    """Raise in your code when a FormField is invalid"""
     pass
 
 
-class CsrfInvalid(FormInvalid, FieldInvalid):
+class CsrfInvalid(FormFieldInvalid):
     """Raise in your code when a formfield is invalid"""
-
     pass
 
 
@@ -57,7 +55,7 @@ class ValidationStop(BaseException):
 __all__ = (
     "BaseException",
     "FormInvalid",
-    "FieldInvalid",
+    "FormFieldInvalid",
     "CsrfInvalid",
     "ValidationStop",
 )

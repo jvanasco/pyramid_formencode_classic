@@ -245,16 +245,16 @@ class FormStash(object):
         message_prepend=False,
         is_error_csrf=None,
         raise_FormInvalid=None,
-        raise_FieldInvalid=None,
+        raise_FormFieldInvalid=None,
     ):
         """manages the dict of errors
 
             `field`: the field in the form
             `message`: your error message
-            `raise_FormInvalid`: default `False`. if `True` will raise `FormInvalid`
-            `raise_FieldInvalid`: default `False`. if `True` will raise `FieldInvalid`
-            `message_append`: default `False`.  if true, will append the `message` argument to any existing argument in this `field`
-            `message_prepend`: default `False`.  if true, will prepend the `message` argument to any existing argument in this `field`
+            `raise_FormInvalid`: default `None`. If `True` will raise `FormInvalid`
+            `raise_FormFieldInvalid`: default `None`. If `True` will raise `FormFieldInvalid`
+            `message_append`: default `False`. If `True`, will append the `message` argument to any existing argument in this `field`
+            `message_prepend`: default `False`. If `True`, will prepend the `message` argument to any existing argument in this `field`
 
             meessage_append and message_prepend allow you to elegantly combine errors
 
@@ -315,8 +315,8 @@ class FormStash(object):
         if raise_FormInvalid:
             raise FormInvalid()
 
-        if raise_FieldInvalid:
-            raise FieldInvalid()
+        if raise_FormFieldInvalid:
+            raise FormFieldInvalid()
 
     def clear_error(self, field=None):
         """clear the dict of errors"""
@@ -472,7 +472,7 @@ def form_validate(
     error_string_key="Error_String",
     return_stash=True,
     raise_FormInvalid=None,
-    raise_FieldInvalid=None,
+    raise_FormFieldInvalid=None,
     csrf_name="csrf_",
     csrf_token=None,
     is_unicode_params=None,
@@ -642,7 +642,7 @@ def form_validate(
                     field=formStash.error_main_key,
                     message=error_main,
                     raise_FormInvalid=False,
-                    raise_FieldInvalid=False,
+                    raise_FormFieldInvalid=False,
                 )
         else:
             if csrf_token is not None:
@@ -652,7 +652,7 @@ def form_validate(
                         field=formStash.csrf_error_field,
                         message=formStash.csrf_error_string,
                         raise_FormInvalid=False,
-                        raise_FieldInvalid=False,
+                        raise_FormFieldInvalid=False,
                         is_error_csrf=True,
                     )
 
@@ -664,13 +664,12 @@ def form_validate(
     # save the form onto the request
     request.pyramid_formencode_classic[form_stash] = formStash
 
+    # now raise if needed
     if formStash.is_error:
-
-        # now raise
         if raise_FormInvalid:
             raise FormInvalid()
-        if raise_FieldInvalid:
-            raise FieldInvalid()
+        if raise_FormFieldInvalid:
+            raise FormFieldInvalid()
 
     if return_stash:
         return (not formStash.is_error, formStash)

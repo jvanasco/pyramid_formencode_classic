@@ -2,9 +2,16 @@ debugtoolbar support!
 ---------------------
 
 0.4.0
+	backwards compatible? NO.
+		* `FieldInvalid` renamed to `FormFieldInvalid`
+		* `FormFieldInvalid` inherits from `FormInvalid`
+		* `CsrfInvalid` inherits from `FormFieldInvalid`
+		* `raise_FieldInvalid` renamed to `raise_FormFieldInvalid`
+	
 	* streamline api
 	* new : `FormStash.register_error_main_exception`
-	* new : `FormStash.fatal_form`
+	* new : `FormStash.fatal_form()`
+	* new : `FormStash.fatal_field()`
 	
 
 
