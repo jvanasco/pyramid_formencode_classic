@@ -2322,7 +2322,9 @@ class TestParsingApi040(object):
 
             except pyramid_formencode_classic.FormInvalid as exc:
                 formStash.register_error_main_exception(exc)
-                formStash.register_error_main_exception(exc)  # this can be repeated because we defend against it
+                formStash.register_error_main_exception(
+                    exc
+                )  # this can be repeated because we defend against it
                 rendered = pyramid_formencode_classic.form_reprint(
                     self.request, _print_form_simple, **_reprint_kwargs
                 )
@@ -2386,7 +2388,9 @@ class TestParsingApi040(object):
                 formStash.register_error_main_exception(
                     exc, message_append=True, message_prepend=False
                 )
-                formStash.register_error_main_exception(exc)  # this can be repeated because we defend against it
+                formStash.register_error_main_exception(
+                    exc
+                )  # this can be repeated because we defend against it
                 rendered = pyramid_formencode_classic.form_reprint(
                     self.request, _print_form_simple, **_reprint_kwargs
                 )
@@ -2450,7 +2454,9 @@ class TestParsingApi040(object):
                 formStash.register_error_main_exception(
                     exc, message_append=False, message_prepend=True
                 )
-                formStash.register_error_main_exception(exc)  # this can be repeated because we defend against it
+                formStash.register_error_main_exception(
+                    exc
+                )  # this can be repeated because we defend against it
                 rendered = pyramid_formencode_classic.form_reprint(
                     self.request, _print_form_simple, **_reprint_kwargs
                 )
@@ -2524,7 +2530,9 @@ class TestParsingApi040(object):
                     tests_fail.append(test_name)
 
                 # oh hey, do it again after integrating the error
-                formStash.register_error_main_exception(exc)  # this can be repeated because we defend against it
+                formStash.register_error_main_exception(
+                    exc
+                )  # this can be repeated because we defend against it
                 rendered_alt = pyramid_formencode_classic.form_reprint(
                     self.request, _print_form_simple, **_reprint_kwargs
                 )
@@ -2601,7 +2609,9 @@ class TestParsingApi040(object):
                     tests_fail.append(test_name)
 
                 # oh hey, do it again after integrating the error
-                formStash.register_error_main_exception(exc)  # this can be repeated because we defend against it
+                formStash.register_error_main_exception(
+                    exc
+                )  # this can be repeated because we defend against it
                 rendered_alt = pyramid_formencode_classic.form_reprint(
                     self.request, _print_form_simple, **_reprint_kwargs
                 )

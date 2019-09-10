@@ -1,14 +1,14 @@
-"""formatters we use
-"""
-# stdlib
-import cgi
-
 # pypi
 import formencode
+
 import six
 
 six.add_move(six.MovedAttribute("html_escape", "cgi", "html", "escape", "escape"))
 from six.moves import html_escape
+
+"""
+collection of common formatters to use
+"""
 
 
 def formatter_help_inline(error):

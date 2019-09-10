@@ -19,7 +19,7 @@ class BaseException(Exception):
 
 
 class FormInvalid(BaseException):
-    """Raise in your code when a form is invalid"""
+    """Raise in your code when a Form is invalid"""
 
     def __init__(
         self,
@@ -37,12 +37,14 @@ class FormInvalid(BaseException):
 
 
 class FormFieldInvalid(FormInvalid):
-    """Raise in your code when a FormField is invalid"""
+    """Raise in your code when a Form's Field is invalid"""
+
     pass
 
 
 class CsrfInvalid(FormFieldInvalid):
-    """Raise in your code when a formfield is invalid"""
+    """Raise in your code when a Form's CSRF Field is invalid"""
+
     pass
 
 

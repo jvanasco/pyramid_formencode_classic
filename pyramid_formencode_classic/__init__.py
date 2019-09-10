@@ -5,7 +5,6 @@ log = logging.getLogger(__name__)
 # stdlib
 # import pdb
 import sys
-import warnings
 
 
 # pypi
@@ -17,12 +16,14 @@ import six
 
 
 # local
-from .exceptions import *
-from .formatters import *
+from .exceptions import FormInvalid, FormFieldInvalid, ValidationStop
+from .formatters import formatter_nobr  # default formatter
 
 
-# no warnings in 0.3.0
+# no warnings in > 0.3.0
 """
+import warnings
+
 # define warnings
 def warn_future(message):
     warnings.warn(message, FutureWarning, stacklevel=2)
@@ -247,7 +248,7 @@ class FormStash(object):
     ):
         """
         Manages entries in the dict of errors
-        
+
         As of v0.4.0, this will not raise an exception
 
         `field`: the field in the form
@@ -323,7 +324,7 @@ class FormStash(object):
     ):
         """
         Sets an error for ``field``, then raises a `FormInvalid`.
-        
+
         consider this code:
 
             try:
@@ -342,7 +343,7 @@ class FormStash(object):
 
             There was an error with your form.  We encountered a `CaughtError`
 
-        """        
+        """
         _kwargs = {}
         if message_append is not None:
             _kwargs["message_append"] = message_append
@@ -350,7 +351,7 @@ class FormStash(object):
             _kwargs["message_prepend"] = message_prepend
         self.set_error(field=field, message=message, **_kwargs)
         self._raise_unique_FormInvalid()
-    
+
     def _raise_unique_FormInvalid(self):
         """
         this is used to defend against integrating an exception multiple times
@@ -635,10 +636,7 @@ def form_validate(
                         errors[_error_key] = _error_condensed
             if error_main:
                 # don't raise an error, because we have to stash the form
-                formStash.set_error(
-                    field=formStash.error_main_key,
-                    message=error_main,
-                )
+                formStash.set_error(field=formStash.error_main_key, message=error_main)
         else:
             if csrf_token is not None:
                 if request.params.get(csrf_name) != csrf_token:

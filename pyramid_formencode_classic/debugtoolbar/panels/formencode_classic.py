@@ -1,8 +1,10 @@
 from pyramid_debugtoolbar.panels import DebugPanel
-import pdb
 
 
 _ = lambda x: x
+
+
+# ==============================================================================
 
 
 class FormencodeClassicDebugPanel(DebugPanel):
