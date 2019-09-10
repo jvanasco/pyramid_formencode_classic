@@ -244,38 +244,18 @@ class FormStash(object):
         message_append=False,
         message_prepend=False,
         is_error_csrf=None,
-        raise_FormInvalid=None,
-        raise_FormFieldInvalid=None,
     ):
-        """manages the dict of errors
+        """
+        Manages entries in the dict of errors
+        
+        As of v0.4.0, this will not raise an exception
 
-            `field`: the field in the form
-            `message`: your error message
-            `raise_FormInvalid`: default `None`. If `True` will raise `FormInvalid`
-            `raise_FormFieldInvalid`: default `None`. If `True` will raise `FormFieldInvalid`
-            `message_append`: default `False`. If `True`, will append the `message` argument to any existing argument in this `field`
-            `message_prepend`: default `False`. If `True`, will prepend the `message` argument to any existing argument in this `field`
+        `field`: the field in the form
+        `message`: your error message
+        `message_append`: default `False`. If `True`, will append the `message` argument to any existing argument in this `field`
+        `message_prepend`: default `False`. If `True`, will prepend the `message` argument to any existing argument in this `field`
 
-            meessage_append and message_prepend allow you to elegantly combine errors
-
-            consider this code:
-
-                try:
-                    except CaughtError as e:
-                        formStash.set_error(message="We encountered a `CaughtError`",
-                                            raise_FormInvalid=True,
-                                            )
-                    ...
-                except formhandling.FormInvalid:
-                    formStash.set_error(field='Error_Main',
-                                        message="There was an error with your form.",
-                                        message_append=True,
-                                        )
-                    return formhandling.form_reprint(...)
-
-            This would generate the following text for the `Error_Main` field:
-
-                There was an error with your form.  We encountered a `CaughtError`
+        ``meessage_append` and ``message_prepend``` allow you to elegantly combine errors
         """
         if field is None:
             field = self.error_main_key
@@ -312,12 +292,6 @@ class FormStash(object):
             if self.error_main_key not in self.errors:
                 self.errors[self.error_main_key] = self.error_main_text
 
-        if raise_FormInvalid:
-            raise FormInvalid()
-
-        if raise_FormFieldInvalid:
-            raise FormFieldInvalid()
-
     def clear_error(self, field=None):
         """clear the dict of errors"""
         if self.errors:
@@ -333,6 +307,9 @@ class FormStash(object):
             self.is_error = True
 
     def fatal_form(self, message=None, message_append=True, message_prepend=False):
+        """
+        Sets an error for the main error key, then raises a `FormInvalid`.
+        """
         _kwargs = {}
         if message_append is not None:
             _kwargs["message_append"] = message_append
@@ -344,6 +321,28 @@ class FormStash(object):
     def fatal_field(
         self, field=None, message=None, message_append=True, message_prepend=False
     ):
+        """
+        Sets an error for ``field``, then raises a `FormInvalid`.
+        
+        consider this code:
+
+            try:
+                except CaughtError as e:
+                    formStash.set_error(message="We encountered a `CaughtError`",
+                                        )
+                ...
+            except formhandling.FormInvalid:
+                formStash.set_error(field='Error_Main',
+                                    message="There was an error with your form.",
+                                    message_append=True,
+                                    )
+                return formhandling.form_reprint(...)
+
+        This would generate the following text for the `Error_Main` field:
+
+            There was an error with your form.  We encountered a `CaughtError`
+
+        """        
         _kwargs = {}
         if message_append is not None:
             _kwargs["message_append"] = message_append
@@ -376,9 +375,8 @@ class FormStash(object):
                 ...
             except formhandling.FormInvalid as exc:
                 - if exc.message:
-                -     formStash.set_error(field="Error_Main",
+                -     formStash.set_error(field=formStash.error_main_key,
                 -                         message=exc.message,
-                -                         raise_FormInvalid=False,
                 -                         message_prepend=True
                 -                         )
                 + formStash.register_error_main_exception(exc)
@@ -400,7 +398,6 @@ class FormStash(object):
                     self.set_error(
                         field=self.error_main_key,
                         message=exc.message,
-                        raise_FormInvalid=False,
                         message_append=message_append,
                         message_prepend=message_prepend,
                     )
@@ -641,8 +638,6 @@ def form_validate(
                 formStash.set_error(
                     field=formStash.error_main_key,
                     message=error_main,
-                    raise_FormInvalid=False,
-                    raise_FormFieldInvalid=False,
                 )
         else:
             if csrf_token is not None:
@@ -651,8 +646,6 @@ def form_validate(
                     formStash.set_error(
                         field=formStash.csrf_error_field,
                         message=formStash.csrf_error_string,
-                        raise_FormInvalid=False,
-                        raise_FormFieldInvalid=False,
                         is_error_csrf=True,
                     )
 

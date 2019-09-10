@@ -181,22 +181,20 @@ If the marking is not in your template, it will be at the top of the document (b
                 useraccount = model.find_user(results['email_address'])
                 if not useraccount:
                 	# set a custom error and raise an exception to reprint
-                    formStash.set_error(field="email_address",
-                    				    message="Email not registered",
-                    				    raise_FormInvalid=True,
-                    				    )
+                    formStash.fatal_field(field="email_address",
+										  message="Email not registered",
+										  )
 
                 if not useraccount.verify_submitted_password(results['password']):
                 	# set a custom error and raise an exception to reprint
-                    formStash.set_error(field="email_address",
-                    					message="Wrong password",
-                    					raise_FormInvalid=True,
-                    					)
+                    formStash.fatal_field(field="email_address",
+										  message="Wrong password",
+										  )
 
 				do_login()
 				return HTTPFound(location='/account/home')
 
-            except formhandling.FormInvalid:
+            except formhandling.FormInvalid as exc:
                 # our reprint logic
                 return formhandling.form_reprint(self.request,
                 								 self._login_print
@@ -277,10 +275,9 @@ The form methods always render a response object via `pyramid.renderers.render_t
 					raise formhandling.FormInvalid()
 				userAccount= query_for_useraccount(formStash.results['email'])
 				if not userAccount:
-					formStash.set_error(field='email',
-										message='Invalid Login',
-										raise_FormInvalid=True,
-										)
+					formStash.fatal_field(field='email',
+										  message='Invalid Login',
+										  )
 				...
 			except formhandling.FormInvalid:
 				# you could set a field manually too
@@ -316,9 +313,7 @@ The form methods use a pyramid renderer
 				if not result:
 					raise formhandling.FormInvalid()
 				...
-			except formhandling.FormInvalid:
-				# you could set a field manually too
-				#formhandling.formerrors_set(self.request, field="field", message='missing this field')
+			except formhandling.FormInvalid as exc:
 				return formhandling.form_reprint(self.request
 												 None,
 												 render_view=self._test_print,
@@ -384,8 +379,8 @@ full python example:
                                                           **_validate_kwargs
                                                           )
             if not result:
-                raise pyramid_formencode_classic.FormInvalid("Invalid Form")
-        except pyramid_formencode_classic.FormInvalid:
+                raise pyramid_formencode_classic.FormInvalid("Custom Main Error")
+        except pyramid_formencode_classic.FormInvalid as exc:
             rendered = pyramid_formencode_classic.form_reprint(self.request,
                                                                _print_form_simple,
                                                                form_stash='b',
@@ -498,4 +493,6 @@ The new setup makes invoking error formatters for htmlfill much easier.
 
 ### v0.3.x to v0.4.x
 
+* `FormStash.set_error()` the `raise_FieldInvalid` kwarg was removed. instead, use `FormStash.fatal_field()`
+* `FormStash.set_error()` the `raise_FormInvalid` kwarg was removed. instead, use `FormStash.fatal_form()`
 

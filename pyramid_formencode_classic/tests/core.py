@@ -1821,18 +1821,6 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
     }
 
 
-"""
-
-    results = formStash.results
-    email = results['email']
-
-    formStash.set_error(field="email",
-                        message="Wrong password",
-                        raise_FormInvalid=True,
-                        )
-"""
-
-
 class TestCustomError(TestHarness, unittest.TestCase):
     """
 

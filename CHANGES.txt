@@ -6,7 +6,8 @@ debugtoolbar support!
 		* `FieldInvalid` renamed to `FormFieldInvalid`
 		* `FormFieldInvalid` inherits from `FormInvalid`
 		* `CsrfInvalid` inherits from `FormFieldInvalid`
-		* `raise_FieldInvalid` renamed to `raise_FormFieldInvalid`
+		* `raise_FormInvalid` kwarg removed from several places
+		* `raise_FieldInvalid` kwarg removed from several places
 	
 	* streamline api
 	* new : `FormStash.register_error_main_exception`
