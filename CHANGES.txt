@@ -2,21 +2,23 @@ debugtoolbar support!
 ---------------------
 
 0.4.1
-	* addressed a regression from 0.4.0 where a leading space character could appear in error printing.
-	
-0.4.0
 	backwards compatible? NO.
 		* `FieldInvalid` renamed to `FormFieldInvalid`
 		* `FormFieldInvalid` inherits from `FormInvalid`
 		* `CsrfInvalid` inherits from `FormFieldInvalid`
 		* `raise_FormInvalid` kwarg removed from several places
 		* `raise_FieldInvalid` kwarg removed from several places
+		* `error_main` kwarg renamed to `error_main_text`
 	
 	* streamline api
 	* new : `FormStash.register_error_main_exception`
 	* new : `FormStash.fatal_form()`
 	* new : `FormStash.fatal_field()`
-	* new versioning policy
+	* new : explicit versioning policy
+	* new : tracking `is_submitted_vars` on form
+	
+0.4.0
+	accidentally released to pypi. deleted; should not be used.
 
 
 0.3.1

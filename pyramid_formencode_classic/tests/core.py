@@ -164,7 +164,7 @@ class TestParsing(object):
                 (result, formStash) = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
-                    error_main="There was an error with your form.",
+                    error_main_text="There was an error with your form.",
                     **_validate_kwargs
                 )
                 if not result:
@@ -225,7 +225,7 @@ class TestParsing(object):
                 (result, formStash) = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
-                    error_main="There was an error with your form.",
+                    error_main_text="There was an error with your form.",
                     **_validate_kwargs
                 )
                 if not result:
@@ -1877,7 +1877,7 @@ class TestCustomError(TestHarness, unittest.TestCase):
                 (result, formStash) = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
-                    error_main="There was an error with your form.",
+                    error_main_text="There was an error with your form.",
                     **_validate_kwargs
                 )
                 if html_error_placeholder_template:
@@ -2001,7 +2001,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
                 self.request,
                 schema=Form_EmailUsername,
                 form_stash="a",
-                error_main="There was an error with your form.",
+                error_main_text="There was an error with your form.",
                 **_validate_kwargs
             )
             if html_error_placeholder_template:
@@ -2036,7 +2036,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
                 self.request,
                 schema=Form_EmailUsername,
                 form_stash="b",
-                error_main="There was an error with your form.",
+                error_main_text="There was an error with your form.",
                 **_validate_kwargs
             )
             if html_error_placeholder_template:
@@ -2089,7 +2089,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
                 self.request,
                 schema=Form_EmailUsername,
                 form_stash="a",
-                error_main="There was an error with your form.",
+                error_main_text="There was an error with your form.",
                 **_validate_kwargs
             )
             if html_error_placeholder_template:
@@ -2130,7 +2130,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
                 self.request,
                 schema=Form_EmailUsername,
                 form_stash="b",
-                error_main="There was an error with your form.",
+                error_main_text="There was an error with your form.",
                 **_validate_kwargs
             )
             if html_error_placeholder_template:
@@ -2310,7 +2310,7 @@ class TestParsingApi040(object):
                 (result, formStash) = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
-                    error_main="There was an error with your form.",
+                    error_main_text="There was an error with your form.",
                     **_validate_kwargs
                 )
                 if not result:
@@ -2374,7 +2374,7 @@ class TestParsingApi040(object):
                 (result, formStash) = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
-                    error_main="There was an error with your form.",
+                    error_main_text="There was an error with your form.",
                     **_validate_kwargs
                 )
                 if not result:
@@ -2440,7 +2440,7 @@ class TestParsingApi040(object):
                 (result, formStash) = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
-                    error_main="There was an error with your form.",
+                    error_main_text="There was an error with your form.",
                     **_validate_kwargs
                 )
                 if not result:
@@ -2506,7 +2506,7 @@ class TestParsingApi040(object):
                 (result, formStash) = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
-                    error_main="There was an error with your form.",
+                    error_main_text="There was an error with your form.",
                     **_validate_kwargs
                 )
                 formStash.fatal_form(message="FATAL FORM.")
@@ -2583,7 +2583,7 @@ class TestParsingApi040(object):
                 (result, formStash) = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
-                    error_main="There was an error with your form.",
+                    error_main_text="There was an error with your form.",
                     **_validate_kwargs
                 )
                 formStash.fatal_field(
@@ -2662,7 +2662,7 @@ class TestParsingApi040(object):
                 (result, formStash) = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
-                    error_main="There was an error with your form.",
+                    error_main_text="There was an error with your form.",
                     **_validate_kwargs
                 )
                 if not result:

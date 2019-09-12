@@ -35,7 +35,7 @@ def warn_user(message):
 
 
 # defaults
-__VERSION__ = "0.4.0"
+__VERSION__ = "0.4.1"
 
 DEFAULT_FORM_STASH = "_default"
 DEFAULT_ERROR_MAIN_KEY = "Error_Main"
@@ -88,6 +88,7 @@ class FormStash(object):
     is_error_csrf = None
     is_parsed = False
     is_unicode_params = False
+    is_submitted_vars = None
     schema = None
     errors = None
     results = None
@@ -465,7 +466,7 @@ def form_validate(
     dict_char=".",
     list_char="-",
     state=None,
-    error_main=DEFAULT_ERROR_MAIN_TEXT,
+    error_main_text=DEFAULT_ERROR_MAIN_TEXT,
     error_main_key=DEFAULT_ERROR_MAIN_KEY,
     error_string_key="Error_String",
     return_stash=True,
@@ -534,7 +535,7 @@ def form_validate(
     ``error_main_key`` ('Error_Main')
         If there are any errors that occur, this will be the key they are dropped into.
 
-    ``error_main`` ('There was an error with your form submittion.')
+    ``error_main_text`` ('There was an error with your form submittion.')
         If there are any errors that occur, this will drop an error in the key that corresponds to ``error_main_key``.
 
     ``error_string_key`` ('Error_String')
@@ -562,7 +563,7 @@ def form_validate(
     if form_stash_object is None:
         formStash = FormStash(
             error_main_key=error_main_key,
-            error_main_text=error_main,
+            error_main_text=error_main_text,
             name=form_stash,
             is_unicode_params=is_unicode_params,
         )
@@ -600,10 +601,13 @@ def form_validate(
 
         # if there are no params to validate against, then just stop
         if not decoded_params:
+            formStash.is_submitted_vars = False
             formStash.set_error(
                 field=formStash.error_main_key, message="Nothing submitted."
             )
             raise ValidationStop("no `decoded_params`")
+        else:
+            formStash.is_submitted_vars = True
 
         # initialize our results
         results = {}
@@ -634,9 +638,11 @@ def form_validate(
                             ", ".join([i for i in errors[_error_key] if i]) or "error"
                         )
                         errors[_error_key] = _error_condensed
-            if error_main:
+            if error_main_text:
                 # don't raise an error, because we have to stash the form
-                formStash.set_error(field=formStash.error_main_key, message=error_main)
+                formStash.set_error(
+                    field=formStash.error_main_key, message=error_main_text
+                )
         else:
             if csrf_token is not None:
                 if request.params.get(csrf_name) != csrf_token:
@@ -646,6 +652,7 @@ def form_validate(
                         message=formStash.csrf_error_string,
                         is_error_csrf=True,
                     )
+                    formStash.is_error_csrf = True
 
     except ValidationStop as e:
         if __debug__:
