@@ -495,6 +495,36 @@ The recommended usage is to pin versioning within the `Major.Minor` range:
 	pyramid_formencode_classic >=0.4.0, <0.5.0
             
 
+### Why doesn't form_validate` raise an Exception by default?
+
+This design choice was made to allow for scoping within Pyramid apps:
+
+	try:
+		(result,
+		 formStash
+		 ) = form_validate(...)
+		if not result:
+			raise FormInvalid()
+		# do stuff
+
+	except FormInvalid as exc:
+		# formStash is scoped here
+
+An alternative would be something like this...
+
+	try:
+		formStash = form_validate(..., form_stash='FormId')
+		# do stuff
+
+	except FormInvalid as exc:
+		formStash = request.pyramid_formencode_classic['FormId']
+
+The latter situation can be easily accomplished by defining a custom `form_validate` function
+		
+
+
+
+
 ## Migration Guide
 
 ### v0.1.x to v0.2.0
@@ -518,4 +548,6 @@ The new setup makes invoking error formatters for htmlfill much easier.
 
 * `FormStash.set_error()` the `raise_FieldInvalid` kwarg was removed. instead, use `FormStash.fatal_field()`
 * `FormStash.set_error()` the `raise_FormInvalid` kwarg was removed. instead, use `FormStash.fatal_form()`
+* import formatters from `pyramid_formencode_classic.formatters` not the main namespace
+
 

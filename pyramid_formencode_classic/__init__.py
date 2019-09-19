@@ -262,37 +262,35 @@ class FormStash(object):
         if field is None:
             field = self.error_main_key
 
-        if message is None:
-            if field in self.errors:
-                del self.errors[field]
-        else:
-            if message_append and message_prepend:
-                raise ValueError(
-                    "You can not set both `message_append` `message_prepend`"
-                )
+        if not message:  # None or ''
+            raise ValueError("use `clear_error`")
 
-            if message_append or message_prepend:
-                _message_existing = self.errors[field] if (field in self.errors) else ""
-                if _message_existing != message:  # don't duplicate the error
-                    _message_existing = [_message_existing] if _message_existing else []
-                    if message_append and message:
-                        _message_existing.append(message)
-                    elif message_prepend and message:
-                        _message_existing.insert(0, message)
-                    message = " ".join(_message_existing)
+        if message_append and message_prepend:
+            raise ValueError("You can not set both `message_append` `message_prepend`")
+        if message_append or message_prepend:
+            _message_existing = self.errors[field] if (field in self.errors) else ""
+            if not _message_existing and (field == self.error_main_key):
+                _message_existing = self.error_main_text
 
-            self.errors[field] = message
+            if _message_existing != message:  # don't duplicate the error
+                _message_existing = [_message_existing] if _message_existing else []
+                if message_append and message:
+                    _message_existing.append(message)
+                elif message_prepend and message:
+                    _message_existing.insert(0, message)
+                message = " ".join(_message_existing)
 
-            if is_error_csrf:
-                self.is_error_csrf = True
+        self.errors[field] = message
 
-        if self.errors:
-            # mark the form as invalid
-            self.is_error = True
+        # mark the form as invalid
+        self.is_error = True
 
-            # set the main error
-            if self.error_main_key not in self.errors:
-                self.errors[self.error_main_key] = self.error_main_text
+        # set the main error if needed
+        if self.error_main_key not in self.errors:
+            self.errors[self.error_main_key] = self.error_main_text
+
+        if is_error_csrf:
+            self.is_error_csrf = True
 
     def clear_error(self, field=None):
         """clear the dict of errors"""
@@ -317,6 +315,9 @@ class FormStash(object):
             _kwargs["message_append"] = message_append
         if message_prepend is not None:
             _kwargs["message_prepend"] = message_prepend
+        # default to the error_main_text
+        if message is None:
+            message = self.error_main_text
         self.set_error(field=self.error_main_key, message=message, **_kwargs)
         self._raise_unique_FormInvalid()
 
@@ -345,6 +346,10 @@ class FormStash(object):
             There was an error with your form.  We encountered a `CaughtError`
 
         """
+        if field is None:
+            raise ValueError("`field` must be submitted")
+        if message is None:
+            raise ValueError("`message` must be submitted")
         _kwargs = {}
         if message_append is not None:
             _kwargs["message_append"] = message_append
