@@ -13,7 +13,7 @@ import formencode.htmlfill
 from pyramid.response import Response as PyramidResponse
 from pyramid.renderers import render as pyramid_render
 import six
-
+import webob.compat
 
 # local
 from .exceptions import FormInvalid, FormFieldInvalid, ValidationStop
@@ -35,13 +35,14 @@ def warn_user(message):
 
 
 # defaults
-__VERSION__ = "0.4.1"
+__VERSION__ = "0.4.2"
 
 DEFAULT_FORM_STASH = "_default"
 DEFAULT_ERROR_MAIN_KEY = "Error_Main"
 DEFAULT_ERROR_MAIN_TEXT = "There was an error with your form submission."
 
 DEPRECATION_WARNING = False
+AUTOMATIC_CLEANUP = True
 
 
 def determine_response_charset(response):
@@ -792,12 +793,28 @@ def form_reprint(
     return response
 
 
+def _form_cleanup(request):
+    """
+    make sure we close all fieldstorage objects
+    """
+    for _form in set(request.pyramid_formencode_classic.values()):
+        for (k, v) in list(_form.results.items()):
+            try:
+                # don't compare to Boolean, as some Form objects can't handle that
+                if isinstance(v, webob.compat.cgi_FieldStorage):
+                    v.fp.close()
+            except Exception as exc:
+                pass
+
+
 def _new_request_FormStashList(request):
     """
     This is a modern version of `init_request` from the .1 branch
     It is a memoized property via the pyramid `includeme` configuration hook
     This merely creates a new FormStashList object
     """
+    if AUTOMATIC_CLEANUP:
+        request.add_finished_callback(_form_cleanup)
     return FormStashList()
 
 

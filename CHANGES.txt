@@ -1,6 +1,10 @@
 debugtoolbar support!
 ---------------------
 
+0.4.2
+	integrated pyramid's `add_finished_callback` to cleanup fieldstorage objects.
+	This can be toggled off by setting `pyramid_formencode_classic.AUTOMATIC_CLEANUP = False` before including the file into pyramid
+
 0.4.1
 	backwards compatible? NO.
 		* `FieldInvalid` renamed to `FormFieldInvalid`
@@ -10,7 +14,6 @@ debugtoolbar support!
 		* `raise_FieldInvalid` kwarg removed from several places
 		* `error_main` kwarg renamed to `error_main_text`
 		* `set_error` submitting no message will now raise a ValueError exception; use `clear_error` to remove errors
-		
 	
 	* streamline api
 	* new : `FormStash.register_error_main_exception`
@@ -19,6 +22,8 @@ debugtoolbar support!
 	* new : explicit versioning policy
 	* new : tracking `is_submitted_vars` on form
 	* `formatters.*` no longer imported into main namespace
+	
+	added `pyproject.toml`
 	
 0.4.0
 	accidentally released to pypi. deleted; should not be used.

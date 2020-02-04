@@ -1,6 +1,6 @@
 ## Current Recommended Version
 
-`v 0.4.1 (2019.09.10)`
+`v 0.4.2 (2020.02.04)`
 
 New Features:
 
