@@ -1,3 +1,7 @@
+unreleased
+	* upgraded black; 20.8b1
+	* integrated with pre-commit
+
 debugtoolbar support!
 ---------------------
 

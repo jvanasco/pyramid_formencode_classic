@@ -420,18 +420,15 @@ class FormStash(object):
         csrf_token="",
         htmlfill_ignore=True,
     ):
-        return (
-            """<input id="%(id)s" type="%(type)s" name="%(name)s" value="%(csrf_token)s"%(htmlfill_ignore)s/>"""
-            % {
-                "id": id,
-                "name": name,
-                "type": type,
-                "csrf_token": csrf_token,
-                "htmlfill_ignore": " data-formencode-ignore='1' "
-                if htmlfill_ignore
-                else "",
-            }
-        )
+        return """<input id="%(id)s" type="%(type)s" name="%(name)s" value="%(csrf_token)s"%(htmlfill_ignore)s/>""" % {
+            "id": id,
+            "name": name,
+            "type": type,
+            "csrf_token": csrf_token,
+            "htmlfill_ignore": " data-formencode-ignore='1' "
+            if htmlfill_ignore
+            else "",
+        }
 
 
 class FormStashList(dict):
@@ -691,17 +688,17 @@ def form_reprint(
     **htmlfill_kwargs
 ):
     """reprint a form
-        args:
-        ``request`` -- request instance
-        ``form_print_method`` -- bound method to execute
-        kwargs:
-        ``frorm_stash`` (pyramid_formencode_classic.DEFAULT_FORM_STASH = _default) -- specify a stash
-        ``auto_error_formatter`` (formatter_nobr) -- specify a formatter for rendering errors
-            this is an htmlfill_kwargs, but we default to one without a br
-        ``error_formatters`` (default None) is a dict of error formatters to be passed into htmlfill.
-            in order to ensure compatibilty, this dict will be merged with a copy of the htmlfill defaults,
-            allowing you to override them or add extras.
-        `**htmlfill_kwargs` -- passed on to htmlfill
+    args:
+    ``request`` -- request instance
+    ``form_print_method`` -- bound method to execute
+    kwargs:
+    ``frorm_stash`` (pyramid_formencode_classic.DEFAULT_FORM_STASH = _default) -- specify a stash
+    ``auto_error_formatter`` (formatter_nobr) -- specify a formatter for rendering errors
+        this is an htmlfill_kwargs, but we default to one without a br
+    ``error_formatters`` (default None) is a dict of error formatters to be passed into htmlfill.
+        in order to ensure compatibilty, this dict will be merged with a copy of the htmlfill defaults,
+        allowing you to override them or add extras.
+    `**htmlfill_kwargs` -- passed on to htmlfill
     """
     if __debug__:
         log.debug("form_reprint - starting...")

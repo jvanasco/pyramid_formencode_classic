@@ -8,8 +8,7 @@ _ = lambda x: x
 
 
 class FormencodeClassicDebugPanel(DebugPanel):
-    """
-    """
+    """"""
 
     name = "FormencodeClassic"
     has_content = None

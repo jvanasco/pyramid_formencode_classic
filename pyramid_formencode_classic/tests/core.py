@@ -75,8 +75,8 @@ class TestHarness(object):
         self.request = DummyRequest()
 
         # copy the item over...
-        self.request.pyramid_formencode_classic = pyramid_formencode_classic._new_request_FormStashList(
-            self.request
+        self.request.pyramid_formencode_classic = (
+            pyramid_formencode_classic._new_request_FormStashList(self.request)
         )
 
     def tearDown(self):
