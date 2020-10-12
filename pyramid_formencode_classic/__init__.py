@@ -3,7 +3,6 @@ import logging
 log = logging.getLogger(__name__)
 
 # stdlib
-# import pdb
 import sys
 
 
@@ -11,6 +10,7 @@ import sys
 import formencode
 import formencode.htmlfill
 from pyramid.response import Response as PyramidResponse
+from pyramid.interfaces import IResponse
 from pyramid.renderers import render as pyramid_render
 import six
 import webob.compat
@@ -35,7 +35,7 @@ def warn_user(message):
 
 
 # defaults
-__VERSION__ = "0.4.2"
+__VERSION__ = "0.4.3"
 
 DEFAULT_FORM_STASH = "_default"
 DEFAULT_ERROR_MAIN_KEY = "Error_Main"
@@ -102,9 +102,18 @@ class FormStash(object):
         '<form:error name="%(field)s" data-formencode-form="%(form)s"/>'
     )
     html_error_template = """<span class="help-inline">%(error)s</span>"""
-    html_error_main_template = """<div class="alert alert-error"><div class="control-group error"><span class="help-inline"><i class="icon-exclamation-sign"></i> %(error)s</span></div></div>"""
+    html_error_main_template = (
+        """<div class="alert alert-error">"""
+        """<div class="control-group error">"""
+        """<span class="help-inline"> <i class="icon-exclamation-sign"></i> %(error)s</span>"""
+        """</div></div>"""
+    )
 
-    csrf_error_string = """We're worried about the security of your form submission. Please reload this page and try again. It would be best to highlight the URL in your web-browser and hit 'return'."""
+    csrf_error_string = (
+        """We're worried about the security of your form submission. """
+        """Please reload this page and try again. """
+        """It would be best to highlight the URL in your web-browser and hit 'return'."""
+    )
     csrf_error_field = csrf_error_section = "Error_Main"
 
     _reprints = None  # internal use for debugging
@@ -143,7 +152,9 @@ class FormStash(object):
 
     def set_html_error_placeholder_form_template(self, template):
         """
-        sets the html error template field for the form when data-formencode-form is needed
+        sets the html error template field for the form when data-formencode-form
+        is needed
+
         for example:
             <form:error name="%(field)s" data-formencode-form="%(form)s"/>
         """
@@ -154,11 +165,13 @@ class FormStash(object):
         self.html_error_template = template
 
     def set_html_error_main_template(self, template):
-        """sets the html error template MAIN field for the form.  useful for alerting the entire form is bad."""
+        """sets the html error template MAIN field for the form.
+        useful for alerting the entire form is bad."""
         self.html_error_main_template = template
 
     def has_error(self, field):
-        """Returns True or False if there is an error in `field`.  Does not return the value of the error field, because the value could be False."""
+        """Returns True or False if there is an error in `field`.
+        Does not return the value of the error field, because the value could be False."""
         if field in self.errors:
             return True
         return False
@@ -170,7 +183,9 @@ class FormStash(object):
         return False
 
     def css_error(self, field, css_error=""):
-        """Returns the css class if there is an error.  returns '' if there is not.  The default css_error is 'error' and can be set with `set_css_error`.  You can also overwrite with a `css_error` kwarg."""
+        """Returns the css class if there is an error.  returns '' if there is not.
+        The default css_error is 'error' and can be set with `set_css_error`.
+        You can also overwrite with a `css_error` kwarg."""
         if field in self.errors:
             if css_error:
                 return css_error
@@ -178,7 +193,8 @@ class FormStash(object):
         return ""
 
     def html_error(self, field, template=None):
-        """Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`"""
+        """Returns an HTML error formatted by a string template.
+        Currently only provides for `%(error)s`"""
         if self.has_error(field):
             if template is None:
                 template = self.html_error_template
@@ -218,7 +234,8 @@ class FormStash(object):
 
     def render_html_error_main(self, field=None, template=None):
         """
-        Returns an HTML error formatted by a string template.  currently only provides for `%(error)s`
+        Returns an HTML error formatted by a string template.
+        currently only provides for `%(error)s`
         This was previously `html_error_main` in the 0.1 branch
         """
         error = None
@@ -255,8 +272,10 @@ class FormStash(object):
 
         `field`: the field in the form
         `message`: your error message
-        `message_append`: default `False`. If `True`, will append the `message` argument to any existing argument in this `field`
-        `message_prepend`: default `False`. If `True`, will prepend the `message` argument to any existing argument in this `field`
+        `message_append`: default `False`.
+                          If `True`, will append the `message` argument to any existing argument in this `field`
+        `message_prepend`: default `False`.
+                           If `True`, will prepend the `message` argument to any existing argument in this `field`
 
         ``meessage_append` and ``message_prepend``` allow you to elegantly combine errors
         """
@@ -488,12 +507,13 @@ def form_validate(
 
     Given a form schema, validate will attempt to validate the schema
 
-    If validation was successful, the valid result dict will be saved as ``request.formResult.results``.
+    If validation was successful, the valid result dict will be saved as
+    ``request.formResult.results``.
 
     .. warnings::
-            ``validate_post`` and ``validate_get`` applies to *where* the arguments to be
-            validated come from. It does *not* restrict the form to
-            only working with post, merely only checking POST vars.
+            ``validate_post`` and ``validate_get`` applies to *where* the
+            arguments to be validated come from. It does *not* restrict the form
+            to only working with post, merely only checking POST vars.
 
             ``validate_params`` will exclude get and post data
 
@@ -539,13 +559,16 @@ def form_validate(
         If there are any errors that occur, this will be the key they are dropped into.
 
     ``error_main_text`` ('There was an error with your form submittion.')
-        If there are any errors that occur, this will drop an error in the key that corresponds to ``error_main_key``.
+        If there are any errors that occur, this will drop an error in the key that
+        corresponds to ``error_main_key``.
 
     ``error_string_key`` ('Error_String')
-        If there are is a string-based error that occurs, this will be the key they are dropped into.
+        If there are is a string-based error that occurs, this will be the key they are
+        dropped into.
 
     ``return_stash`` (True)
-        When set to True, returns a tuple of the status and the wrapped stash.  Otherwise just returns the status, and a separate call is needed to get the Stash.
+        When set to True, returns a tuple of the status and the wrapped stash.
+        Otherwise just returns the status, and a separate call is needed to get the Stash.
         As True:
             (status, stash)= form_validate()
         else:
@@ -556,7 +579,8 @@ def form_validate(
 
 
     ``foreach_defense`` (True)
-        Implementing `ForEach` in FormEncode (such as dealing with checkboxes) can generate a LIST of errors instead of a single error.
+        Implementing `ForEach` in FormEncode (such as dealing with checkboxes) can
+        generate a LIST of errors instead of a single error.
         When `True`, this is detected and consolidated into a single error.
 
     """
@@ -693,11 +717,11 @@ def form_reprint(
     ``form_print_method`` -- bound method to execute
     kwargs:
     ``frorm_stash`` (pyramid_formencode_classic.DEFAULT_FORM_STASH = _default) -- specify a stash
-    ``auto_error_formatter`` (formatter_nobr) -- specify a formatter for rendering errors
-        this is an htmlfill_kwargs, but we default to one without a br
-    ``error_formatters`` (default None) is a dict of error formatters to be passed into htmlfill.
-        in order to ensure compatibilty, this dict will be merged with a copy of the htmlfill defaults,
-        allowing you to override them or add extras.
+    ``auto_error_formatter`` (formatter_nobr) -- specify a formatter for rendering
+        errors this is an htmlfill_kwargs, but we default to one without a br
+    ``error_formatters`` (default None) is a dict of error formatters to be passed into
+        htmlfill. in order to ensure compatibilty, this dict will be merged with a copy
+        of the htmlfill defaults, allowing you to override them or add extras.
     `**htmlfill_kwargs` -- passed on to htmlfill
     """
     if __debug__:
@@ -712,6 +736,14 @@ def form_reprint(
         )
     else:
         raise ValueError("invalid args submitted")
+
+    # if not isinstance(response, PyramidResponse):
+    if not IResponse.providedBy(response):
+        raise ValueError(
+            "`form_reprint` must be invoked with functions which generate "
+            "a `Pyramid.response.Response` or provides the interface "
+            "`pyramid.interfaces.IResponse`."
+        )
 
     # If the form_content is an exception response, return it
     # potential ways to check:
@@ -742,7 +774,8 @@ def form_reprint(
     if not formStash.is_unicode_params:
         if __debug__:
             log.debug(
-                "Raw string form params: ensuring the '%s' form and FormEncode errors are converted to raw strings for htmlfill",
+                "Raw string form params: ensuring the '%s' form and FormEncode errors "
+                "are converted to raw strings for htmlfill",
                 form_print_method,
             )
         encoding = determine_response_charset(response)
@@ -759,7 +792,8 @@ def form_reprint(
     elif not isinstance(form_content, six.text_type):  # PY2=unicode()
         if __debug__:
             log.debug(
-                "Unicode form params: ensuring the '%s' form is converted to unicode for htmlfill",
+                "Unicode form params: ensuring the '%s' form is converted to unicode "
+                "for htmlfill",
                 formStash,
             )
         # py3 - test
@@ -784,8 +818,6 @@ def form_reprint(
         auto_error_formatter=auto_error_formatter,
         **_htmlfill_kwargs
     )
-    # import pdb
-    # pdb.set_trace()
     response.text = form_content
     return response
 

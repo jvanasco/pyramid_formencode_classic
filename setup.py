@@ -18,7 +18,7 @@ with open(
 
 requires = [
     "pyramid",
-    "formencode @ git+ssh://git@github.com/jvanasco/formencode@v1.1#8401bc9440ce743063c1e66cfc7811bf129042b0=formencode",
+    "formencode>=2.0.0",
     "six",
 ]
 setup(

@@ -1,5 +1,9 @@
 ## Current Recommended Version
 
+`v 0.4.3 (2020.10.12)`
+
+Python3 via pypi formencode (no longer requires forks)
+
 `v 0.4.2 (2020.02.04)`
 
 New Features:
@@ -9,16 +13,6 @@ New Features:
 * python3 support
 * pyramid debugtoolbar support
 * automatic handling of edge cases with ForEach validator errors
-
-
-## Python3 Incompatibilty
-
-This package relies on Formencode. Formencode has some issues running under Python3.
-
-You will need to run a custom version of Formencode until that project updates the release or the project is forked
-
-       https://github.com/jvanasco/formencode/tree/fix-python3
-       pip install -e git://github.com/jvanasco/formencode@8401bc9440ce743063c1e66cfc7811bf129042b0#egg=formencode
 
 
 ### Backwards Compatible?

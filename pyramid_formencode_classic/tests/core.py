@@ -3348,4 +3348,95 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
     }
 
 
+class TestRenderJson(TestHarness, unittest.TestCase):
+    """
+    python -munittest pyramid_formencode_classic.tests.core.TestRenderJson
+    """
+
+    template = "fixtures/form_a-html_error_placeholder-default.mako"
+    rendered = """<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">There was an error with your form.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+"""
+
+    def test_submit(self):
+
+        # set the submit
+        self.request.POST["submit"] = "submit"
+
+        _template = self.template
+        _rendered = self.rendered
+        _reprint_kwargs = {}
+        _validate_kwargs = {}
+
+        def _print_form__valid():
+            rendered = render_to_response(self.template, {"request": self.request})
+            return rendered
+
+        def _print_form__fail():
+            unrendered = {"request": self.request}
+            return unrendered
+
+        # first print this RIGHT
+        try:
+            (result, formStash) = pyramid_formencode_classic.form_validate(
+                self.request,
+                schema=Form_EmailUsername,
+                error_main_text="There was an error with your form.",
+                **_validate_kwargs
+            )
+            if not result:
+                raise pyramid_formencode_classic.FormInvalid()
+
+            raise ValueError(
+                "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
+            )
+
+        except pyramid_formencode_classic.FormInvalid as exc:
+            formStash.register_error_main_exception(exc)
+            rendered = pyramid_formencode_classic.form_reprint(
+                self.request, _print_form__valid, **_reprint_kwargs
+            )
+            assert rendered.text == _rendered
+
+        # then print this WRONG
+        try:
+            (result, formStash) = pyramid_formencode_classic.form_validate(
+                self.request,
+                schema=Form_EmailUsername,
+                error_main_text="There was an error with your form.",
+                **_validate_kwargs
+            )
+            if not result:
+                raise pyramid_formencode_classic.FormInvalid()
+
+            raise ValueError(
+                "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
+            )
+
+        except pyramid_formencode_classic.FormInvalid as exc:
+            formStash.register_error_main_exception(exc)
+            try:
+                rendered = pyramid_formencode_classic.form_reprint(
+                    self.request, _print_form__fail, **_reprint_kwargs
+                )
+                raise ValueError("`form_reprint` should have raised a `ValueError`")
+            except ValueError as exc:
+                print(exc.args[0])
+                assert (
+                    exc.args[0]
+                    == """`form_reprint` must be invoked with functions which generate a `Pyramid.response.Response` or provides the interface `pyramid.interfaces.IResponse`."""
+                )
+
+
 # TODO: test clear/errors with error main

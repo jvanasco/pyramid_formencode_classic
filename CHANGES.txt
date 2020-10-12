@@ -1,9 +1,8 @@
-unreleased
+0.4.3
 	* upgraded black; 20.8b1
 	* integrated with pre-commit
-
-debugtoolbar support!
----------------------
+	* upgraded to formencode 2.0.0, which is Python3 compatible!
+	* debugtoolbar support!
 
 0.4.2
 	integrated pyramid's `add_finished_callback` to cleanup fieldstorage objects.
