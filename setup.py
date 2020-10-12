@@ -21,19 +21,24 @@ requires = [
     "formencode>=2.0.0",
     "six",
 ]
+tests_require = [
+    "webob",
+]
+
 setup(
     name="pyramid_formencode_classic",
     author="Jonathan Vanasco",
     author_email="jonathan@findmeon.com",
     version=VERSION,
     url="https://github.com/jvanasco/pyramid_formencode_classic",
-    description="an implementation of the classic pylons formencode validation, for pyramid",
-    long_description="an implementation of the classic pylons formencode validation, for pyramid",
+    description="An implementation of the classic Pylons formencode validation, for Pyramid",
+    long_description="An implementation of the classic Pylons formencode validation, for Pyramid",
     license="BSD",
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
+    tests_require=tests_require,
     test_suite="pyramid_formencode_classic.tests",
     classifiers=[
         "Intended Audience :: Developers",

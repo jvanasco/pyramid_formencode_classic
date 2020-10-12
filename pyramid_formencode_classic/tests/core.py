@@ -7,26 +7,18 @@ whitespace in the this file IS SIGNIFICANT AND IMPORTANT.
 the test-cases check for specific whitespace
 """
 
-
 import pyramid_formencode_classic
-import formencode
 from pyramid_formencode_classic import formatters
 
-# core testing facility
+# stdblib
 import unittest
-import pdb
 
-# pyramid testing requirements
+# pypi
+import formencode
 from pyramid import testing
-
-# from pyramid.renderers import render
 from pyramid.renderers import render_to_response
 from pyramid.interfaces import IRequestExtensions
-
-
-# testing needs
 from webob.multidict import MultiDict
-
 
 DEBUG_PRINT = True
 
