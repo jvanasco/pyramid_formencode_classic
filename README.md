@@ -1,3 +1,5 @@
+![Python package](https://github.com/jvanasco/pyramid_formencode_classic/workflows/Python%20package/badge.svg)
+
 ## Current Recommended Version
 
 `v 0.4.3 (2020.10.12)`
