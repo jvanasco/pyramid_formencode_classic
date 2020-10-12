@@ -22,6 +22,8 @@ requires = [
     "six",
 ]
 tests_require = [
+    "pyramid_mako",
+    "pytest",
     "webob",
 ]
 
