@@ -21,7 +21,7 @@ requires = [
     "formencode>=2.0.0",
     "six",
 ]
-tests_require = [
+tests_require = requires + [
     "pyramid_mako",
     "pytest",
     "webob",
