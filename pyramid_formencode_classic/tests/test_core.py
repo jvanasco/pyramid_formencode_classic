@@ -12,6 +12,7 @@ from pyramid_formencode_classic import formatters
 
 # stdblib
 import unittest
+import pytest
 
 # pypi
 import formencode
@@ -53,7 +54,7 @@ class DummyRequest(testing.DummyRequest):
         self.POST = MultiDict()
 
 
-class TestHarness(object):
+class _TestHarness(object):
     def setUp(self):
         self.config = testing.setUp()
         self.config.include("pyramid_formencode_classic")
@@ -75,7 +76,7 @@ class TestHarness(object):
         testing.tearDown()
 
 
-class TestRenderSimple(object):
+class _TestRenderSimple(object):
     """
     mixin class
     subclass and define a dict of test/values
@@ -108,7 +109,7 @@ class TestRenderSimple(object):
             raise
 
 
-class TestParsing(object):
+class _TestParsing(object):
     """
     mixin class
     subclass and define a dict of test/values
@@ -247,7 +248,7 @@ class TestParsing(object):
             raise ValueError(tests_fail)
 
 
-class TestSetup(TestHarness, unittest.TestCase):
+class TestSetup(_TestHarness, unittest.TestCase):
     def test_pyramid_setup(self):
         """test the request property worked"""
         exts = self.config.registry.getUtility(IRequestExtensions)
@@ -255,7 +256,7 @@ class TestSetup(TestHarness, unittest.TestCase):
 
 
 class TestRenderSimple_FormA_HtmlErrorPlaceholder_Alt(
-    TestRenderSimple, TestHarness, unittest.TestCase
+    _TestRenderSimple, _TestHarness, unittest.TestCase
 ):
     template = "fixtures/form_a-html_error_placeholder-alt.mako"
 
@@ -274,7 +275,7 @@ class TestRenderSimple_FormA_HtmlErrorPlaceholder_Alt(
 
 
 class TestRenderSimple_FormA_HtmlErrorPlaceholder_Explicit(
-    TestRenderSimple, TestHarness, unittest.TestCase
+    _TestRenderSimple, _TestHarness, unittest.TestCase
 ):
     template = "fixtures/form_a-html_error_placeholder-explicit.mako"
 
@@ -293,7 +294,7 @@ class TestRenderSimple_FormA_HtmlErrorPlaceholder_Explicit(
 
 
 class TestRenderSimple_FormA_HtmlErrorPlaceholder_Default(
-    TestRenderSimple, TestHarness, unittest.TestCase
+    _TestRenderSimple, _TestHarness, unittest.TestCase
 ):
     template = "fixtures/form_a-html_error_placeholder-default.mako"
 
@@ -312,7 +313,7 @@ class TestRenderSimple_FormA_HtmlErrorPlaceholder_Default(
 
 
 class TestRenderSimple_FormA_ErrorPlaceholder_None(
-    TestRenderSimple, TestHarness, unittest.TestCase
+    _TestRenderSimple, _TestHarness, unittest.TestCase
 ):
     template = "fixtures/form_a-html_error_placeholder-none.mako"
 
@@ -330,7 +331,7 @@ class TestRenderSimple_FormA_ErrorPlaceholder_None(
 
 
 class TestParsing_FormA_HtmlErrorPlaceholder_Default(
-    TestParsing, TestHarness, unittest.TestCase
+    _TestParsing, _TestHarness, unittest.TestCase
 ):
     template = "fixtures/form_a-html_error_placeholder-default.mako"
 
@@ -570,8 +571,8 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Default(
 
 class TestParsing_FormA_HtmlErrorPlaceholder_Explicit(
     TestParsing_FormA_HtmlErrorPlaceholder_Default,
-    TestParsing,
-    TestHarness,
+    _TestParsing,
+    _TestHarness,
     unittest.TestCase,
 ):
     """
@@ -583,7 +584,7 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Explicit(
 
 
 class TestParsing_FormA_ErrorPlaceholder_None(
-    TestParsing, TestHarness, unittest.TestCase
+    _TestParsing, _TestHarness, unittest.TestCase
 ):
     """
     Tests:
@@ -822,7 +823,7 @@ class TestParsing_FormA_ErrorPlaceholder_None(
 
 
 class TestParsing_FormA_HtmlErrorPlaceholder_Alt(
-    TestParsing, TestHarness, unittest.TestCase
+    _TestParsing, _TestHarness, unittest.TestCase
 ):
     """
     this behaves slightly differently than TestParsing_FormA_HtmlErrorPlaceholder_Explicit
@@ -1066,7 +1067,7 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Alt(
 
 
 class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt(
-    TestParsing, TestHarness, unittest.TestCase
+    _TestParsing, _TestHarness, unittest.TestCase
 ):
     """
     this behaves slightly differently than TestParsing_FormA_HtmlErrorPlaceholder_Alt
@@ -1315,7 +1316,7 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt(
 
 
 class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Default(
-    TestParsing, TestHarness, unittest.TestCase
+    _TestParsing, _TestHarness, unittest.TestCase
 ):
     template = "fixtures/form_a-html_error_placeholder-default.mako"
 
@@ -1559,7 +1560,7 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Default(
 
 
 class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
-    TestParsing, TestHarness, unittest.TestCase
+    _TestParsing, _TestHarness, unittest.TestCase
 ):
     """
     Tests:
@@ -1813,7 +1814,7 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
     }
 
 
-class TestCustomError(TestHarness, unittest.TestCase):
+class TestCustomError(_TestHarness, unittest.TestCase):
     """
 
     python -munittest pyramid_formencode_classic.tests.core.TestCustomError
@@ -1947,7 +1948,7 @@ class TestCustomError(TestHarness, unittest.TestCase):
     }
 
 
-class TestMultiForm(TestHarness, unittest.TestCase):
+class TestMultiForm(_TestHarness, unittest.TestCase):
     """
 
     python -munittest pyramid_formencode_classic.tests.core.TestMultiForm
@@ -2254,7 +2255,7 @@ class TestMultiForm(TestHarness, unittest.TestCase):
     }
 
 
-class TestParsingApi040(object):
+class _TestParsingApi040(object):
     """
 
     python -munittest pyramid_formencode_classic.tests.core.TestParsingApi040_FormA_HtmlErrorPlaceholder_Default
@@ -2688,7 +2689,7 @@ class TestParsingApi040(object):
 
 
 class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
-    TestParsingApi040, TestHarness, unittest.TestCase
+    _TestParsingApi040, _TestHarness, unittest.TestCase
 ):
     template = "fixtures/form_a-html_error_placeholder-default.mako"
 
@@ -3340,7 +3341,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
     }
 
 
-class TestRenderJson(TestHarness, unittest.TestCase):
+class TestRenderJson(_TestHarness, unittest.TestCase):
     """
     python -munittest pyramid_formencode_classic.tests.core.TestRenderJson
     """
