@@ -21,10 +21,12 @@ requires = [
     "formencode>=2.0.0",
     "six",
 ]
-tests_require = requires + [
+tests_require = [
     "pyramid_mako",
-    "pytest",
     "webob",
+]
+testing_extras = [
+    "pytest",
 ]
 
 setup(
@@ -41,6 +43,9 @@ setup(
     zip_safe=False,
     install_requires=requires,
     tests_require=tests_require,
+    extras_require={
+        "testing": testing_extras,
+    },
     test_suite="pyramid_formencode_classic.tests",
     classifiers=[
         "Intended Audience :: Developers",
