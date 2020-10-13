@@ -25,7 +25,7 @@ tests_require = [
     "pyramid_mako",
     "webob",
 ]
-testing_extras = [
+testing_extras = tests_require + [
     "pytest",
 ]
 
