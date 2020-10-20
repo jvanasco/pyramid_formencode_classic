@@ -2,6 +2,10 @@
 
 ## Current Recommended Version
 
+`v 0.4.4 (2020.10.20)`
+
+Packaging fix
+
 `v 0.4.3 (2020.10.12)`
 
 Python3 via pypi formencode (no longer requires forks)

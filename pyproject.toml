@@ -3,4 +3,3 @@ requires = ["setuptools",]
 
 [tool.black]
 target-version = ['py27', 'py38']
-
