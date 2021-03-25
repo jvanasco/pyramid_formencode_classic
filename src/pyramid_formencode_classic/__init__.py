@@ -35,7 +35,7 @@ def warn_user(message):
 
 
 # defaults
-__VERSION__ = "0.4.4"
+__VERSION__ = "0.4.5"
 
 DEFAULT_FORM_STASH = "_default"
 DEFAULT_ERROR_MAIN_KEY = "Error_Main"

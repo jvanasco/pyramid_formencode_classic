@@ -1,4 +1,7 @@
-0.4.3
+0.4.5
+	* packaging fixes
+
+0.4.4
 	* upgraded black; 20.8b1
 	* integrated with pre-commit
 	* upgraded to formencode 2.0.0, which is Python3 compatible!

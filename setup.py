@@ -15,7 +15,9 @@ with open(os.path.join(HERE, "README.md")) as r_file:
     long_description = r_file.read()
 
 # store version in the init.py
-with open(os.path.join(HERE, "pyramid_formencode_classic", "__init__.py")) as v_file:
+with open(
+    os.path.join(HERE, "src", "pyramid_formencode_classic", "__init__.py")
+) as v_file:
     VERSION = (
         re.compile(r'''.*__VERSION__ = "(.*?)"''', re.S).match(v_file.read()).group(1)
     )
@@ -44,7 +46,10 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="BSD",
-    packages=find_packages(),
+    packages=find_packages(
+        where="src",
+    ),
+    package_dir={"": "src"},
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
@@ -52,7 +57,7 @@ setup(
     extras_require={
         "testing": testing_extras,
     },
-    test_suite="pyramid_formencode_classic.tests",
+    test_suite="tests",
     classifiers=[
         "Intended Audience :: Developers",
         "Framework :: Pyramid",
