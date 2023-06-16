@@ -26,9 +26,9 @@ with open(
 requires = [
     "pyramid",
     "formencode>=2.0.0",
-    "six",
 ]
 tests_require = [
+    "mypy",
     "pyramid_mako",
     "webob",
 ]
@@ -50,6 +50,7 @@ setup(
         where="src",
     ),
     package_dir={"": "src"},
+    package_data={"pyramid_formencode_classic": ["py.typed"]},
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
@@ -62,8 +63,13 @@ setup(
         "Intended Audience :: Developers",
         "Framework :: Pyramid",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "License :: OSI Approved :: BSD License",
     ],
 )
