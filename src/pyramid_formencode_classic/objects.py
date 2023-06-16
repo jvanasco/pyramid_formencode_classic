@@ -36,9 +36,12 @@ class FormStash(object):
     errors: Dict
     results: Dict
     defaults: Dict
+
+    # protected vars; use @property to access
     _css_error: str = "error"
-    error_main_key = "Error_Main"
-    error_main_text = None
+    _error_main_key: str = "Error_Main"
+    _error_main_text: Optional[str] = None
+
     html_error_placeholder_template: str = '<form:error name="%s"/>'
     html_error_placeholder_form_template: str = (
         '<form:error name="%(field)s" data-formencode-form="%(form)s"/>'
@@ -72,13 +75,21 @@ class FormStash(object):
         self.results = {}
         self.defaults = {}
         if error_main_key:
-            self.error_main_key = error_main_key
+            self._error_main_key = error_main_key
         if error_main_text:
-            self.error_main_text = error_main_text
+            self._error_main_text = error_main_text
         if name:
             self.name = name
         self.is_unicode_params = is_unicode_params
         self._reprints = []
+
+    @property
+    def error_main_key(self) -> str:
+        return self._error_main_key
+
+    @property
+    def error_main_text(self) -> Optional[str]:
+        return self._error_main_text
 
     def set_css_error(self, css_error: str) -> None:
         """sets the css error field for the form"""

@@ -4,6 +4,10 @@
 
 `v 0.5.0 (2023.06.xx)`
 
+New Features:
+* mypy support
+* drop python2
+* project reorganized
 
 
 ## Last Python2 Version
