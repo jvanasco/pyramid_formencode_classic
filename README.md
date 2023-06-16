@@ -2,15 +2,13 @@
 
 ## Current Recommended Version
 
+`v 0.5.0 (2023.06.xx)`
+
+
+
+## Last Python2 Version
+
 `v 0.4.4 (2020.10.20)`
-
-Packaging fix
-
-`v 0.4.3 (2020.10.12)`
-
-Python3 via pypi formencode (no longer requires forks)
-
-`v 0.4.2 (2020.02.04)`
 
 New Features:
 
@@ -22,6 +20,14 @@ New Features:
 
 
 ### Backwards Compatible?
+
+### 0.5.0
+
+The library was reorganized to implement typing.
+Most uses should be backwards compatible.
+It is possible an object you used moved. If so, please file a ticket to see if we can pull it back in.
+The default values were moved to a separate file. Those should never have been referenced in code.
+
 
 ### 0.4.0
 
