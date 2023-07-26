@@ -1,6 +1,8 @@
 0.5.0
     * drop py2
     * mypy support
+    * reorganized a lot of code/functions into new files.
+      the relevant imports should be unchanged.
 
 0.4.5
 	* packaging fixes
