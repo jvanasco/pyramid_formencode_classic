@@ -1,6 +1,10 @@
-"""
-Custom Exceptions
-"""
+# stdlib
+from typing import Optional
+
+# local
+from ._utils import TYPES_ERRORS
+
+# ==============================================================================
 
 
 class BaseException(Exception):
@@ -12,17 +16,17 @@ class BaseException(Exception):
 class FormInvalid(BaseException):
     """Raise in your code when a Form is invalid"""
 
-    message = None
-    errors = None
-    form = None
+    message: str
+    errors: Optional[TYPES_ERRORS] = None
+    form = None  # ToDo: typing
 
     def __init__(
         self,
-        message="",
-        errors=None,
+        message: str = "",
+        errors: Optional[TYPES_ERRORS] = None,
         form=None,
-        message_append=True,
-        message_prepend=False,
+        message_append: bool = True,
+        message_prepend: bool = False,
     ):
         self.message = message
         self.errors = errors
@@ -30,26 +34,28 @@ class FormInvalid(BaseException):
         super(FormInvalid, self).__init__()
         if form:
             form.register_error_main_exception(
-                self, message_append=message_append, message_prepend=message_prepend
+                self,
+                message_append=message_append,
+                message_prepend=message_prepend,
             )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<FormInvalid `%s`>" % self.message
 
 
 class FormFieldInvalid(FormInvalid):
     """Raise in your code when a Form's Field is invalid"""
 
-    field = None
+    field: str
 
     def __init__(
         self,
-        field="",
-        message="",
-        errors=None,
-        form=None,
-        message_append=True,
-        message_prepend=False,
+        field: str = "",
+        message: str = "",
+        errors=None,  # ToDo: typing
+        form=None,  # ToDo: typing
+        message_append: bool = True,
+        message_prepend: bool = False,
     ):
         self.field = field
         super(FormFieldInvalid, self).__init__(
@@ -60,7 +66,7 @@ class FormFieldInvalid(FormInvalid):
             message_prepend=message_prepend,
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<FormFieldInvalid %s: `%s`>" % (self.field, self.message)
 
 

@@ -1,17 +1,13 @@
+# stdlib
+from html import escape as html_escape
+
 # pypi
 import formencode
 
-import six
-
-six.add_move(six.MovedAttribute("html_escape", "cgi", "html", "escape", "escape"))
-from six.moves import html_escape
-
-"""
-collection of common formatters to use
-"""
+# ==============================================================================
 
 
-def formatter_help_inline(error):
+def formatter_help_inline(error: str) -> str:
     """
     Formatter that escapes the error, wraps the error in a span with
     class ``help-inline``, and doesn't add a ``<br>`` ; somewhat compatible with twitter's bootstrap
@@ -22,14 +18,14 @@ def formatter_help_inline(error):
     )
 
 
-def formatter_hidden(error):
+def formatter_hidden(error: str) -> str:
     """
     returns a hidden field with the error in the name
     """
     return '<input type="hidden" name="%s" />\n' % html_escape(error)
 
 
-def formatter_nobr(error):
+def formatter_nobr(error: str) -> str:
     """
     This is a variant of the htmlfill `default_formatter`, in which a trailing <br/> is not included
 
@@ -42,7 +38,7 @@ def formatter_nobr(error):
     )
 
 
-def formatter_comment(error):
+def formatter_comment(error: str) -> str:
     """
     Formatter that ignores the error and hides it in a comment
     This is useful / necessary when handling custom css/html
@@ -51,7 +47,7 @@ def formatter_comment(error):
     return "<!-- formatter_comment (%s)-->" % html_escape(error)
 
 
-def formatter_empty_string(error):
+def formatter_empty_string(error: str) -> str:
     """
     Formatting that returns an empty string
     """
