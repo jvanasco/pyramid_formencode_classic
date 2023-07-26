@@ -32,7 +32,7 @@ def warn_user(message):
 
 
 # defaults
-__VERSION__ = "0.5.0dev"
+__VERSION__ = "0.5.0"
 
 AUTOMATIC_CLEANUP = True
 
