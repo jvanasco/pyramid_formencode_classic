@@ -9,6 +9,7 @@ import webob.compat
 from .api import form_reprint  # noqa: F401 ; maintain API
 from .api import form_validate  # noqa: F401 ; maintain API
 from .exceptions import FormInvalid  # noqa: F401 ; maintain API
+from .objects import FormStash
 from .objects import FormStashList
 
 if TYPE_CHECKING:
@@ -32,7 +33,7 @@ def warn_user(message):
 
 
 # defaults
-__VERSION__ = "0.5.0"
+__VERSION__ = "0.5.1"
 
 AUTOMATIC_CLEANUP = True
 
