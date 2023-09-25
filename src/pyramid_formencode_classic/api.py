@@ -14,6 +14,7 @@ import formencode.htmlfill
 from pyramid.interfaces import IResponse
 from pyramid.renderers import render as pyramid_render
 from pyramid.response import Response as PyramidResponse
+from webob.multidict import MultiDict
 
 # local
 from ._defaults import DEFAULT_ERROR_MAIN_KEY
@@ -31,7 +32,6 @@ if TYPE_CHECKING:
     from formencode import Schema
     from pyramid.request import Request
     from pyramid.response import Response
-    from webob.multidict import MultiDict
 
 # ==============================================================================
 
@@ -40,14 +40,14 @@ log = logging.getLogger(__name__)
 # ------------------------------------------------------------------------------
 
 
-def form_validate(
+def _form_validate_core(
     request: "Request",
     schema: Optional["Schema"] = None,
     form_stash: str = DEFAULT_FORM_STASH,
     form_stash_object: Optional[FormStash] = None,
     validate_post: bool = True,
     validate_get: bool = False,
-    validate_params: Optional["MultiDict"] = None,
+    validate_params: Optional[MultiDict] = None,
     variable_decode: bool = False,
     dict_char: str = ".",
     list_char: str = "-",
@@ -177,17 +177,18 @@ def form_validate(
                     field=formStash.error_main_key, message="Nothing submitted."
                 )
                 raise ValidationStop("no `validate_params`")
-
-        validate_params = validate_params.mixed()
+        if TYPE_CHECKING:
+            assert isinstance(validate_params, MultiDict)
+        _validate_params: Dict = validate_params.mixed()
 
         if variable_decode:
             if __debug__:
                 log.debug("form_validate - running variable_decode on params")
             decoded_params = formencode.variabledecode.variable_decode(
-                validate_params, dict_char, list_char
+                _validate_params, dict_char, list_char
             )
         else:
-            decoded_params = validate_params
+            decoded_params = _validate_params
 
         # if there are no params to validate against, then just stop
         if not decoded_params:
@@ -264,6 +265,26 @@ def form_validate(
     if return_stash:
         return (not formStash.is_error, formStash)
     return not formStash.is_error
+
+
+def form_validate(request: "Request", **kwargs) -> Tuple[bool, FormStash]:
+    if "return_stash" in kwargs:
+        if kwargs["return_stash"] is not True:
+            raise ValueError("`form_validate` REQUIRES `return_stash=True`")
+    result = _form_validate_core(request, **kwargs)
+    if TYPE_CHECKING:
+        assert isinstance(result, tuple)
+    return result
+
+
+def form_validate_simple(request: "Request", **kwargs) -> bool:
+    if "return_stash" in kwargs:
+        if kwargs["return_stash"] not in (False, None):
+            raise ValueError("`form_validate_simple` REQUIRES `return_stash=False`")
+    result = _form_validate_core(request, **kwargs)
+    if TYPE_CHECKING:
+        assert isinstance(result, bool)
+    return result
 
 
 def form_reprint(

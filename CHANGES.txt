@@ -1,3 +1,13 @@
+0.6.0
+    BACKWARDS INCOMPATIBLE CHANGE
+    * `form_validate` now requires `return_stash=True` - which is enabled by default.
+      To support `return_stash=False`, please call `form_validate_simple` instead.
+      This change was required to streamline typing and better standardize the library.
+      Background:
+        `form_validate` was renamed to `_form_validate_core`
+        the new `form_validate` ensures `return_stash==True` and invokes `_form_validate_core`
+        the new `form_validate_simple` ensures `return_stash==False` and invokes `_form_validate_core`
+
 0.5.0
     * drop py2
     * mypy support

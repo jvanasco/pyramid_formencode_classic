@@ -90,7 +90,6 @@ class _TestRenderSimple(object):
     template = None
 
     def test_render_simple(self):
-
         _template = self.template
         _response_text = self._test_render_simple__data["response_text"]
 
@@ -130,7 +129,6 @@ class _TestParsing(object):
     _test_no_params__data = None  # placeholder
 
     def test_no_params(self):
-
         tests_completed = []
         tests_fail = []
 
@@ -158,7 +156,7 @@ class _TestParsing(object):
                     self.request,
                     schema=Form_EmailUsername,
                     error_main_text="There was an error with your form.",
-                    **_validate_kwargs
+                    **_validate_kwargs,
                 )
                 if not result:
                     raise pyramid_formencode_classic.FormInvalid()
@@ -189,7 +187,6 @@ class _TestParsing(object):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     def test_submit(self):
-
         # set the submit
         self.request.POST["submit"] = "submit"
 
@@ -219,7 +216,7 @@ class _TestParsing(object):
                     self.request,
                     schema=Form_EmailUsername,
                     error_main_text="There was an error with your form.",
-                    **_validate_kwargs
+                    **_validate_kwargs,
                 )
                 if not result:
                     raise pyramid_formencode_classic.FormInvalid()
@@ -1824,7 +1821,6 @@ class TestCustomError(_TestHarness, unittest.TestCase):
     template = "fixtures/form_a-html_error_placeholder-default.mako"
 
     def test_submit(self):
-
         # set the submit
         self.request.POST["submit"] = "submit"
 
@@ -1871,7 +1867,7 @@ class TestCustomError(_TestHarness, unittest.TestCase):
                     self.request,
                     schema=Form_EmailUsername,
                     error_main_text="There was an error with your form.",
-                    **_validate_kwargs
+                    **_validate_kwargs,
                 )
                 if html_error_placeholder_template:
                     formStash.html_error_placeholder_template = (
@@ -1957,7 +1953,6 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
     template = "fixtures/form_b-multi.mako"
 
     def test_render_simple(self):
-
         _template = self.template
         _response_text = self._test_data["response_text-test_render_simple"]
 
@@ -1978,7 +1973,6 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     def test_parse(self):
-
         _template = self.template
         _validate_kwargs = {}
         _reprint_kwargs = {}
@@ -1995,7 +1989,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 schema=Form_EmailUsername,
                 form_stash="a",
                 error_main_text="There was an error with your form.",
-                **_validate_kwargs
+                **_validate_kwargs,
             )
             if html_error_placeholder_template:
                 formStash.html_error_placeholder_template = (
@@ -2030,7 +2024,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 schema=Form_EmailUsername,
                 form_stash="b",
                 error_main_text="There was an error with your form.",
-                **_validate_kwargs
+                **_validate_kwargs,
             )
             if html_error_placeholder_template:
                 formStash.html_error_placeholder_template = (
@@ -2061,7 +2055,6 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     def test_parse_error(self):
-
         # set the submit
         self.request.POST["submit"] = "submit"
         self.request.POST["email"] = "failmail"
@@ -2083,7 +2076,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 schema=Form_EmailUsername,
                 form_stash="a",
                 error_main_text="There was an error with your form.",
-                **_validate_kwargs
+                **_validate_kwargs,
             )
             if html_error_placeholder_template:
                 formStash.html_error_placeholder_template = (
@@ -2104,7 +2097,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 _print_form_simple,
                 form_stash="a",
                 data_formencode_form="a",
-                **_reprint_kwargs
+                **_reprint_kwargs,
             )
             try:
                 assert (
@@ -2124,7 +2117,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 schema=Form_EmailUsername,
                 form_stash="b",
                 error_main_text="There was an error with your form.",
-                **_validate_kwargs
+                **_validate_kwargs,
             )
             if html_error_placeholder_template:
                 formStash.html_error_placeholder_template = (
@@ -2145,7 +2138,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 _print_form_simple,
                 form_stash="b",
                 data_formencode_form="b",
-                **_reprint_kwargs
+                **_reprint_kwargs,
             )
             try:
                 assert (
@@ -2274,7 +2267,6 @@ class _TestParsingApi040(object):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     def test_manual_error_default(self):
-
         # set the submit
         self.request.POST["submit"] = "submit"
 
@@ -2304,7 +2296,7 @@ class _TestParsingApi040(object):
                     self.request,
                     schema=Form_EmailUsername,
                     error_main_text="There was an error with your form.",
-                    **_validate_kwargs
+                    **_validate_kwargs,
                 )
                 if not result:
                     raise pyramid_formencode_classic.FormInvalid("OVERRIDE MESSAGE.")
@@ -2338,7 +2330,6 @@ class _TestParsingApi040(object):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     def test_manual_error_append(self):
-
         # set the submit
         self.request.POST["submit"] = "submit"
 
@@ -2368,7 +2359,7 @@ class _TestParsingApi040(object):
                     self.request,
                     schema=Form_EmailUsername,
                     error_main_text="There was an error with your form.",
-                    **_validate_kwargs
+                    **_validate_kwargs,
                 )
                 if not result:
                     raise pyramid_formencode_classic.FormInvalid("OVERRIDE MESSAGE.")
@@ -2404,7 +2395,6 @@ class _TestParsingApi040(object):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     def test_manual_error_prepend(self):
-
         # set the submit
         self.request.POST["submit"] = "submit"
 
@@ -2434,7 +2424,7 @@ class _TestParsingApi040(object):
                     self.request,
                     schema=Form_EmailUsername,
                     error_main_text="There was an error with your form.",
-                    **_validate_kwargs
+                    **_validate_kwargs,
                 )
                 if not result:
                     raise pyramid_formencode_classic.FormInvalid("OVERRIDE MESSAGE.")
@@ -2470,7 +2460,6 @@ class _TestParsingApi040(object):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     def test_fatal_form(self):
-
         # set the submit
         self.request.POST["submit"] = "submit"
 
@@ -2500,7 +2489,7 @@ class _TestParsingApi040(object):
                     self.request,
                     schema=Form_EmailUsername,
                     error_main_text="There was an error with your form.",
-                    **_validate_kwargs
+                    **_validate_kwargs,
                 )
                 formStash.fatal_form(message="FATAL FORM.")
 
@@ -2547,7 +2536,6 @@ class _TestParsingApi040(object):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     def test_fatal_field(self):
-
         # set the submit
         self.request.POST["submit"] = "submit"
 
@@ -2577,7 +2565,7 @@ class _TestParsingApi040(object):
                     self.request,
                     schema=Form_EmailUsername,
                     error_main_text="There was an error with your form.",
-                    **_validate_kwargs
+                    **_validate_kwargs,
                 )
                 formStash.fatal_field(
                     field="email", message="THIS FIELD CAUSED A FATAL ERROR."
@@ -2626,7 +2614,6 @@ class _TestParsingApi040(object):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     def test_raise_form_aware(self):
-
         # set the submit
         self.request.POST["submit"] = "submit"
 
@@ -2656,7 +2643,7 @@ class _TestParsingApi040(object):
                     self.request,
                     schema=Form_EmailUsername,
                     error_main_text="There was an error with your form.",
-                    **_validate_kwargs
+                    **_validate_kwargs,
                 )
                 if not result:
                     raise pyramid_formencode_classic.FormInvalid(
@@ -3363,7 +3350,6 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
 """
 
     def test_submit(self):
-
         # set the submit
         self.request.POST["submit"] = "submit"
 
@@ -3386,7 +3372,7 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
                 self.request,
                 schema=Form_EmailUsername,
                 error_main_text="There was an error with your form.",
-                **_validate_kwargs
+                **_validate_kwargs,
             )
             if not result:
                 raise pyramid_formencode_classic.FormInvalid()
@@ -3408,7 +3394,7 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
                 self.request,
                 schema=Form_EmailUsername,
                 error_main_text="There was an error with your form.",
-                **_validate_kwargs
+                **_validate_kwargs,
             )
             if not result:
                 raise pyramid_formencode_classic.FormInvalid()
