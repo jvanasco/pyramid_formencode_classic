@@ -8,7 +8,11 @@ import webob.compat
 # local
 from .api import form_reprint  # noqa: F401 ; maintain API
 from .api import form_validate  # noqa: F401 ; maintain API
+from .exceptions import BaseException  # noqa: F401 ; maintain API
 from .exceptions import FormInvalid  # noqa: F401 ; maintain API
+from .exceptions import FormFieldInvalid  # noqa: F401 ; maintain API
+from .exceptions import CsrfInvalid  # noqa: F401 ; maintain API
+from .exceptions import ValidationStop  # noqa: F401 ; maintain API
 from .objects import FormStash  # noqa: F401 ; maintain API
 from .objects import FormStashList  # noqa: F401 ; maintain API
 
