@@ -2,6 +2,20 @@
 
 ## Current Recommended Version
 
+`v 0.6.0 (2024.04.09)`
+
+This is backwards compatible due to the following change:
+
+    * `form_validate` now requires `return_stash=True` - which is enabled by default.
+      To support `return_stash=False`, please call `form_validate_simple` instead.
+      This change was required to streamline typing and better standardize the library.
+      Background:
+        `form_validate` was renamed to `_form_validate_core`
+        the new `form_validate` ensures `return_stash==True` and invokes `_form_validate_core`
+        the new `form_validate_simple` ensures `return_stash==False` and invokes `_form_validate_core`
+
+## Current EOL version
+
 `v 0.5.0 (2023.06.xx)`
 
 New Features:
@@ -24,6 +38,13 @@ New Features:
 
 
 ### Backwards Compatible?
+
+### 0.6.0
+
+A backwards incompatible change was introduced.
+
+form_validate` now requires `return_stash=True` - which is enabled by default.
+To support `return_stash=False`, please call `form_validate_simple` instead.
 
 ### 0.5.0
 
