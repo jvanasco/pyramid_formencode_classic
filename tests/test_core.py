@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 """
 IMPORTANT
 
@@ -7,23 +5,26 @@ whitespace in the this file IS SIGNIFICANT AND IMPORTANT.
 the test-cases check for specific whitespace
 """
 
-import pyramid_formencode_classic
-from pyramid_formencode_classic import formatters
-
 # stdblib
+from typing import Dict
+from typing import Optional
 import unittest
-import pytest
 
 # pypi
 import formencode
 from pyramid import testing
-from pyramid.renderers import render_to_response
 from pyramid.interfaces import IRequestExtensions
+from pyramid.renderers import render_to_response
+from pyramid.request import Request
 from webob.multidict import MultiDict
 
-DEBUG_PRINT = True
+# local
+import pyramid_formencode_classic
+from pyramid_formencode_classic import formatters
 
 # ==============================================================================
+
+DEBUG_PRINT = True
 
 
 class _Schema_Base(formencode.Schema):
@@ -47,6 +48,9 @@ class DummyRequest(testing.DummyRequest):
     """
     extend `testing.DummyRequest` with a closer represtantion
     """
+
+    GET: MultiDict
+    POST: MultiDict
 
     def __init__(self):
         super(DummyRequest, self).__init__()
@@ -87,7 +91,9 @@ class _TestRenderSimple(object):
                       pyramid_formencode_classic.tests.core.TestRenderSimple_FormA_HtmlErrorPlaceholder_None
     """
 
-    template = None
+    template: str
+    _test_render_simple__data: Dict
+    request: Request
 
     def test_render_simple(self):
         _template = self.template
@@ -123,10 +129,11 @@ class _TestParsing(object):
                       pyramid_formencode_classic.tests.core.TestParsingErrorFormatters_FormA_NoErrorMain
     """
 
-    error_main_key = None
-    template = None
-    _test_submit__data = None  # placeholder
-    _test_no_params__data = None  # placeholder
+    _test_submit__data: Dict  # placeholder
+    _test_no_params__data: Dict  # placeholder
+    error_main_key: Optional[str] = None
+    template: str
+    request: Request
 
     def test_no_params(self):
         tests_completed = []
@@ -135,7 +142,7 @@ class _TestParsing(object):
         for test_name, test_data in self._test_no_params__data.items():
             _template = self.template
             _response_text = test_data["response_text"]
-            _reprint_kwargs = {}
+            _reprint_kwargs: Dict = {}
             if "auto_error_formatter" in test_data:
                 _reprint_kwargs["auto_error_formatter"] = test_data[
                     "auto_error_formatter"
@@ -143,7 +150,7 @@ class _TestParsing(object):
             if "error_formatters" in test_data:
                 if test_data["error_formatters"] is not None:
                     _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
-            _validate_kwargs = {}
+            _validate_kwargs: Dict = {}
             if self.error_main_key is not None:
                 _validate_kwargs["error_main_key"] = self.error_main_key
 
@@ -195,7 +202,7 @@ class _TestParsing(object):
         for test_name, test_data in self._test_submit__data.items():
             _template = self.template
             _response_text = test_data["response_text"]
-            _reprint_kwargs = {}
+            _reprint_kwargs: Dict = {}
             if "auto_error_formatter" in test_data:
                 _reprint_kwargs["auto_error_formatter"] = test_data[
                     "auto_error_formatter"
@@ -203,7 +210,7 @@ class _TestParsing(object):
             if "error_formatters" in test_data:
                 if test_data["error_formatters"] is not None:
                     _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
-            _validate_kwargs = {}
+            _validate_kwargs: Dict = {}
             if self.error_main_key is not None:
                 _validate_kwargs["error_main_key"] = self.error_main_key
 
@@ -1843,7 +1850,7 @@ class TestCustomError(_TestHarness, unittest.TestCase):
         for test_name, test_data in self._test_submit__data.items():
             _template = self.template
             _response_text = test_data["response_text"]
-            _reprint_kwargs = {"error_formatters": {}}
+            _reprint_kwargs: Dict = {"error_formatters": {}}
             if "error_formatters_default" in test_data:
                 if test_data["error_formatters_default"] == "main_error_formatter":
                     _reprint_kwargs["error_formatters"][
@@ -1853,7 +1860,7 @@ class TestCustomError(_TestHarness, unittest.TestCase):
                 if test_data["error_formatters_alt"] == "alt_error_formatter":
                     _reprint_kwargs["error_formatters"]["alt"] = alt_error_formatter
 
-            _validate_kwargs = {}
+            _validate_kwargs: Dict = {}
             html_error_placeholder_template = test_data.get(
                 "html_error_placeholder_template", None
             )
@@ -1974,8 +1981,8 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
 
     def test_parse(self):
         _template = self.template
-        _validate_kwargs = {}
-        _reprint_kwargs = {}
+        _validate_kwargs: Dict = {}
+        _reprint_kwargs: Dict = {}
         html_error_placeholder_template = None
 
         def _print_form_simple():
@@ -2061,8 +2068,8 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
         self.request.POST["username"] = ""
 
         _template = self.template
-        _validate_kwargs = {}
-        _reprint_kwargs = {}
+        _validate_kwargs: Dict = {}
+        _reprint_kwargs: Dict = {}
         html_error_placeholder_template = None
 
         def _print_form_simple():
@@ -2255,14 +2262,15 @@ class _TestParsingApi040(object):
     """
 
     error_main_key = None
-    template = None
+    template: str
+    request: Request
 
-    _test_manual_error_append__data = None  # placeholder
-    _test_manual_error_prepend__data = None  # placeholder
-    _test_manual_error_default__data = None  # placeholder
-    _test_fatal_form__data = None  # placeholder
-    _test_fatal_field__data = None  # placeholder
-    _test_raise_form_aware__data = None  # placeholder
+    _test_manual_error_append__data: Dict  # placeholder
+    _test_manual_error_prepend__data: Dict  # placeholder
+    _test_manual_error_default__data: Dict  # placeholder
+    _test_fatal_form__data: Dict  # placeholder
+    _test_fatal_field__data: Dict  # placeholder
+    _test_raise_form_aware__data: Dict  # placeholder
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -2275,7 +2283,7 @@ class _TestParsingApi040(object):
         for test_name, test_data in self._test_manual_error_default__data.items():
             _template = self.template
             _response_text = test_data["response_text"]
-            _reprint_kwargs = {}
+            _reprint_kwargs: Dict = {}
             if "auto_error_formatter" in test_data:
                 _reprint_kwargs["auto_error_formatter"] = test_data[
                     "auto_error_formatter"
@@ -2283,7 +2291,7 @@ class _TestParsingApi040(object):
             if "error_formatters" in test_data:
                 if test_data["error_formatters"] is not None:
                     _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
-            _validate_kwargs = {}
+            _validate_kwargs: Dict = {}
             if self.error_main_key is not None:
                 _validate_kwargs["error_main_key"] = self.error_main_key
 
@@ -2338,7 +2346,7 @@ class _TestParsingApi040(object):
         for test_name, test_data in self._test_manual_error_append__data.items():
             _template = self.template
             _response_text = test_data["response_text"]
-            _reprint_kwargs = {}
+            _reprint_kwargs: Dict = {}
             if "auto_error_formatter" in test_data:
                 _reprint_kwargs["auto_error_formatter"] = test_data[
                     "auto_error_formatter"
@@ -2346,7 +2354,7 @@ class _TestParsingApi040(object):
             if "error_formatters" in test_data:
                 if test_data["error_formatters"] is not None:
                     _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
-            _validate_kwargs = {}
+            _validate_kwargs: Dict = {}
             if self.error_main_key is not None:
                 _validate_kwargs["error_main_key"] = self.error_main_key
 
@@ -2403,7 +2411,7 @@ class _TestParsingApi040(object):
         for test_name, test_data in self._test_manual_error_prepend__data.items():
             _template = self.template
             _response_text = test_data["response_text"]
-            _reprint_kwargs = {}
+            _reprint_kwargs: Dict = {}
             if "auto_error_formatter" in test_data:
                 _reprint_kwargs["auto_error_formatter"] = test_data[
                     "auto_error_formatter"
@@ -2411,7 +2419,7 @@ class _TestParsingApi040(object):
             if "error_formatters" in test_data:
                 if test_data["error_formatters"] is not None:
                     _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
-            _validate_kwargs = {}
+            _validate_kwargs: Dict = {}
             if self.error_main_key is not None:
                 _validate_kwargs["error_main_key"] = self.error_main_key
 
@@ -2468,7 +2476,7 @@ class _TestParsingApi040(object):
         for test_name, test_data in self._test_fatal_form__data.items():
             _template = self.template
             _response_text = test_data["response_text"]
-            _reprint_kwargs = {}
+            _reprint_kwargs: Dict = {}
             if "auto_error_formatter" in test_data:
                 _reprint_kwargs["auto_error_formatter"] = test_data[
                     "auto_error_formatter"
@@ -2476,7 +2484,7 @@ class _TestParsingApi040(object):
             if "error_formatters" in test_data:
                 if test_data["error_formatters"] is not None:
                     _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
-            _validate_kwargs = {}
+            _validate_kwargs: Dict = {}
             if self.error_main_key is not None:
                 _validate_kwargs["error_main_key"] = self.error_main_key
 
@@ -2544,7 +2552,7 @@ class _TestParsingApi040(object):
         for test_name, test_data in self._test_fatal_field__data.items():
             _template = self.template
             _response_text = test_data["response_text"]
-            _reprint_kwargs = {}
+            _reprint_kwargs: Dict = {}
             if "auto_error_formatter" in test_data:
                 _reprint_kwargs["auto_error_formatter"] = test_data[
                     "auto_error_formatter"
@@ -2552,7 +2560,7 @@ class _TestParsingApi040(object):
             if "error_formatters" in test_data:
                 if test_data["error_formatters"] is not None:
                     _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
-            _validate_kwargs = {}
+            _validate_kwargs: Dict = {}
             if self.error_main_key is not None:
                 _validate_kwargs["error_main_key"] = self.error_main_key
 
@@ -2622,7 +2630,7 @@ class _TestParsingApi040(object):
         for test_name, test_data in self._test_raise_form_aware__data.items():
             _template = self.template
             _response_text = test_data["response_text"]
-            _reprint_kwargs = {}
+            _reprint_kwargs: Dict = {}
             if "auto_error_formatter" in test_data:
                 _reprint_kwargs["auto_error_formatter"] = test_data[
                     "auto_error_formatter"
@@ -2630,7 +2638,7 @@ class _TestParsingApi040(object):
             if "error_formatters" in test_data:
                 if test_data["error_formatters"] is not None:
                     _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
-            _validate_kwargs = {}
+            _validate_kwargs: Dict = {}
             if self.error_main_key is not None:
                 _validate_kwargs["error_main_key"] = self.error_main_key
 
@@ -2654,7 +2662,7 @@ class _TestParsingApi040(object):
                     "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
                 )
 
-            except pyramid_formencode_classic.FormInvalid as exc:
+            except pyramid_formencode_classic.FormInvalid as exc:  # noqa: F841
                 rendered = pyramid_formencode_classic.form_reprint(
                     self.request, _print_form_simple, **_reprint_kwargs
                 )
@@ -3353,10 +3361,10 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
         # set the submit
         self.request.POST["submit"] = "submit"
 
-        _template = self.template
+        # _template = self.template
         _rendered = self.rendered
-        _reprint_kwargs = {}
-        _validate_kwargs = {}
+        _reprint_kwargs: Dict = {}
+        _validate_kwargs: Dict = {}
 
         def _print_form__valid():
             rendered = render_to_response(self.template, {"request": self.request})
