@@ -2,6 +2,30 @@
 
 ## Current Recommended Version
 
+`v 0.7.0 (2025.03.25)`
+This is backwards compatible due to the following changes:
+
+    * `_form_validate_core`
+      * now requires `request`; this should not affect anything
+      * now requires `schema`; this should not affect anything
+      * `form_stash_object` now named `formStash`
+      * dropped `return_stash`; ALWAYS return a tuple
+      * dropped `raise_FormFieldInvalid` as it made no sense in context;
+        use `raise_FormInvalid`
+    * `form_validate`
+      * now requires `schema`; this should not affect anything
+      * dropped `return_stash`; ALWAYS return a tuple
+    * `form_validate_simple`
+      * now requires `schema`; this should not affect anything
+      * dropped `return_stash`; ALWAYS return a tuple
+    * `FormStash`
+        now requires a `schema`
+    * `FormInvalid`
+        kwarg `form` is now `formStash`
+    * `FormFieldInvalid`
+        kwarg `form` is now `formStash`
+
+
 `v 0.6.0 (2024.04.09)`
 
 This is backwards compatible due to the following change:
@@ -16,7 +40,7 @@ This is backwards compatible due to the following change:
 
 ## Current EOL version
 
-`v 0.5.0 (2023.06.xx)`
+`v 0.6.0 (2024.06.xx)`
 
 New Features:
 * mypy support
@@ -38,6 +62,10 @@ New Features:
 
 
 ### Backwards Compatible?
+
+### 0.7.0
+
+See warnings above
 
 ### 0.6.0
 
@@ -253,10 +281,10 @@ If the marking is not in your template, it will be at the top of the document (b
                 								 )
 
 
-Twitter Bootstrap Example
+Bootstrap Example
 =========================
 
-    To handle  twitter bootstrap style errors, it's a bit more manual work -- but doable
+    To handle bootstrap style errors, it's a bit more manual work -- but doable
 
         Mako:
             <% form= request.pyramid_formencode_classic.get_form() %>
@@ -324,7 +352,7 @@ The form methods always render a response object via `pyramid.renderers.render_t
 												error_main="Error",
 												)
 				if not result:
-					raise formhandling.FormInvalid()
+					raise formhandling.FormInvalid(formStash=formStash)
 				userAccount= query_for_useraccount(formStash.results['email'])
 				if not userAccount:
 					formStash.fatal_field(field='email',
@@ -363,7 +391,7 @@ The form methods use a pyramid renderer
 												error_main="Error",
 												)
 				if not result:
-					raise formhandling.FormInvalid()
+					raise formhandling.FormInvalid(formStash=formStash)
 				...
 			except formhandling.FormInvalid as exc:
 				return formhandling.form_reprint(self.request
@@ -431,7 +459,7 @@ full python example:
                                                           **_validate_kwargs
                                                           )
             if not result:
-                raise pyramid_formencode_classic.FormInvalid("Custom Main Error")
+                raise pyramid_formencode_classic.FormInvalid("Custom Main Error", formStash=formStash)
         except pyramid_formencode_classic.FormInvalid as exc:
             rendered = pyramid_formencode_classic.form_reprint(self.request,
                                                                _print_form_simple,
@@ -546,7 +574,7 @@ This design choice was made to allow for scoping within Pyramid apps:
 		 formStash
 		 ) = form_validate(...)
 		if not result:
-			raise FormInvalid()
+			raise FormInvalid(formStash=formStash)
 		# do stuff
 
 	except FormInvalid as exc:

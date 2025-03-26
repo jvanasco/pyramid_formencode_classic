@@ -372,7 +372,7 @@ class FormStash(object):
         via `register_error_main_exception` after being created in
         `fatal_form` or `fatal_field`.
         """
-        _FormInvalid = FormInvalid()
+        _FormInvalid = FormInvalid(formStash=self)
         if self._exceptions_integrated is None:
             self._exceptions_integrated = []
         self._exceptions_integrated.append(_FormInvalid)
@@ -389,7 +389,7 @@ class FormStash(object):
         ------------------------------------------------------------------------
             try:
                 ...
-                raise formhandling.FormInvalid('foo')
+                raise formhandling.FormInvalid('foo', formStash=formStash)
                 ...
             except formhandling.FormInvalid as exc:
                 - if exc.message:
@@ -405,21 +405,24 @@ class FormStash(object):
                 )
         ------------------------------------------------------------------------
         """
+        print("register_error_main_exception", id(exc), message_append, message_prepend)
         if isinstance(exc, FormInvalid):
             if self._exceptions_integrated is None:
                 self._exceptions_integrated = []
 
-            if exc not in self._exceptions_integrated:
+            if exc in self._exceptions_integrated:
+                log.debug("exception already integrated")
+                print("exception already integrated")
+            else:
                 self._exceptions_integrated.append(exc)
                 if exc.message:
+                    print("set_error", message_append, message_prepend)
                     self.set_error(
                         field=self.error_main_key,
                         message=exc.message,
                         message_append=message_append,
                         message_prepend=message_prepend,
                     )
-            else:
-                log.debug("exception already integrated")
 
     def csrf_input_field(
         self,

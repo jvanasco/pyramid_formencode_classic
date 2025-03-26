@@ -5,12 +5,24 @@
       * now requires `schema`; this should not affect anything
       * `form_stash_object` now named `formStash`
       * the `schema` is now stored in the `FormStash` result
+      * dropped `return_stash`; ALWAYS return a tuple
+      * dropped `raise_FormFieldInvalid` as it made no sense in context;
+        use `raise_FormInvalid`
     * `form_validate`
       * now requires `schema`; this should not affect anything
+      * dropped `return_stash`; ALWAYS return a tuple
     * `form_validate_simple`
       * now requires `schema`; this should not affect anything
+      * dropped `return_stash`; ALWAYS return a tuple
     * `FormStash`
         now requires a `schema`
+    * `FormInvalid`
+        kwarg `form` is now `formStash`
+    * `FormFieldInvalid`
+        kwarg `form` is now `formStash`
+    
+    New:
+        beware that raising a `FormInvalid(formStash)` will invoke the seterror and utilize the append/prepend args
 
 0.6.0
     BACKWARDS INCOMPATIBLE CHANGE

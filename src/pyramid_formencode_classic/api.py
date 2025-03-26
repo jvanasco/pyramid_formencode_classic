@@ -6,7 +6,6 @@ from typing import Dict
 from typing import Optional
 from typing import Tuple
 from typing import TYPE_CHECKING
-from typing import Union
 
 # pypi
 import formencode
@@ -20,7 +19,6 @@ from webob.multidict import MultiDict
 from ._defaults import DEFAULT_ERROR_MAIN_KEY
 from ._defaults import DEFAULT_ERROR_MAIN_TEXT
 from ._defaults import DEFAULT_FORM_STASH
-from .exceptions import FormFieldInvalid
 from .exceptions import FormInvalid
 from .exceptions import ValidationStop
 from .formatters import formatter_nobr  # default formatter
@@ -55,14 +53,12 @@ def _form_validate_core(
     error_main_text: str = DEFAULT_ERROR_MAIN_TEXT,
     error_main_key: str = DEFAULT_ERROR_MAIN_KEY,
     error_string_key: str = "Error_String",
-    return_stash: bool = True,
     raise_FormInvalid: bool = False,
-    raise_FormFieldInvalid: bool = False,
     csrf_name: str = "csrf_",
     csrf_token: Optional[str] = None,
     is_unicode_params: bool = False,
     foreach_defense: bool = True,
-) -> Union[bool, Tuple[bool, FormStash]]:
+) -> Tuple[bool, FormStash]:
     """form validation only: returns True/False ; sets up Errors ;
 
     Validate input for a FormEncode schema.
@@ -133,17 +129,8 @@ def _form_validate_core(
         If there are is a string-based error that occurs, this will be the key they are
         dropped into.
 
-    ``return_stash`` (True)
-        When set to True, returns a tuple of the status and the wrapped stash.
-        Otherwise just returns the status, and a separate call is needed to get the Stash.
-        As True:
-            (status, stash)= form_validate()
-        else:
-            status = form_validate()
-
     ``is_unicode_params`` (False)
         passthrough to new `Form`
-
 
     ``foreach_defense`` (True)
         Implementing `ForEach` in FormEncode (such as dealing with checkboxes) can
@@ -268,21 +255,14 @@ def _form_validate_core(
     # now raise if needed
     if formStash.is_error:
         if raise_FormInvalid:
-            raise FormInvalid()
-        if raise_FormFieldInvalid:
-            raise FormFieldInvalid()
+            raise FormInvalid(formStash=formStash)
 
-    if return_stash:
-        return (not formStash.is_error, formStash)
-    return not formStash.is_error
+    return (not formStash.is_error, formStash)
 
 
 def form_validate(
     request: "Request", schema: "Schema", **kwargs
 ) -> Tuple[bool, FormStash]:
-    if "return_stash" in kwargs:
-        if kwargs["return_stash"] is not True:
-            raise ValueError("`form_validate` REQUIRES `return_stash=True`")
     result = _form_validate_core(request, schema, **kwargs)
     if TYPE_CHECKING:
         assert isinstance(result, tuple)
@@ -290,9 +270,6 @@ def form_validate(
 
 
 def form_validate_simple(request: "Request", schema: "Schema", **kwargs) -> bool:
-    if "return_stash" in kwargs:
-        if kwargs["return_stash"] not in (False, None):
-            raise ValueError("`form_validate_simple` REQUIRES `return_stash=False`")
     result = _form_validate_core(request, schema, **kwargs)
     if TYPE_CHECKING:
         assert isinstance(result, bool)

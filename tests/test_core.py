@@ -166,7 +166,7 @@ class _TestParsing(object):
                     **_validate_kwargs,
                 )
                 if not result:
-                    raise pyramid_formencode_classic.FormInvalid()
+                    raise pyramid_formencode_classic.FormInvalid(formStash=formStash)
 
                 raise ValueError(
                     "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
@@ -226,7 +226,7 @@ class _TestParsing(object):
                     **_validate_kwargs,
                 )
                 if not result:
-                    raise pyramid_formencode_classic.FormInvalid()
+                    raise pyramid_formencode_classic.FormInvalid(formStash=formStash)
 
                 raise ValueError(
                     "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
@@ -1882,7 +1882,7 @@ class TestCustomError(_TestHarness, unittest.TestCase):
                     )
 
                 if not result:
-                    raise pyramid_formencode_classic.FormInvalid()
+                    raise pyramid_formencode_classic.FormInvalid(formStash=formStash)
 
                 raise ValueError(
                     "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
@@ -2004,7 +2004,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 )
 
             if not result:
-                raise pyramid_formencode_classic.FormInvalid()
+                raise pyramid_formencode_classic.FormInvalid(formStash=formStash)
 
             raise ValueError(
                 "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
@@ -2039,7 +2039,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 )
 
             if not result:
-                raise pyramid_formencode_classic.FormInvalid()
+                raise pyramid_formencode_classic.FormInvalid(formStash=formStash)
 
             raise ValueError(
                 "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
@@ -2091,7 +2091,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 )
 
             if not result:
-                raise pyramid_formencode_classic.FormInvalid()
+                raise pyramid_formencode_classic.FormInvalid(formStash=formStash)
 
             raise ValueError(
                 "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
@@ -2132,7 +2132,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 )
 
             if not result:
-                raise pyramid_formencode_classic.FormInvalid()
+                raise pyramid_formencode_classic.FormInvalid(formStash=formStash)
 
             raise ValueError(
                 "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
@@ -2307,7 +2307,9 @@ class _TestParsingApi040(object):
                     **_validate_kwargs,
                 )
                 if not result:
-                    raise pyramid_formencode_classic.FormInvalid("OVERRIDE MESSAGE.")
+                    raise pyramid_formencode_classic.FormInvalid(
+                        "OVERRIDE MESSAGE.", formStash=formStash
+                    )
 
                 raise ValueError(
                     "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
@@ -2370,7 +2372,9 @@ class _TestParsingApi040(object):
                     **_validate_kwargs,
                 )
                 if not result:
-                    raise pyramid_formencode_classic.FormInvalid("OVERRIDE MESSAGE.")
+                    raise pyramid_formencode_classic.FormInvalid(
+                        "OVERRIDE MESSAGE.", formStash=formStash
+                    )
 
                 raise ValueError(
                     "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
@@ -2435,7 +2439,12 @@ class _TestParsingApi040(object):
                     **_validate_kwargs,
                 )
                 if not result:
-                    raise pyramid_formencode_classic.FormInvalid("OVERRIDE MESSAGE.")
+                    raise pyramid_formencode_classic.FormInvalid(
+                        "OVERRIDE MESSAGE.",
+                        formStash=formStash,
+                        message_append=False,
+                        message_prepend=True,
+                    )
 
                 raise ValueError(
                     "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
@@ -2655,7 +2664,7 @@ class _TestParsingApi040(object):
                 )
                 if not result:
                     raise pyramid_formencode_classic.FormInvalid(
-                        "OVERRIDE MESSAGE.", form=formStash
+                        "OVERRIDE MESSAGE.", formStash=formStash
                     )
 
                 raise ValueError(
@@ -3383,7 +3392,7 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
                 **_validate_kwargs,
             )
             if not result:
-                raise pyramid_formencode_classic.FormInvalid()
+                raise pyramid_formencode_classic.FormInvalid(formStash=formStash)
 
             raise ValueError(
                 "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"
@@ -3405,7 +3414,7 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
                 **_validate_kwargs,
             )
             if not result:
-                raise pyramid_formencode_classic.FormInvalid()
+                raise pyramid_formencode_classic.FormInvalid(formStash=formStash)
 
             raise ValueError(
                 "`form_validate` should have raised `pyramid_formencode_classic.FormInvalid`"

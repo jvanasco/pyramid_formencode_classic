@@ -1,8 +1,12 @@
 # stdlib
 from typing import Optional
+from typing import TYPE_CHECKING
 
 # local
 from ._utils import TYPES_ERRORS
+
+if TYPE_CHECKING:
+    from .objects import FormStash
 
 # ==============================================================================
 
@@ -18,22 +22,22 @@ class FormInvalid(BaseException):
 
     message: str
     errors: Optional[TYPES_ERRORS] = None
-    form = None  # ToDo: typing
+    formStash: Optional["FormStash"] = None
 
     def __init__(
         self,
         message: str = "",
         errors: Optional[TYPES_ERRORS] = None,
-        form=None,
+        formStash: Optional["FormStash"] = None,
         message_append: bool = True,
         message_prepend: bool = False,
     ):
         self.message = message
         self.errors = errors
-        self.form = form
+        self.formStash = formStash
         super(FormInvalid, self).__init__()
-        if form:
-            form.register_error_main_exception(
+        if formStash:
+            formStash.register_error_main_exception(
                 self,
                 message_append=message_append,
                 message_prepend=message_prepend,
@@ -53,7 +57,7 @@ class FormFieldInvalid(FormInvalid):
         field: str = "",
         message: str = "",
         errors=None,  # ToDo: typing
-        form=None,  # ToDo: typing
+        formStash: Optional["FormStash"] = None,
         message_append: bool = True,
         message_prepend: bool = False,
     ):
@@ -61,7 +65,7 @@ class FormFieldInvalid(FormInvalid):
         super(FormFieldInvalid, self).__init__(
             message=message,
             errors=errors,
-            form=form,
+            formStash=formStash,
             message_append=message_append,
             message_prepend=message_prepend,
         )
