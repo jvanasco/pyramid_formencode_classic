@@ -1,3 +1,17 @@
+0.7.0
+    BACKWARDS INCOMPATIBLE CHANGES
+    * `_form_validate_core`
+      * now requires `request`; this should not affect anything
+      * now requires `schema`; this should not affect anything
+      * `form_stash_object` now named `formStash`
+      * the `schema` is now stored in the `FormStash` result
+    * `form_validate`
+      * now requires `schema`; this should not affect anything
+    * `form_validate_simple`
+      * now requires `schema`; this should not affect anything
+    * `FormStash`
+        now requires a `schema`
+
 0.6.0
     BACKWARDS INCOMPATIBLE CHANGE
     * `form_validate` now requires `return_stash=True` - which is enabled by default.

@@ -26,13 +26,13 @@ log = logging.getLogger(__name__)
 class FormStash(object):
     """Wrapper object, stores all the vars and objects surrounding a form validation"""
 
+    schema: Optional["Schema"] = None
     name: str
     is_error: bool = False
     is_error_csrf: bool = False
     is_parsed: bool = False
     is_unicode_params: bool = False
     is_submitted_vars: bool = False
-    schema: Optional["Schema"] = None
     errors: Dict
     results: Dict
     defaults: Dict
@@ -66,11 +66,15 @@ class FormStash(object):
 
     def __init__(
         self,
-        error_main_key: Optional[str] = None,
+        schema: Optional["Schema"] = None,
         name: Optional[str] = None,
-        is_unicode_params: bool = False,
+        error_main_key: Optional[str] = None,
         error_main_text: Optional[str] = None,
+        is_unicode_params: bool = False,
     ):
+        self.schema = schema
+        if name:
+            self.name = name
         self.errors = {}
         self.results = {}
         self.defaults = {}
@@ -78,8 +82,6 @@ class FormStash(object):
             self._error_main_key = error_main_key
         if error_main_text:
             self._error_main_text = error_main_text
-        if name:
-            self.name = name
         self.is_unicode_params = is_unicode_params
         self._reprints = []
 
@@ -434,9 +436,9 @@ class FormStash(object):
                 "name": name,
                 "type": type,
                 "csrf_token": csrf_token,
-                "htmlfill_ignore": " data-formencode-ignore='1' "
-                if htmlfill_ignore
-                else "",
+                "htmlfill_ignore": (
+                    " data-formencode-ignore='1' " if htmlfill_ignore else ""
+                ),
             }
         )
 
@@ -455,13 +457,17 @@ class FormStashList(dict):
     def get_form(
         self,
         form_stash: str = DEFAULT_FORM_STASH,
+        schema: Optional["Schema"] = None,
         error_main_key: str = DEFAULT_ERROR_MAIN_KEY,
         error_main_text: str = DEFAULT_ERROR_MAIN_TEXT,
+        is_unicode_params: bool = False,
     ) -> FormStash:
         if form_stash not in self:
             self[form_stash] = FormStash(
+                schema=schema,
                 name=form_stash,
                 error_main_key=DEFAULT_ERROR_MAIN_KEY,
                 error_main_text=DEFAULT_ERROR_MAIN_TEXT,
+                is_unicode_params=is_unicode_params,
             )
         return self[form_stash]

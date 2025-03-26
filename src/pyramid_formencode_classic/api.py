@@ -42,9 +42,9 @@ log = logging.getLogger(__name__)
 
 def _form_validate_core(
     request: "Request",
-    schema: Optional["Schema"] = None,
-    form_stash: str = DEFAULT_FORM_STASH,
-    form_stash_object: Optional[FormStash] = None,
+    schema: "Schema",
+    form_stash: str = DEFAULT_FORM_STASH,  # name of stash
+    formStash: Optional[FormStash] = None,  # a subclassed object; WHY?
     validate_post: bool = True,
     validate_get: bool = False,
     validate_params: Optional[MultiDict] = None,
@@ -81,14 +81,17 @@ def _form_validate_core(
 
             ``validate_params`` will exclude get and post data
 
-    ``schema`` (None)
+    ``request`` required
+        A pyramid.request.Request object
+
+    ``schema`` required
         Refers to a FormEncode Schema object to use during validation.
 
     ``form_stash`` (pyramid_formencode_classic.DEFAULT_FORM_STASH = '_default')
         Name of the attribute the FormStash will be saved into.
         Useful if you have multiple forms.
 
-    ``form_stash_object`` (None)
+    ``formStash`` (None)
         you can pass in a form stash object if you decided to subclass or alter FormStash
 
     ``validate_post`` (True)
@@ -150,17 +153,25 @@ def _form_validate_core(
     """
     if __debug__:
         log.debug("form_validate - starting...")
+    if not request:
+        raise ValueError("`request` is required")
+    if not schema:
+        raise ValueError("`schema` is required")
     errors = {}
-    if form_stash_object is None:
+    if formStash is None:
         formStash = FormStash(
+            schema=schema,
+            name=form_stash,
             error_main_key=error_main_key,
             error_main_text=error_main_text,
-            name=form_stash,
             is_unicode_params=is_unicode_params,
         )
     else:
-        formStash = form_stash_object
-    formStash.schema = schema
+        if formStash.schema != schema:
+            raise ValueError(
+                "`formStash.schema`[%s] is not `schema`[%s]"
+                % (formStash.schema, schema)
+            )
 
     try:
         # if we don't pass in ``validate_params``...
@@ -203,18 +214,17 @@ def _form_validate_core(
         # initialize our results
         results = {}
 
-        if schema:
-            if __debug__:
-                log.debug("form_validate - validating against a schema")
-            try:
-                results = schema.to_python(
-                    decoded_params,
-                )
-            except formencode.Invalid as e:
-                errors = e.unpack_errors(variable_decode, dict_char, list_char)
-                if isinstance(errors, str):
-                    errors = {error_string_key: errors}
-            formStash.is_parsed = True
+        if __debug__:
+            log.debug("form_validate - validating against a schema")
+        try:
+            results = schema.to_python(
+                decoded_params,
+            )
+        except formencode.Invalid as e:
+            errors = e.unpack_errors(variable_decode, dict_char, list_char)
+            if isinstance(errors, str):
+                errors = {error_string_key: errors}
+        formStash.is_parsed = True
 
         formStash.results = results
         formStash.errors = errors
@@ -267,21 +277,23 @@ def _form_validate_core(
     return not formStash.is_error
 
 
-def form_validate(request: "Request", **kwargs) -> Tuple[bool, FormStash]:
+def form_validate(
+    request: "Request", schema: "Schema", **kwargs
+) -> Tuple[bool, FormStash]:
     if "return_stash" in kwargs:
         if kwargs["return_stash"] is not True:
             raise ValueError("`form_validate` REQUIRES `return_stash=True`")
-    result = _form_validate_core(request, **kwargs)
+    result = _form_validate_core(request, schema, **kwargs)
     if TYPE_CHECKING:
         assert isinstance(result, tuple)
     return result
 
 
-def form_validate_simple(request: "Request", **kwargs) -> bool:
+def form_validate_simple(request: "Request", schema: "Schema", **kwargs) -> bool:
     if "return_stash" in kwargs:
         if kwargs["return_stash"] not in (False, None):
             raise ValueError("`form_validate_simple` REQUIRES `return_stash=False`")
-    result = _form_validate_core(request, **kwargs)
+    result = _form_validate_core(request, schema, **kwargs)
     if TYPE_CHECKING:
         assert isinstance(result, bool)
     return result
@@ -290,7 +302,7 @@ def form_validate_simple(request: "Request", **kwargs) -> bool:
 def form_reprint(
     request: "Request",
     form_print_method: Optional[Callable],
-    form_stash=DEFAULT_FORM_STASH,
+    form_stash=DEFAULT_FORM_STASH,  # name of stash
     render_view: Optional[Callable] = None,
     render_view_template: Optional[str] = None,
     auto_error_formatter: Callable = formatter_nobr,
@@ -302,7 +314,7 @@ def form_reprint(
     ``request`` -- request instance
     ``form_print_method`` -- bound method to execute
     kwargs:
-    ``frorm_stash`` (pyramid_formencode_classic.DEFAULT_FORM_STASH = _default) -- specify a stash
+    ``form_stash`` (pyramid_formencode_classic.DEFAULT_FORM_STASH = _default) -- specify a stash
     ``auto_error_formatter`` (formatter_nobr) -- specify a formatter for rendering
         errors this is an htmlfill_kwargs, but we default to one without a br
     ``error_formatters`` (default None) is a dict of error formatters to be passed into
