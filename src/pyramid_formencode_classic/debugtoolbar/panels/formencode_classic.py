@@ -19,7 +19,9 @@ class FormencodeClassicDebugPanel(DebugPanel):
 
     name: str = "FormencodeClassic"
     has_content: Optional[bool] = None
-    template: str = "pyramid_formencode_classic.debugtoolbar.panels:templates/formencode_classic.dbtmako"
+    template: str = (
+        "pyramid_formencode_classic.debugtoolbar.panels:templates/formencode_classic.dbtmako"
+    )
 
     def __init__(self, request: "Request"):
         self.data: Dict = {}
