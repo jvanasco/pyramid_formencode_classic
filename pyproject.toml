@@ -3,3 +3,9 @@ requires = ["setuptools",]
 
 [tool.black]
 target-version = ['py36']
+
+# pyproject.toml
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

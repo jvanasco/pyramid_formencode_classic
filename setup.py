@@ -1,5 +1,6 @@
 """pyramid_formencode_classic installation script.
 """
+
 import os
 import re
 

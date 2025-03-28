@@ -1,3 +1,25 @@
+0.8.0
+    BACKWARDS INCOMPATIBLE CHANGES
+    FormInvalid
+    * `exceptions.FormInvalid`
+        `formStash` (formerly `form`) is now the first required arg
+        `errors` arg and attribute are removed; use the formStash instead
+    * `exceptions.FormFieldInvalid`
+        `formStash` (formerly `form`) is now the first required arg    
+        `errors` arg and attribute are removed; use the formStash instead
+    * removed `form_validate_simple`
+
+    Other changes:
+        `objects.FormStash::fatal_field`
+        * function typed to raise exception with `typing.NoReturn`
+        
+        `objects.FormStash::fatal_form`
+        * `message` renamed to `error_main`
+        * function typed to raise exception with `typing.NoReturn`
+        
+    
+
+
 0.7.0
     BACKWARDS INCOMPATIBLE CHANGES
     * `_form_validate_core`

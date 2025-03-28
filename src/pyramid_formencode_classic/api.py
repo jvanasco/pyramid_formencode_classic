@@ -16,9 +16,7 @@ from pyramid.response import Response as PyramidResponse
 from webob.multidict import MultiDict
 
 # local
-from ._defaults import DEFAULT_ERROR_MAIN_KEY
-from ._defaults import DEFAULT_ERROR_MAIN_TEXT
-from ._defaults import DEFAULT_FORM_STASH
+from . import _defaults
 from .exceptions import FormInvalid
 from .exceptions import ValidationStop
 from .formatters import formatter_nobr  # default formatter
@@ -41,7 +39,7 @@ log = logging.getLogger(__name__)
 def _form_validate_core(
     request: "Request",
     schema: "Schema",
-    form_stash: str = DEFAULT_FORM_STASH,  # name of stash
+    form_stash: str = _defaults.DEFAULT_FORM_STASH,  # name of stash
     formStash: Optional[FormStash] = None,  # a subclassed object; WHY?
     validate_post: bool = True,
     validate_get: bool = False,
@@ -50,8 +48,8 @@ def _form_validate_core(
     dict_char: str = ".",
     list_char: str = "-",
     state: Optional[Any] = None,  # passthrough to formencode
-    error_main_text: str = DEFAULT_ERROR_MAIN_TEXT,
-    error_main_key: str = DEFAULT_ERROR_MAIN_KEY,
+    error_main_text: Optional[str] = None,
+    error_main_key: Optional[str] = None,
     error_string_key: str = "Error_String",
     raise_FormInvalid: bool = False,
     csrf_name: str = "csrf_",
@@ -83,7 +81,7 @@ def _form_validate_core(
     ``schema`` required
         Refers to a FormEncode Schema object to use during validation.
 
-    ``form_stash`` (pyramid_formencode_classic.DEFAULT_FORM_STASH = '_default')
+    ``form_stash`` (pyramid_formencode_classic._defaults.DEFAULT_FORM_STASH = '_default')
         Name of the attribute the FormStash will be saved into.
         Useful if you have multiple forms.
 
@@ -144,6 +142,12 @@ def _form_validate_core(
         raise ValueError("`request` is required")
     if not schema:
         raise ValueError("`schema` is required")
+
+    if error_main_text is None:
+        error_main_text = _defaults.DEFAULT_ERROR_MAIN_TEXT
+    if error_main_key is None:
+        error_main_key = _defaults.DEFAULT_ERROR_MAIN_KEY
+
     errors = {}
     if formStash is None:
         formStash = FormStash(
@@ -171,9 +175,7 @@ def _form_validate_core(
             elif not validate_post and validate_get:
                 validate_params = request.GET
             elif not validate_post and not validate_get:
-                formStash.set_error(
-                    field=formStash.error_main_key, message="Nothing submitted."
-                )
+                formStash.set_error_nothing_submitted()
                 raise ValidationStop("no `validate_params`")
         if TYPE_CHECKING:
             assert isinstance(validate_params, MultiDict)
@@ -189,11 +191,10 @@ def _form_validate_core(
             decoded_params = _validate_params
 
         # if there are no params to validate against, then just stop
+        # TODO: test how there are no `decoded_params` after
+        #       determining there are `validate_params`
         if not decoded_params:
-            formStash.is_submitted_vars = False
-            formStash.set_error(
-                field=formStash.error_main_key, message="Nothing submitted."
-            )
+            formStash.set_error_nothing_submitted()
             raise ValidationStop("no `decoded_params`")
         else:
             formStash.is_submitted_vars = True
@@ -204,9 +205,7 @@ def _form_validate_core(
         if __debug__:
             log.debug("form_validate - validating against a schema")
         try:
-            results = schema.to_python(
-                decoded_params,
-            )
+            results = schema.to_python(decoded_params)
         except formencode.Invalid as e:
             errors = e.unpack_errors(variable_decode, dict_char, list_char)
             if isinstance(errors, str):
@@ -231,7 +230,8 @@ def _form_validate_core(
             if error_main_text:
                 # don't raise an error, because we have to stash the form
                 formStash.set_error(
-                    field=formStash.error_main_key, message=error_main_text
+                    field=formStash.error_main_key,
+                    message=error_main_text,
                 )
         else:
             if csrf_token is not None:
@@ -255,7 +255,11 @@ def _form_validate_core(
     # now raise if needed
     if formStash.is_error:
         if raise_FormInvalid:
-            raise FormInvalid(formStash=formStash)
+            raise FormInvalid(
+                formStash,
+                error_main=_defaults.DEFAULT_ERROR_MAIN_TEXT,
+                raised_by="_form_validate_core",
+            )
 
     return (not formStash.is_error, formStash)
 
@@ -269,17 +273,10 @@ def form_validate(
     return result
 
 
-def form_validate_simple(request: "Request", schema: "Schema", **kwargs) -> bool:
-    result = _form_validate_core(request, schema, **kwargs)
-    if TYPE_CHECKING:
-        assert isinstance(result, bool)
-    return result
-
-
 def form_reprint(
     request: "Request",
     form_print_method: Optional[Callable],
-    form_stash=DEFAULT_FORM_STASH,  # name of stash
+    form_stash=_defaults.DEFAULT_FORM_STASH,  # name of stash
     render_view: Optional[Callable] = None,
     render_view_template: Optional[str] = None,
     auto_error_formatter: Callable = formatter_nobr,
@@ -291,7 +288,7 @@ def form_reprint(
     ``request`` -- request instance
     ``form_print_method`` -- bound method to execute
     kwargs:
-    ``form_stash`` (pyramid_formencode_classic.DEFAULT_FORM_STASH = _default) -- specify a stash
+    ``form_stash`` (pyramid_formencode_classic._defaults.DEFAULT_FORM_STASH = _default) -- specify a stash
     ``auto_error_formatter`` (formatter_nobr) -- specify a formatter for rendering
         errors this is an htmlfill_kwargs, but we default to one without a br
     ``error_formatters`` (default None) is a dict of error formatters to be passed into

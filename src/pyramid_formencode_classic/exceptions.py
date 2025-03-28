@@ -3,7 +3,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 
 # local
-from ._utils import TYPES_ERRORS
+from . import _defaults
 
 if TYPE_CHECKING:
     from .objects import FormStash
@@ -20,58 +20,83 @@ class BaseException(Exception):
 class FormInvalid(BaseException):
     """Raise in your code when a Form is invalid"""
 
-    message: str
-    errors: Optional[TYPES_ERRORS] = None
-    formStash: Optional["FormStash"] = None
+    error_main: str
+    formStash: "FormStash"
+    raised_by: Optional[str]
 
     def __init__(
         self,
-        message: str = "",
-        errors: Optional[TYPES_ERRORS] = None,
-        formStash: Optional["FormStash"] = None,
-        message_append: bool = True,
-        message_prepend: bool = False,
+        formStash: "FormStash",
+        error_main: Optional[str] = None,
+        error_main_overwrite: bool = False,
+        error_main_append: bool = True,
+        error_main_prepend: bool = False,
+        raised_by: Optional[str] = None,
     ):
-        self.message = message
-        self.errors = errors
         self.formStash = formStash
+        if error_main is None:
+            error_main = _defaults.DEFAULT_ERROR_MAIN_TEXT
+        self.error_main = error_main
+        self.raised_by = raised_by
         super(FormInvalid, self).__init__()
-        if formStash:
-            formStash.register_error_main_exception(
-                self,
-                message_append=message_append,
-                message_prepend=message_prepend,
-            )
+        formStash.register_error_main_exception(
+            self,
+            error_main_overwrite=error_main_overwrite,
+            error_main_append=error_main_append,
+            error_main_prepend=error_main_prepend,
+        )
 
     def __repr__(self) -> str:
-        return "<FormInvalid `%s`>" % self.message
+        return "<FormInvalid `%s`>" % self.error_main
 
 
 class FormFieldInvalid(FormInvalid):
     """Raise in your code when a Form's Field is invalid"""
 
     field: str
+    field_error_text: str
 
     def __init__(
         self,
+        formStash: "FormStash",
         field: str = "",
-        message: str = "",
-        errors=None,  # ToDo: typing
-        formStash: Optional["FormStash"] = None,
-        message_append: bool = True,
+        field_error_text: Optional[str] = None,
+        error_main: Optional[str] = None,
+        message_append: bool = False,
         message_prepend: bool = False,
+        error_main_append: bool = False,
+        error_main_prepend: bool = False,
+        allow_unknown_fields: bool = False,
     ):
+        if not field:
+            raise ValueError("field `%s` must be provided")
+        if field not in formStash.schema.fields:
+            if not allow_unknown_fields:
+                raise ValueError(
+                    "field `%s` is not in schema: `%s`" % (field, formStash.schema)
+                )
         self.field = field
-        super(FormFieldInvalid, self).__init__(
-            message=message,
-            errors=errors,
-            formStash=formStash,
+        if field_error_text is None:
+            field_error_text = _defaults.DEFAULT_ERROR_FIELD_TEXT
+        self.field_error_text = field_error_text
+
+        # set the error so it appears in `formStash.results`
+        formStash.set_error(
+            field=field,
+            message=field_error_text,
             message_append=message_append,
             message_prepend=message_prepend,
         )
 
+        super(FormFieldInvalid, self).__init__(
+            error_main=error_main,
+            formStash=formStash,
+            error_main_append=error_main_append,
+            error_main_prepend=error_main_prepend,
+        )
+
     def __repr__(self) -> str:
-        return "<FormFieldInvalid %s: `%s`>" % (self.field, self.message)
+        return "<FormFieldInvalid %s: `%s`>" % (self.field, self.field_error_text)
 
 
 class CsrfInvalid(FormFieldInvalid):

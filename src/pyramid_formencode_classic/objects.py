@@ -3,13 +3,12 @@ import logging
 from typing import Dict
 from typing import Iterable
 from typing import List
+from typing import NoReturn
 from typing import Optional
 from typing import TYPE_CHECKING
 
 # local
-from ._defaults import DEFAULT_ERROR_MAIN_KEY
-from ._defaults import DEFAULT_ERROR_MAIN_TEXT
-from ._defaults import DEFAULT_FORM_STASH
+from . import _defaults
 from ._utils import TYPES_ERRORS
 from .exceptions import FormInvalid
 
@@ -26,21 +25,22 @@ log = logging.getLogger(__name__)
 class FormStash(object):
     """Wrapper object, stores all the vars and objects surrounding a form validation"""
 
-    schema: Optional["Schema"] = None
+    schema: "Schema"
     name: str
+    error_main_key: str
+    error_main_text: str
     is_error: bool = False
     is_error_csrf: bool = False
     is_parsed: bool = False
     is_unicode_params: bool = False
-    is_submitted_vars: bool = False
-    errors: Dict
-    results: Dict
-    defaults: Dict
+    is_submitted_vars: Optional[bool] = None
+    nothing_submitted_error_text: Optional[str] = None
+    errors: Dict[str, str]
+    results: Dict[str, str]
+    defaults: Dict[str, str]
 
-    # protected vars; use @property to access
+    # protected attribute; use property to access
     _css_error: str = "error"
-    _error_main_key: str = "Error_Main"
-    _error_main_text: Optional[str] = None
 
     html_error_placeholder_template: str = '<form:error name="%s"/>'
     html_error_placeholder_form_template: str = (
@@ -66,7 +66,7 @@ class FormStash(object):
 
     def __init__(
         self,
-        schema: Optional["Schema"] = None,
+        schema: "Schema",
         name: Optional[str] = None,
         error_main_key: Optional[str] = None,
         error_main_text: Optional[str] = None,
@@ -78,20 +78,19 @@ class FormStash(object):
         self.errors = {}
         self.results = {}
         self.defaults = {}
-        if error_main_key:
-            self._error_main_key = error_main_key
-        if error_main_text:
-            self._error_main_text = error_main_text
+
+        if error_main_key is None:
+            error_main_key = _defaults.DEFAULT_ERROR_MAIN_KEY  # "Error_Main"
+        self.error_main_key = error_main_key
+
+        if error_main_text is None:
+            error_main_text = (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT
+            )  # "There was an error with your form submission."
+        self.error_main_text = error_main_text
+
         self.is_unicode_params = is_unicode_params
         self._reprints = []
-
-    @property
-    def error_main_key(self) -> str:
-        return self._error_main_key
-
-    @property
-    def error_main_text(self) -> Optional[str]:
-        return self._error_main_text
 
     def set_css_error(self, css_error: str) -> None:
         """sets the css error field for the form"""
@@ -143,7 +142,8 @@ class FormStash(object):
         field: str,
         css_error: Optional[str] = None,
     ) -> str:
-        """Returns the css class if there is an error.  returns '' if there is not.
+        """Returns the css error class if there is an error; Returns '' if there is not.
+
         The default css_error is 'error' and can be set with `set_css_error`.
         You can also overwrite with a `css_error` kwarg."""
         if field in self.errors:
@@ -233,10 +233,20 @@ class FormStash(object):
             return self.errors[field]
         return None
 
+    def set_error_nothing_submitted(self):
+        log.debug("`FormStash.set_error_nothing_submitted`")
+        self.is_submitted_vars = False
+        self.nothing_submitted_error_text = _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED
+        self.set_error(
+            field=self.error_main_key,
+            message=_defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+        )
+
     def set_error(
         self,
         field: Optional[str] = None,
         message: Optional[str] = "Error",
+        message_overwrite: bool = False,
         message_append: bool = False,
         message_prepend: bool = False,
         is_error_csrf: Optional[bool] = None,
@@ -244,7 +254,7 @@ class FormStash(object):
         """
         Manages entries in the dict of errors
 
-        As of v0.4.0, this will not raise an exception
+        As of v0.4.0, this will NOT raise an exception
 
         `field`: the field in the form
         `message`: your error message
@@ -255,26 +265,57 @@ class FormStash(object):
 
         ``meessage_append` and ``message_prepend``` allow you to elegantly combine errors
         """
+        log.debug("`FormStash.set_error`")
+        log.debug(locals())
+
         if field is None:
             field = self.error_main_key
 
+        # pass 1 - "'Nothing submitted.'"
+
         if not message:  # None or ''
-            raise ValueError("use `clear_error`")
+            raise ValueError(
+                "no `message` provided. use `.clear_error` to remove an error."
+            )
+
+        if message_overwrite and (message_append or message_prepend):
+            raise ValueError(
+                "You can not set both `message_overwrite` with `message_append` or `message_prepend`"
+            )
 
         if message_append and message_prepend:
             raise ValueError("You can not set both `message_append` `message_prepend`")
-        if message_append or message_prepend:
-            _message_existing = self.errors[field] if (field in self.errors) else ""
+
+        _message_existing = self.errors[field] if (field in self.errors) else None
+        if _message_existing and not message_overwrite:
+            if field == self.error_main_key:
+                if not message_append and not message_prepend:
+                    if _message_existing == self.error_main_text:
+                        message_append = True
+                        message_prepend = False
+                    else:
+                        message_append = False
+                        message_prepend = True
+
             if not _message_existing and (field == self.error_main_key):
                 _message_existing = self.error_main_text
 
-            if _message_existing != message:  # don't duplicate the error
-                _message_existing = [_message_existing] if _message_existing else []
-                if message_append and message:
-                    _message_existing.append(message)
-                elif message_prepend and message:
-                    _message_existing.insert(0, message)
-                message = " ".join(_message_existing)
+            if self.is_submitted_vars is False:
+                if _message_existing == self.nothing_submitted_error_text:
+                    message_append = False
+                    message_prepend = True
+
+            if message_append or message_prepend:
+
+                if _message_existing != message:  # don't duplicate the error
+                    _msgs = [_message_existing] if _message_existing else []
+                    if message_append:
+                        if not _msgs[0].endswith(message):
+                            _msgs.append(message)
+                    elif message_prepend:
+                        if not _msgs[0].startswith(message):
+                            _msgs.insert(0, message)
+                    message = " ".join(_msgs)
 
         self.errors[field] = message
 
@@ -307,33 +348,53 @@ class FormStash(object):
 
     def fatal_form(
         self,
-        message: Optional[str] = None,
-        message_append: bool = True,
+        error_main: Optional[str] = None,
+        message_overwrite: bool = True,
+        message_append: bool = False,
         message_prepend: bool = False,
-    ):
+    ) -> NoReturn:
         """
         Sets an error for the main error key, then raises a `FormInvalid`.
+
+        `message_append`: default `False`.
+                          If `True`, will append the `message` argument to any existing argument in the `self.error_main_key` field
+        `message_prepend`: default `False`.
+                           If `True`, will prepend the `message` argument to any existing argument in the `self.error_main_key` field
         """
+        log.debug("`FormStash.fatal_form`")
+        log.debug(locals())
+
+        if error_main is None:
+            error_main = _defaults.DEFAULT_ERROR_MAIN_TEXT
+
         _kwargs = {}
+        if message_overwrite is not None:
+            _kwargs["message_overwrite"] = message_overwrite
         if message_append is not None:
             _kwargs["message_append"] = message_append
         if message_prepend is not None:
             _kwargs["message_prepend"] = message_prepend
-        # default to the error_main_text
-        if message is None:
-            message = self.error_main_text
-        self.set_error(field=self.error_main_key, message=message, **_kwargs)
-        self._raise_unique_FormInvalid()
+        self.set_error(field=self.error_main_key, message=error_main, **_kwargs)
+        self._raise_unique_FormInvalid(error_main=error_main, raised_by="fatal_form")
 
     def fatal_field(
         self,
-        field: Optional[str] = None,
+        field: str,
         message: Optional[str] = None,
-        message_append: bool = True,
+        error_main: Optional[str] = None,
+        message_overwrite: bool = False,
+        message_append: bool = True,  # don't overwrite a formencode error here
         message_prepend: bool = False,
-    ):
+        allow_unknown_fields: bool = False,
+    ) -> NoReturn:
         """
         Sets an error for ``field``, then raises a `FormInvalid`.
+
+        `message_append`: default `True`.
+                          If `True`, will append the `message` argument to any existing argument in the `self.error_main_key` field.
+
+        `message_prepend`: default `False`.
+                           If `True`, will prepend the `message` argument to any existing argument in the `self.error_main_key` field
 
         consider this code:
 
@@ -354,25 +415,39 @@ class FormStash(object):
             There was an error with your form.  We encountered a `CaughtError`
 
         """
-        if field is None:
-            raise ValueError("`field` must be submitted")
-        if message is None:
-            raise ValueError("`message` must be submitted")
+        log.debug("`FormStash.fatal_field`")
+        log.debug(locals())
+
+        if not field:
+            raise ValueError("field `%s` must be provided" % field)
+        if field not in self.schema.fields:
+            if not allow_unknown_fields:
+                raise ValueError(
+                    "field `%s` is not in schema: `%s`" % (field, self.schema)
+                )
+        if not message:
+            message = _defaults.DEFAULT_ERROR_FIELD_TEXT
         _kwargs = {}
+        if message_overwrite is not None:
+            _kwargs["message_overwrite"] = message_overwrite
         if message_append is not None:
             _kwargs["message_append"] = message_append
         if message_prepend is not None:
             _kwargs["message_prepend"] = message_prepend
         self.set_error(field=field, message=message, **_kwargs)
-        self._raise_unique_FormInvalid()
+        self._raise_unique_FormInvalid(error_main=error_main, raised_by="fatal_field")
 
-    def _raise_unique_FormInvalid(self):
+    def _raise_unique_FormInvalid(
+        self,
+        error_main: Optional[str] = None,
+        raised_by: Optional[str] = None,
+    ) -> NoReturn:
         """
         this is used to defend against integrating an exception multiple times
         via `register_error_main_exception` after being created in
         `fatal_form` or `fatal_field`.
         """
-        _FormInvalid = FormInvalid(formStash=self)
+        _FormInvalid = FormInvalid(self, error_main=error_main, raised_by=raised_by)
         if self._exceptions_integrated is None:
             self._exceptions_integrated = []
         self._exceptions_integrated.append(_FormInvalid)
@@ -380,48 +455,59 @@ class FormStash(object):
 
     def register_error_main_exception(
         self,
-        exc: Exception,
-        message_append: bool = True,
-        message_prepend: bool = False,
+        exc: FormInvalid,
+        error_main_overwrite: bool = False,
+        error_main_append: bool = False,
+        error_main_prepend: bool = False,
     ) -> None:
         """
         This is a convenience method to replace this common use pattern:
         ------------------------------------------------------------------------
             try:
                 ...
-                raise formhandling.FormInvalid('foo', formStash=formStash)
+                raise formhandling.FormInvalid(formStash, 'foo')
                 ...
             except formhandling.FormInvalid as exc:
                 - if exc.message:
-                -     formStash.set_error(field=formStash.error_main_key,
-                -                         message=exc.message,
-                -                         message_prepend=True
-                -                         )
-                + formStash.register_error_main_exception(exc)
-                <<<<<
+                -     formStash.set_error(
+                -         field=formStash.error_main_key,
+                -         message=exc.message,
+                -         error_main_prepend=True,
+                -         )
+                + formStash.register_error_main_exception(
+                +     exc,
+                +     error_main_prepend=True,
+                + )
                 return formhandling.form_reprint(
                     self.request,
                     self._print_form,
                 )
         ------------------------------------------------------------------------
         """
-        print("register_error_main_exception", id(exc), message_append, message_prepend)
         if isinstance(exc, FormInvalid):
             if self._exceptions_integrated is None:
                 self._exceptions_integrated = []
 
             if exc in self._exceptions_integrated:
-                log.debug("exception already integrated")
-                print("exception already integrated")
+                log.debug(
+                    "`FormStash.register_error_main_exception`: exception already integrated"
+                )
             else:
+                log.debug(
+                    "`FormStash.register_error_main_exception`: integrating exception"
+                )
                 self._exceptions_integrated.append(exc)
-                if exc.message:
-                    print("set_error", message_append, message_prepend)
+                if exc.error_main:
+                    log.debug(
+                        "`FormStash.register_error_main_exception`: invoking `set_error`"
+                    )
+                    log.debug(locals())
                     self.set_error(
                         field=self.error_main_key,
-                        message=exc.message,
-                        message_append=message_append,
-                        message_prepend=message_prepend,
+                        message=exc.error_main,
+                        message_overwrite=error_main_overwrite,
+                        message_append=error_main_append,
+                        message_prepend=error_main_prepend,
                     )
 
     def csrf_input_field(
@@ -459,18 +545,18 @@ class FormStashList(dict):
 
     def get_form(
         self,
-        form_stash: str = DEFAULT_FORM_STASH,
+        form_stash: str = _defaults.DEFAULT_FORM_STASH,
         schema: Optional["Schema"] = None,
-        error_main_key: str = DEFAULT_ERROR_MAIN_KEY,
-        error_main_text: str = DEFAULT_ERROR_MAIN_TEXT,
+        error_main_key: str = _defaults.DEFAULT_ERROR_MAIN_KEY,
+        error_main_text: str = _defaults.DEFAULT_ERROR_MAIN_TEXT,
         is_unicode_params: bool = False,
     ) -> FormStash:
         if form_stash not in self:
             self[form_stash] = FormStash(
                 schema=schema,
                 name=form_stash,
-                error_main_key=DEFAULT_ERROR_MAIN_KEY,
-                error_main_text=DEFAULT_ERROR_MAIN_TEXT,
+                error_main_key=error_main_key,
+                error_main_text=error_main_text,
                 is_unicode_params=is_unicode_params,
             )
         return self[form_stash]
