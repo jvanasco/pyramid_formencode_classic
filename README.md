@@ -2,9 +2,17 @@
 
 `pyramid_formencode_classic` is a port of some classic `Pylons` form validation concepts onto the `Pyramid` framework.
 
+The package automates `formencode`'s validation of their Schemas under Pyramid, and offers a `FormStash` object to manag the validation results.
+
 ## Installation
 
 This requires the 2.0 branch of formencode.
+
+
+### Current Version(s)
+
+Version 0.8.0 is current and recommended.  It has major breaking changes against earlier versions.
+Version 0.7.0 offers minimal breaking changes against earlier versions while fixing some issues.
 
 
 ### Versioning Policy
@@ -18,7 +26,6 @@ This project using a Semantic Versioning Policy: `Major.Minor.Patch`.
 The recommended usage is to pin versioning within the `Major.Minor` range:
 
 	pyramid_formencode_classic >=0.8.0, <0.9.0
-
 
 ## Debugtoolbar Support?
 
@@ -37,9 +44,104 @@ The panel shows information such as:
 * form configuration
 
 
+## How does this handle form validation?
+
+The simplest way to utilize this library is with this code:
+
+    result: bool
+    formStash: pyramid_formencode_classic.FormStash
+    request: pyramid.request.Request
+    Form_Email: formencode.Schema
+
+	(result, formStash) = pyramid_formencode_classic.form_validate(request, schema=Form_Email)
+
+`form_validate` can either raise an Exception (`pyramid_formencode_classic.exceptions.FormInvalid`) or return `False``, based on the kwargs.
+
+if `form_validate` raises an Exception, the `FormStash` is available as an attribute.
+
+Formencode's htmlfill can be used to re-render the form with errors.
+
+## Pyramid Integration
+
+Just do this::
+
+	config.include('pyramid_formencode_classic')
+
+Which will invoke `Pyramid`'s `add_request_method` to add a new attribute to your request.
+
+`request.pyramid_formencode_classic` will be a per-request instance of `pyramid_formencode_classic.FormStashList`.
+
+Parsing a form will manage the formdata in `request.pyramid_formencode_classic['_default']` the default form stash.
+
+If you want to specify a particular stash, because you use multiple forms on a page or have other needs:
+
+* `request.pyramid_formencode_classic.get_form(...)` accepts a `form_stash` kwarg, which defaults to `_default`
+* `form_validate(...)` accepts a `form_stash` kwarg, which defaults to `_default`
+* `form_reprint(...)` accepts a `form_stash` kwarg, which defaults to `_default`
+
+
+## Caveats, Oddities, Etc
+
+### Custom Errors, Custom Error Displays and Missing Fields
+
+#### Where are errors placed?  What about missing fields?
+
+`formencode.htmlfill` prefers to upgrade a html form element with the error information.
+
+If the html input for an error is missing, such as a custom `Error_Main` field, `formencode` will attempt to do two things:
+
+1. `formencode` will look for a custom `form:error` field, such as `<form:error name="Error_Main"/>`.
+2. If no fields are available, `formencode` will *PREPEND* the error messages to the document.  This can create problems if you are running the reprint on a full (not partial) html page.
+
+#### How are errors styled?
+
+`formencode` styles errors using two arguments.
+
+* `auto_error_formatter` is a function that formats the error messages for fields which do not appear on the document and are pre-pended.
+* `error_formatters` is a dict of error formatters that can be passed into `htmlfill`.  if provided, these will be merged into the htmlfill defaults.
+
+`htmlfill` allows a bit of customization by supporting a `format` attribute in `<form:error/>` declarations, which will invoke the respective entry in the `error_formatters` dict.
+
+#### How can a "global" form error be handled?
+
+Handling a custom error can be achieved by reserving a special `error_main` key. By default, `pyramid_formencode_classic` uses `Error_Main`.
+
+Once you set that field as a form error,  `formencode.htmlfill` will replace this markup in your template
+
+    <form:error name="Error_Main"/>
+
+with the following html:
+
+    <!-- for: Error_Main -->
+	<span class="error-message">%(Error_Main)s</span><br/>
+
+In which the `Error_main` text has been run through `error_formatters['default']`
+
+There is a small caveat:
+
+In order for the text to appear in the form where you wish, you must write `<form:error name="Error_Main"/>` in the form.  Non-error views will contain that text in the html source, but not render it; error views will replace it with properly formatted errors.
+
+This package offers a convenience method to conditionally render that text:
+
+	<html><head></head><body><div>
+	<form action="/" method="POST">
+		<% form = request.pyramid_formencode_classic.get_form() %>
+		${form.html_error_placeholder()|n}
+		<input type="text" name="email" value="" />
+		<input type="text" name="username" value="" />
+	</form>
+	</div></body></html>
+
+
+If the marking is not in your template, it will be at the top of the document (before the html), after being run through the `auto_error_formatter`
+
+    <!-- for: Error_Main -->
+    <span class="error-message">${error_main}</span>
+
+
 ### Why doesn't form_validate` raise an Exception by default?
 
-This design choice was made to allow for flexible scoping by default
+This design choice was made to allow for flexible scoping by default::
 
 	try:
 		(result, formStash) = form_validate(request, schema=Form_Email)
@@ -60,8 +162,8 @@ The alternative is::
 
 Most implementations will want to define their own `form_validate()` function
 that invokes `pyramid_formencode_classic.form_validate` with custom defaults, so
-the default behavior is somewhat irrelevant. 
-		
+the default behavior is somewhat irrelevant.
+
 
 # Examples
 
@@ -167,4 +269,14 @@ Bootstrap Example
         3. We tell pyramid to use 'formhandling.formatter_none' as the error formatter.  This surpresses errors.  We need to do that instead of using custom error formatters, because FormEncode places errors BEFORE the fields, not AFTER.
         4. I've included two methods of presenting field errors.  they are funtinoally the same.
         5. I've used an ErrorMain to show that there are issues on the form - not just a specific field.
+
+
+#### How does it work?
+
+The `form_stash` argument represents the unique `FormStash` object on the `request` (when it is not explicitly provided, it defaults to `_default`)
+
+The `data_formencode_form` argument is passed from `form_reprint` to `formencode.htmlfill`; when provided, `formencode` will ignore tags which don't match the active formencode form's elements.
+
+The HTML form elements are associated with a form via the attribute `data-formencode-form`
+
 

@@ -8,6 +8,8 @@
         `formStash` (formerly `form`) is now the first required arg    
         `errors` arg and attribute are removed; use the formStash instead
     * removed `form_validate_simple`
+    * formatter_hidden
+        now stores error in "value" instead of "name"
 
     Other changes:
         `objects.FormStash::fatal_field`
@@ -16,9 +18,6 @@
         `objects.FormStash::fatal_form`
         * `message` renamed to `error_main`
         * function typed to raise exception with `typing.NoReturn`
-        
-    
-
 
 0.7.0
     BACKWARDS INCOMPATIBLE CHANGES

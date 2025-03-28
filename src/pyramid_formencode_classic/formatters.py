@@ -20,9 +20,9 @@ def formatter_help_inline(error: str) -> str:
 
 def formatter_hidden(error: str) -> str:
     """
-    returns a hidden field with the error in the name
+    returns a hidden field with the error in the value
     """
-    return '<input type="hidden" name="%s" />\n' % html_escape(error)
+    return '<input type="hidden" value="%s" />\n' % html_escape(error)
 
 
 def formatter_nobr(error: str) -> str:

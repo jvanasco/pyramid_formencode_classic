@@ -595,13 +595,13 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="%s" />
+    <input type="hidden" value="%s" />
 
     <!-- for: email -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
@@ -734,7 +734,7 @@ class TestParsing_FormA_ErrorPlaceholder_None(
             "auto_error_formatter": formatters.formatter_hidden,
             "response_text": """\
 <!-- for: Error_Main -->
-<input type="hidden" name="%s Nothing submitted." />
+<input type="hidden" value="%s Nothing submitted." />
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -860,15 +860,15 @@ class TestParsing_FormA_ErrorPlaceholder_None(
             "auto_error_formatter": formatters.formatter_hidden,
             "response_text": """\
 <!-- for: Error_Main -->
-<input type="hidden" name="%s" />
+<input type="hidden" value="%s" />
 <html><head></head><body><div>
 <form action="/" method="POST">
     
     <!-- for: email -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
@@ -1121,13 +1121,13 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="%s" />
+    <input type="hidden" value="%s" />
 
     <!-- for: email -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
@@ -1251,7 +1251,7 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="%s Nothing submitted." />
+    <input type="hidden" value="%s Nothing submitted." />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
@@ -1384,13 +1384,13 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="%s" />
+    <input type="hidden" value="%s" />
 
     <!-- for: email -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
@@ -1509,7 +1509,7 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="%s Nothing submitted." />
+    <input type="hidden" value="%s Nothing submitted." />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
@@ -1642,13 +1642,13 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="%s" />
+    <input type="hidden" value="%s" />
 
     <!-- for: email -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
@@ -1776,7 +1776,7 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
             "error_formatters": {"default": formatters.formatter_hidden},
             "response_text": """\
 <!-- for: Error_Main -->
-<input type="hidden" name="%s Nothing submitted." />
+<input type="hidden" value="%s Nothing submitted." />
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -1909,15 +1909,15 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
             "error_formatters": {"default": formatters.formatter_hidden},
             "response_text": """\
 <!-- for: Error_Main -->
-<input type="hidden" name="%s" />
+<input type="hidden" value="%s" />
 <html><head></head><body><div>
 <form action="/" method="POST">
     
     <!-- for: email -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
@@ -2950,13 +2950,13 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="%s OVERRIDE MESSAGE." />
+    <input type="hidden" value="%s OVERRIDE MESSAGE." />
 
     <!-- for: email -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
@@ -3087,13 +3087,13 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="OVERRIDE MESSAGE. %s" />
+    <input type="hidden" value="OVERRIDE MESSAGE. %s" />
 
     <!-- for: email -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
@@ -3222,13 +3222,13 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="FATAL FORM." />
+    <input type="hidden" value="FATAL FORM." />
 
     <!-- for: email -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
@@ -3358,13 +3358,13 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="%s" />
+    <input type="hidden" value="%s" />
 
     <!-- for: email -->
-<input type="hidden" name="Missing value THIS FIELD CAUSED A FATAL ERROR." />
+<input type="hidden" value="Missing value THIS FIELD CAUSED A FATAL ERROR." />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
@@ -3495,13 +3495,13 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" name="%s OVERRIDE MESSAGE." />
+    <input type="hidden" value="%s OVERRIDE MESSAGE." />
 
     <!-- for: email -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
-<input type="hidden" name="Missing value" />
+<input type="hidden" value="Missing value" />
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
