@@ -7,6 +7,7 @@ the test-cases check for specific whitespace
 
 # stdblib
 import logging
+import sys
 from typing import Dict
 from typing import Optional
 import unittest
@@ -3819,10 +3820,15 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                     "`formStash.fatal_field` should have raised `TypeError`"
                 )
             except TypeError as exc:
-                assert (
-                    exc.args[0]
-                    == "FormStash.fatal_field() missing 1 required positional argument: 'field'"
-                )
+                _exc_expected_msg: str
+                if sys.version_info() < 3.9:
+                    # this affects py38
+                    _exc_expected_msg = (
+                        "fatal_field() missing 1 required positional argument: 'field'"
+                    )
+                else:
+                    _exc_expected_msg = "FormStash.fatal_field() missing 1 required positional argument: 'field'"
+                self.assertEqual(exc.args[0], _exc_expected_msg)
 
             try:
                 formStash.fatal_field(field="unknown", error_field=message)
