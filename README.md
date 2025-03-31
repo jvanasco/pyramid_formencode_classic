@@ -66,6 +66,51 @@ Version 0.8.0 is current and recommended.  It has major breaking changes against
 Version 0.7.0 offers minimal breaking changes against earlier versions while fixing some issues.
 
 
+## Under the Hood
+
+A `FormStash` object saves the parsed form data into a `ParsedForm` dict.
+
+    FormStash.parsed_form: ParsedForm = {}
+
+The `ParsedForm` dict has 4 entries, which are all dicts:
+
+    results
+    errors
+    defaults
+    special_errors
+
+`results`, `errors` and `defaults` have accessor properties on the FormStash object.
+
+The `special_errors` entry saves information about special errors, such as "nothing_submitted".
+
+
+### Error Concepts
+
+For the purpose of this package, errors can be grouped into two concepts:
+
+meta-errors
+    Errors about the Form itself, such as:
+        "There is an error with the form"
+        "nothing was submitted."
+field-errors
+    Errors for specific fields
+
+#### meta-errors: Error_Main or error_main_key
+
+To integrate meta-errors into the form, the FormStash will create an "Error_Main"
+entry in the `PrasedForm["errors"]`  dict, which is available as `FormStash.errors`.
+
+`Error_Main` is a key in the `FormStash.error` (`ParsedForm["errors"]`) Dict which corresponds
+to the main message of a form failure.
+
+The `set_error` routine will integrate meta errors, such as `nothing_submitted` into
+the `Error_Main` text, when setting the main form error.
+
+#### field errors
+
+The `errors` dict will contain the field errors as validated.
+
+
 ### Versioning Policy
 
 This project using a Semantic Versioning Policy: `Major.Minor.Patch`.

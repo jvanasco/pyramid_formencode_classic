@@ -1,3 +1,51 @@
+0.9.0
+
+    This release continues the work of 0.8.0 in trying to minimize and simplify
+    the API while still giving control of the meta/special errors.
+    
+    FormStash-
+        the processed form data is now within a dict, ``ParsedForm```
+            Changes:
+                self.defaults -> self.parsed_form["defaults"]
+                self.errors -> self.parsed_form["errors"]
+                self.results -> self.parsed_form["results"]
+            properties are used to make this (mostly) backwards compatible
+        `set_error_nothing_submitted` is now `set_error_nothing_submitted(_set_error__nothing_submitted)`
+        `set_error` now accepts `integrate_special_errors:bool`
+        `fatal_form` no longer accepts:
+            message_overwrite
+            message_append
+            message_prepend
+        `fatal_field` no longer accepts:
+            message_overwrite
+            message_append
+            message_prepend
+        `_raise_unique_FormInvalid` no longer accepts:
+            error_message_overwrite
+            error_message_append
+            error_message_prepend
+
+    * `exceptions.FormInvalid`
+        removed `error_main_overwrite`
+        removed `error_main_append`
+        removed `error_main_prepend`
+        added `integrate_special_errors`
+        added `error_no_submission_text`
+    * `exceptions.FormFieldInvalid`
+        removed `message_append`
+        removed `message_prepend`
+        removed `error_main_append`
+        removed `error_main_prepend`
+        added `raised_by`
+        added `integrate_special_errors`
+        added `error_no_submission_text`
+
+
+
+    TODO:
+        # coverage run --source tests -m pytest tests
+        coverage run --include src/*,tests/* -m pytest tests
+        coverage report && coverage html
 0.8.0
 
     (2025.043.31)
