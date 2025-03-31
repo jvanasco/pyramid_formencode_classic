@@ -39,7 +39,7 @@ log = logging.getLogger(__name__)
 def _form_validate_core(
     request: "Request",
     schema: "Schema",
-    form_stash: str = _defaults.DEFAULT_FORM_STASH,  # name of stash
+    form_stash: Optional[str] = None,  # name of stash
     formStash: Optional[FormStash] = None,  # a subclassed object; WHY?
     validate_post: bool = True,
     validate_get: bool = False,
@@ -51,6 +51,7 @@ def _form_validate_core(
     error_main_text: Optional[str] = None,
     error_main_key: Optional[str] = None,
     error_string_key: str = "Error_String",
+    error_no_submission_text: Optional[str] = None,
     raise_FormInvalid: bool = False,
     csrf_name: str = "csrf_",
     csrf_token: Optional[str] = None,
@@ -66,7 +67,7 @@ def _form_validate_core(
     Given a form schema, validate will attempt to validate the schema
 
     If validation was successful, the valid result dict will be saved as
-    ``request.formResult.results``.
+    ``request.formStash.results``.
 
     .. warnings::
             ``validate_post`` and ``validate_get`` applies to *where* the
@@ -143,10 +144,15 @@ def _form_validate_core(
     if not schema:
         raise ValueError("`schema` is required")
 
+    # delayed defaults
+    if form_stash is None:
+        form_stash = _defaults.DEFAULT_FORM_STASH
     if error_main_text is None:
         error_main_text = _defaults.DEFAULT_ERROR_MAIN_TEXT
     if error_main_key is None:
         error_main_key = _defaults.DEFAULT_ERROR_MAIN_KEY
+    if error_no_submission_text is None:
+        error_no_submission_text = _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED
 
     errors = {}
     if formStash is None:
@@ -156,6 +162,7 @@ def _form_validate_core(
             error_main_key=error_main_key,
             error_main_text=error_main_text,
             is_unicode_params=is_unicode_params,
+            error_no_submission_text=error_no_submission_text,
         )
     else:
         if formStash.schema != schema:
@@ -175,7 +182,7 @@ def _form_validate_core(
             elif not validate_post and validate_get:
                 validate_params = request.GET
             elif not validate_post and not validate_get:
-                formStash.set_error_nothing_submitted()
+                formStash._set_error__nothing_submitted()
                 raise ValidationStop("no `validate_params`")
         if TYPE_CHECKING:
             assert isinstance(validate_params, MultiDict)
@@ -194,10 +201,9 @@ def _form_validate_core(
         # TODO: test how there are no `decoded_params` after
         #       determining there are `validate_params`
         if not decoded_params:
-            formStash.set_error_nothing_submitted()
+            formStash._set_error__nothing_submitted()
             raise ValidationStop("no `decoded_params`")
-        else:
-            formStash.is_submitted_vars = True
+        formStash.is_submitted_vars = True
 
         # initialize our results
         results = {}
@@ -212,9 +218,9 @@ def _form_validate_core(
                 errors = {error_string_key: errors}
         formStash.is_parsed = True
 
-        formStash.results = results
-        formStash.errors = errors
-        formStash.defaults = decoded_params
+        formStash.parsed_form["defaults"] = decoded_params
+        formStash.parsed_form["errors"] = errors
+        formStash.parsed_form["results"] = results
 
         if errors:
             if __debug__:

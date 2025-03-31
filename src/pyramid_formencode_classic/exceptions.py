@@ -21,6 +21,7 @@ class FormInvalid(BaseException):
     """Raise in your code when a Form is invalid"""
 
     error_main: str
+    error_no_submission_text: str
     formStash: "FormStash"
     raised_by: Optional[str]
 
@@ -28,10 +29,9 @@ class FormInvalid(BaseException):
         self,
         formStash: "FormStash",
         error_main: Optional[str] = None,
-        error_main_overwrite: bool = False,
-        error_main_append: bool = True,
-        error_main_prepend: bool = False,
         raised_by: Optional[str] = None,
+        integrate_special_errors: bool = True,
+        error_no_submission_text: Optional[str] = None,
     ):
         self.formStash = formStash
         if error_main is None:
@@ -41,9 +41,8 @@ class FormInvalid(BaseException):
         super(FormInvalid, self).__init__()
         formStash.register_error_main_exception(
             self,
-            error_main_overwrite=error_main_overwrite,
-            error_main_append=error_main_append,
-            error_main_prepend=error_main_prepend,
+            integrate_special_errors=integrate_special_errors,
+            error_no_submission_text=error_no_submission_text,
         )
 
     def __repr__(self) -> str:
@@ -62,11 +61,10 @@ class FormFieldInvalid(FormInvalid):
         field: str = "",
         error_field: Optional[str] = None,
         error_main: Optional[str] = None,
-        message_append: bool = False,
-        message_prepend: bool = False,
-        error_main_append: bool = False,
-        error_main_prepend: bool = False,
         allow_unknown_fields: bool = False,
+        raised_by: Optional[str] = None,
+        integrate_special_errors: bool = True,
+        error_no_submission_text: Optional[str] = None,
     ):
         if not field:
             raise ValueError("field `%s` must be provided")
@@ -84,15 +82,18 @@ class FormFieldInvalid(FormInvalid):
         formStash.set_error(
             field=field,
             message=error_field,
-            message_append=message_append,
-            message_prepend=message_prepend,
         )
-
         super(FormFieldInvalid, self).__init__(
-            error_main=error_main,
             formStash=formStash,
-            error_main_append=error_main_append,
-            error_main_prepend=error_main_prepend,
+            error_main=error_main,
+            raised_by=raised_by,
+            integrate_special_errors=integrate_special_errors,
+            error_no_submission_text=error_no_submission_text,
+        )
+        formStash.register_error_main_exception(
+            self,
+            integrate_special_errors=integrate_special_errors,
+            error_no_submission_text=error_no_submission_text,
         )
 
     def __repr__(self) -> str:

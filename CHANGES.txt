@@ -1,3 +1,17 @@
+0.9.0
+    FormStash-
+        the processed form data is now within a dict, ParsedForm
+            Changes:
+                self.defaults -> self.parsed_form["defaults"]
+                self.errors -> self.parsed_form["errors"]
+                self.results -> self.parsed_form["results"]
+            properties are used to make this (mostly) backwards compatible
+
+
+    TODO:
+        # coverage run --source tests -m pytest tests
+        coverage run --include src/*,tests/* -m pytest tests
+        coverage report && coverage html
 0.8.0
 
     (unreleased)

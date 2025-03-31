@@ -27,6 +27,7 @@ with open(
 requires = [
     "pyramid",
     "formencode>=2.0.0",
+    "typing_extensions",  # TypedDict
 ]
 tests_require = [
     "mypy",

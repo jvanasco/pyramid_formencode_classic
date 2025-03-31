@@ -8,6 +8,7 @@ the test-cases check for specific whitespace
 # stdblib
 import logging
 import sys
+from typing import Callable
 from typing import Dict
 from typing import Optional
 import unittest
@@ -30,6 +31,11 @@ from pyramid_formencode_classic import formatters
 # Set these so it's easier to debug tests
 _defaults.DEFAULT_ERROR_MAIN_TEXT = "[[DEFAULT_ERROR_MAIN_TEXT]]"
 _defaults.DEFAULT_ERROR_FIELD_TEXT = "[[DEFAULT_ERROR_FIELD_TEXT]]"
+_defaults.DEFAULT_ERROR_NOTHING_SUBMITTED = "//DEFAULT_ERROR_NOTHING_SUBMITTED//"
+
+CUSTOM_ERROR_MAIN = "[{{[CUSTOM_ERROR_MAIN]}}]"
+ALT_CUSTOM_ERROR_MAIN = "(((ALT_CUSTOM_ERROR_MAIN)))"
+CUTOM_ERROR_NOTHING_SUBMITTED = "(((CUSTOM_NOTHING_SUBMITTED)))"
 
 
 DEBUG_PRINT = True
@@ -124,7 +130,7 @@ class _TestRenderSimple(object):
         rendered = _print_form_simple()
         try:
             assert rendered.text == _expected_text
-        except:
+        except:  # pragma: no cover
             if DEBUG_PRINT:
                 print("------------")
                 print(rendered.text)
@@ -185,7 +191,7 @@ class _TestParsing(object):
                 if not result:
                     raise pyramid_formencode_classic.FormInvalid(formStash)
 
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
                 )
 
@@ -196,7 +202,7 @@ class _TestParsing(object):
                 )
                 try:
                     assert rendered.text == _expected_text
-                except:
+                except:  # pragma: no cover
                     if DEBUG_PRINT:
                         print("=============")
                         print("%s.test_no_params" % self.__class__)
@@ -209,7 +215,7 @@ class _TestParsing(object):
                     tests_fail.append(test_name)
             tests_completed.append(test_name)
 
-        if tests_fail:
+        if tests_fail:  # pragma: no cover
             raise ValueError(tests_fail)
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -248,7 +254,7 @@ class _TestParsing(object):
                 if not result:
                     raise pyramid_formencode_classic.FormInvalid(formStash)
 
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
                 )
 
@@ -259,7 +265,7 @@ class _TestParsing(object):
                 )
                 try:
                     assert rendered.text == _expected_text
-                except:
+                except:  # pragma: no cover
                     if DEBUG_PRINT:
                         print("------------")
                         print("%s.test_submit" % self.__class__)
@@ -268,7 +274,7 @@ class _TestParsing(object):
                     tests_fail.append(test_name)
             tests_completed.append(test_name)
 
-        if tests_fail:
+        if tests_fail:  # pragma: no cover
             raise ValueError(tests_fail)
 
 
@@ -373,14 +379,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "test_formatter_is_none": {
             "auto_error_formatter": None,
@@ -388,14 +397,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "test_formatter_nobr": {
             "auto_error_formatter": formatters.formatter_nobr,
@@ -403,14 +415,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_help_inline": {
             "auto_error_formatter": formatters.formatter_help_inline,
@@ -418,14 +433,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_comment": {
             "auto_error_formatter": formatters.formatter_comment,
@@ -433,14 +451,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_empty_string": {
             "auto_error_formatter": formatters.formatter_empty_string,
@@ -448,14 +469,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_hidden": {
             "auto_error_formatter": formatters.formatter_hidden,
@@ -463,14 +487,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
     }
 
@@ -648,7 +675,7 @@ class TestParsing_FormA_ErrorPlaceholder_None(
             # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
             "response_text": """\
 <!-- for: Error_Main -->
-<span class="error-message">%s Nothing submitted.</span>
+<span class="error-message">%s %s</span>
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -657,13 +684,16 @@ class TestParsing_FormA_ErrorPlaceholder_None(
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "test_formatter_is_none": {
             "auto_error_formatter": None,
             "response_text": """\
 <!-- for: Error_Main -->
-<span class="error-message">%s Nothing submitted.</span><br />
+<span class="error-message">%s %s</span><br />
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -672,13 +702,16 @@ class TestParsing_FormA_ErrorPlaceholder_None(
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "test_formatter_nobr": {
             "auto_error_formatter": formatters.formatter_nobr,
             "response_text": """\
 <!-- for: Error_Main -->
-<span class="error-message">%s Nothing submitted.</span>
+<span class="error-message">%s %s</span>
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -687,13 +720,16 @@ class TestParsing_FormA_ErrorPlaceholder_None(
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_help_inline": {
             "auto_error_formatter": formatters.formatter_help_inline,
             "response_text": """\
 <!-- for: Error_Main -->
-<span class="help-inline">%s Nothing submitted.</span>
+<span class="help-inline">%s %s</span>
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -702,13 +738,16 @@ class TestParsing_FormA_ErrorPlaceholder_None(
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_comment": {
             "auto_error_formatter": formatters.formatter_comment,
             "response_text": """\
 <!-- for: Error_Main -->
-<!-- formatter_comment (%s Nothing submitted.)--><html><head></head><body><div>
+<!-- formatter_comment (%s %s)--><html><head></head><body><div>
 <form action="/" method="POST">
     
     <input type="text" name="email" value="" />
@@ -716,7 +755,10 @@ class TestParsing_FormA_ErrorPlaceholder_None(
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_empty_string": {
             "auto_error_formatter": formatters.formatter_empty_string,
@@ -735,7 +777,7 @@ class TestParsing_FormA_ErrorPlaceholder_None(
             "auto_error_formatter": formatters.formatter_hidden,
             "response_text": """\
 <!-- for: Error_Main -->
-<input type="hidden" value="%s Nothing submitted." />
+<input type="hidden" value="%s %s" />
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -744,7 +786,10 @@ class TestParsing_FormA_ErrorPlaceholder_None(
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
     }
 
@@ -899,14 +944,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            )
         },
         "test_formatter_is_none": {
             "auto_error_formatter": None,
@@ -914,14 +962,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "test_formatter_nobr": {
             "auto_error_formatter": formatters.formatter_nobr,
@@ -929,14 +980,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_help_inline": {
             "auto_error_formatter": formatters.formatter_help_inline,
@@ -944,14 +998,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_comment": {
             "auto_error_formatter": formatters.formatter_comment,
@@ -959,14 +1016,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_empty_string": {
             "auto_error_formatter": formatters.formatter_empty_string,
@@ -974,14 +1034,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_hidden": {
             "auto_error_formatter": formatters.formatter_hidden,
@@ -989,14 +1052,17 @@ class TestParsing_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
     }
 
@@ -1159,14 +1225,17 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "test_formatter_is_none": {
             "auto_error_formatter": None,
@@ -1175,14 +1244,17 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "test_formatter_nobr": {
             "auto_error_formatter": formatters.formatter_nobr,
@@ -1191,14 +1263,17 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span>
+    <span class="error-message">%s %s</span>
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_help_inline": {
             "auto_error_formatter": formatters.formatter_help_inline,
@@ -1207,14 +1282,17 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="help-inline">%s Nothing submitted.</span>
+    <span class="help-inline">%s %s</span>
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_comment": {
             "auto_error_formatter": formatters.formatter_comment,
@@ -1223,13 +1301,16 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <!-- formatter_comment (%s Nothing submitted.)-->
+    <!-- formatter_comment (%s %s)-->
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_empty_string": {
             "auto_error_formatter": formatters.formatter_empty_string,
@@ -1252,14 +1333,17 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Alt(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" value="%s Nothing submitted." />
+    <input type="hidden" value="%s %s" />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
     }
 
@@ -1417,14 +1501,17 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "test_formatter_is_none": {
             "auto_error_formatter": None,
@@ -1433,14 +1520,17 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "test_formatter_nobr": {
             "auto_error_formatter": formatters.formatter_nobr,
@@ -1449,14 +1539,17 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span>
+    <span class="error-message">%s %s</span>
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_help_inline": {
             "auto_error_formatter": formatters.formatter_help_inline,
@@ -1465,14 +1558,17 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="help-inline">%s Nothing submitted.</span>
+    <span class="help-inline">%s %s</span>
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_comment": {
             "auto_error_formatter": formatters.formatter_comment,
@@ -1481,13 +1577,16 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <!-- formatter_comment (%s Nothing submitted.)-->
+    <!-- formatter_comment (%s %s)-->
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_empty_string": {
             "auto_error_formatter": formatters.formatter_empty_string,
@@ -1510,14 +1609,17 @@ class TestParsingErrorFormatters_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" value="%s Nothing submitted." />
+    <input type="hidden" value="%s %s" />
 
     <input type="text" name="email" value="" />
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
     }
 
@@ -1684,7 +1786,7 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
             "error_formatters": None,
             "response_text": """\
 <!-- for: Error_Main -->
-<span class="error-message">%s Nothing submitted.</span>
+<span class="error-message">%s %s</span>
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -1693,14 +1795,17 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "test_formatter_is_none": {
             "auto_error_formatter": None,
             "error_formatters": None,
             "response_text": """\
 <!-- for: Error_Main -->
-<span class="error-message">%s Nothing submitted.</span><br />
+<span class="error-message">%s %s</span><br />
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -1709,14 +1814,17 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "test_formatter_nobr": {
             "auto_error_formatter": formatters.formatter_nobr,
             "error_formatters": {"default": formatters.formatter_nobr},
             "response_text": """\
 <!-- for: Error_Main -->
-<span class="error-message">%s Nothing submitted.</span>
+<span class="error-message">%s %s</span>
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -1725,14 +1833,17 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_help_inline": {
             "auto_error_formatter": formatters.formatter_help_inline,
             "error_formatters": {"default": formatters.formatter_help_inline},
             "response_text": """\
 <!-- for: Error_Main -->
-<span class="help-inline">%s Nothing submitted.</span>
+<span class="help-inline">%s %s</span>
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -1741,14 +1852,17 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_comment": {
             "auto_error_formatter": formatters.formatter_comment,
             "error_formatters": {"default": formatters.formatter_comment},
             "response_text": """\
 <!-- for: Error_Main -->
-<!-- formatter_comment (%s Nothing submitted.)--><html><head></head><body><div>
+<!-- formatter_comment (%s %s)--><html><head></head><body><div>
 <form action="/" method="POST">
     
     <input type="text" name="email" value="" />
@@ -1756,7 +1870,10 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
         "formatter_empty_string": {
             "auto_error_formatter": formatters.formatter_empty_string,
@@ -1777,7 +1894,7 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
             "error_formatters": {"default": formatters.formatter_hidden},
             "response_text": """\
 <!-- for: Error_Main -->
-<input type="hidden" value="%s Nothing submitted." />
+<input type="hidden" value="%s %s" />
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -1786,7 +1903,10 @@ class TestParsingErrorFormatters_FormA_ErrorPlaceholder_None(
 </form>
 </div></body></html>
 """
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
         },
     }
 
@@ -1993,7 +2113,7 @@ class TestCustomError(_TestHarness, unittest.TestCase):
                 if not result:
                     raise pyramid_formencode_classic.FormInvalid(formStash)
 
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
                 )
 
@@ -2004,7 +2124,7 @@ class TestCustomError(_TestHarness, unittest.TestCase):
                 )
                 try:
                     assert rendered.text == _expected_text
-                except:
+                except:  # pragma: no cover
                     if DEBUG_PRINT:
                         print("------------")
                         print("%s.test_submit" % self.__class__)
@@ -2013,7 +2133,7 @@ class TestCustomError(_TestHarness, unittest.TestCase):
                     tests_fail.append(test_name)
             tests_completed.append(test_name)
 
-        if tests_fail:
+        if tests_fail:  # pragma: no cover
             raise ValueError(tests_fail)
 
     # note: _test_submit__data
@@ -2082,7 +2202,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
         rendered = _print_form_simple()
         try:
             assert rendered.text == _expected_text
-        except:
+        except:  # pragma: no cover
             if DEBUG_PRINT:
                 print("------------")
                 print(rendered.text)
@@ -2117,7 +2237,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
             if not result:
                 raise pyramid_formencode_classic.FormInvalid(formStash)
 
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
 
@@ -2130,7 +2250,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 self.assertEqual(
                     rendered.text, self._test_data["response_text-test_parse-a"]
                 )
-            except:
+            except:  # pragma: no cover
                 if DEBUG_PRINT:
                     print("----------------")
                     print("%s.test_parse" % self.__class__)
@@ -2153,7 +2273,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
             if not result:
                 raise pyramid_formencode_classic.FormInvalid(formStash)
 
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
 
@@ -2164,7 +2284,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
             )
             try:
                 assert rendered.text == self._test_data["response_text-test_parse-b"]
-            except:
+            except:  # pragma: no cover
                 if DEBUG_PRINT:
                     print("----------------")
                     print("%s.test_parse" % self.__class__)
@@ -2204,7 +2324,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
             if not result:
                 raise pyramid_formencode_classic.FormInvalid(formStash)
 
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
 
@@ -2221,7 +2341,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 self.assertEqual(
                     rendered.text, self._test_data["response_text-test_parse_error-a"]
                 )
-            except:
+            except:  # pragma: no cover
                 if DEBUG_PRINT:
                     print("----------------")
                     print("%s.test_parse_error" % self.__class__)
@@ -2244,7 +2364,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
             if not result:
                 raise pyramid_formencode_classic.FormInvalid(formStash)
 
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
 
@@ -2261,7 +2381,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
                 assert (
                     rendered.text == self._test_data["response_text-test_parse_error-b"]
                 )
-            except:
+            except:  # pragma: no cover
                 if DEBUG_PRINT:
                     print("----------------")
                     print("%s.test_parse_error" % self.__class__)
@@ -2289,7 +2409,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
 <html><head></head><body><div>
 <form action="/a" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" data-formencode-form="a" />
     <input type="text" name="username" value="" data-formencode-form="a" />
@@ -2302,26 +2422,34 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
 </form>
 </div></body></html>
 """
-        % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+        % (
+            _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+        ),
         "response_text-test_parse-b": """\
 <html><head></head><body><div>
 <form action="/a" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" data-formencode-form="a" />
     <input type="text" name="username" value="" data-formencode-form="a" />
 </form>
 <form action="/b" method="POST">
     
-    <span class="error-message">%s Nothing submitted.</span><br />
+    <span class="error-message">%s %s</span><br />
 
     <input type="text" name="email" value="" data-formencode-form="b" />
     <input type="text" name="username" value="" data-formencode-form="b" />
 </form>
 </div></body></html>
 """
-        % (_defaults.DEFAULT_ERROR_MAIN_TEXT, _defaults.DEFAULT_ERROR_MAIN_TEXT),
+        % (
+            _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+        ),
         "response_text-test_parse_error-a": """\
 <html><head></head><body><div>
 <form action="/a" method="POST">
@@ -2379,12 +2507,12 @@ class _TestParsingApi040(object):
     template: str
     request: Request
 
-    _test_manual_error_append__data: Dict  # placeholder
-    _test_manual_error_prepend__data: Dict  # placeholder
-    _test_manual_error_default__data: Dict  # placeholder
+    assertEqual: Callable  # unittest.TestCase
+
     _test_fatal_form__data: Dict  # placeholder
     _test_fatal_field__data: Dict  # placeholder
     _test_raise_form_aware__data: Dict  # placeholder
+    _test_manual_error_default__data: Dict  # placeholder
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -2424,7 +2552,7 @@ class _TestParsingApi040(object):
                         formStash, "OVERRIDE MESSAGE."
                     )
 
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
                 )
 
@@ -2438,156 +2566,21 @@ class _TestParsingApi040(object):
                 )
                 try:
                     assert rendered.text == _expected_text
-                except:
+                except:  # pragma: no cover
                     if DEBUG_PRINT:
-                        print("------------")
+                        print("=============")
                         print("%s.test_manual_error_default" % self.__class__)
-                        print(test_name)
-                        print(rendered.text)
-                    tests_fail.append(test_name)
-            tests_completed.append(test_name)
-
-        if tests_fail:
-            raise ValueError(tests_fail)
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    def test_manual_error_append(self):
-        # set the submit
-        self.request.POST["submit"] = "submit"
-
-        tests_completed = []
-        tests_fail = []
-        for test_name, test_data in self._test_manual_error_append__data.items():
-            _template = self.template
-            _expected_text = test_data["response_text"]
-            _reprint_kwargs: Dict = {}
-            if "auto_error_formatter" in test_data:
-                _reprint_kwargs["auto_error_formatter"] = test_data[
-                    "auto_error_formatter"
-                ]
-            if "error_formatters" in test_data:
-                if test_data["error_formatters"] is not None:
-                    _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
-            _validate_kwargs: Dict = {}
-            if self.error_main_key is not None:
-                _validate_kwargs["error_main_key"] = self.error_main_key
-
-            def _print_form_simple():
-                rendered = render_to_response(_template, {"request": self.request})
-                return rendered
-
-            try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
-                    self.request,
-                    schema=Form_EmailUsername,
-                    **_validate_kwargs,
-                )
-                if not result:
-                    raise pyramid_formencode_classic.FormInvalid(
-                        formStash, "OVERRIDE MESSAGE."
-                    )
-
-                raise ValueError(
-                    "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
-                )
-
-            except pyramid_formencode_classic.FormInvalid as exc:
-                formStash.register_error_main_exception(
-                    exc, error_main_append=True, error_main_prepend=False
-                )
-                formStash.register_error_main_exception(
-                    exc
-                )  # this can be repeated because we defend against it
-                rendered = pyramid_formencode_classic.form_reprint(
-                    self.request, _print_form_simple, **_reprint_kwargs
-                )
-                try:
-                    assert rendered.text == _expected_text
-                except:
-                    if DEBUG_PRINT:
-                        print("------------")
-                        print("%s.test_manual_error_append" % self.__class__)
-                        print(test_name)
-                        print(rendered.text)
-                    tests_fail.append(test_name)
-            tests_completed.append(test_name)
-
-        if tests_fail:
-            raise ValueError(tests_fail)
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    def test_manual_error_prepend(self):
-        # set the submit
-        self.request.POST["submit"] = "submit"
-
-        tests_completed = []
-        tests_fail = []
-        for test_name, test_data in self._test_manual_error_prepend__data.items():
-            _template = self.template
-            _expected_text = test_data["response_text"]
-            _reprint_kwargs: Dict = {}
-            if "auto_error_formatter" in test_data:
-                _reprint_kwargs["auto_error_formatter"] = test_data[
-                    "auto_error_formatter"
-                ]
-            if "error_formatters" in test_data:
-                if test_data["error_formatters"] is not None:
-                    _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
-            _validate_kwargs: Dict = {}
-            if self.error_main_key is not None:
-                _validate_kwargs["error_main_key"] = self.error_main_key
-
-            def _print_form_simple():
-                rendered = render_to_response(_template, {"request": self.request})
-                return rendered
-
-            try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
-                    self.request,
-                    schema=Form_EmailUsername,
-                    **_validate_kwargs,
-                )
-                if not result:
-                    raise pyramid_formencode_classic.FormInvalid(
-                        formStash,
-                        "OVERRIDE MESSAGE.",
-                        error_main_append=False,
-                        error_main_prepend=True,
-                    )
-
-                raise ValueError(
-                    "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
-                )
-
-            except pyramid_formencode_classic.FormInvalid as exc:
-                formStash.register_error_main_exception(
-                    exc, error_main_append=False, error_main_prepend=True
-                )
-                formStash.register_error_main_exception(
-                    exc
-                )  # this can be repeated because we defend against it
-                rendered = pyramid_formencode_classic.form_reprint(
-                    self.request, _print_form_simple, **_reprint_kwargs
-                )
-                try:
-                    assert rendered.text == _expected_text
-                except:
-                    if DEBUG_PRINT:
-                        print("===========================")
-                        print("%s.test_manual_error_prepend" % self.__class__)
                         print("------------")
                         print(test_name)
                         print("------------")
                         print(rendered.text)
                         print("------------")
                         print(_expected_text)
-                        print("===========================")
+                        print("=============")
                     tests_fail.append(test_name)
             tests_completed.append(test_name)
 
-        if tests_fail:
+        if tests_fail:  # pragma: no cover
             raise ValueError(tests_fail)
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2625,7 +2618,7 @@ class _TestParsingApi040(object):
                 )
                 formStash.fatal_form(error_main="FATAL FORM.")
 
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
                 )
 
@@ -2635,7 +2628,7 @@ class _TestParsingApi040(object):
                 )
                 try:
                     assert rendered.text == _expected_text
-                except:
+                except:  # pragma: no cover
                     if DEBUG_PRINT:
                         print("====================================")
                         print("%s.test_fatal_form" % self.__class__)
@@ -2657,7 +2650,7 @@ class _TestParsingApi040(object):
                 )
                 try:
                     assert rendered_alt.text == _expected_text
-                except:
+                except:  # pragma: no cover
                     if DEBUG_PRINT:
                         print("====================================")
                         print("alt, %s.test_fatal_form" % self.__class__)
@@ -2672,7 +2665,7 @@ class _TestParsingApi040(object):
 
             tests_completed.append(test_name)
 
-        if tests_fail:
+        if tests_fail:  # pragma: no cover
             raise ValueError(tests_fail)
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2712,7 +2705,7 @@ class _TestParsingApi040(object):
                     field="email", error_field="THIS FIELD CAUSED A FATAL ERROR."
                 )
 
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`formStash.fatal_field` should have raised `pyramid_formencode_classic.FormInvalid`"
                 )
 
@@ -2721,8 +2714,8 @@ class _TestParsingApi040(object):
                     self.request, _print_form_simple, **_reprint_kwargs
                 )
                 try:
-                    assert rendered.text == _expected_text
-                except:
+                    self.assertEqual(rendered.text, _expected_text)
+                except:  # pragma: no cover
                     if DEBUG_PRINT:
                         print("====================================")
                         print("%s.test_fatal_field" % self.__class__)
@@ -2734,6 +2727,7 @@ class _TestParsingApi040(object):
                         print(_expected_text)
                         print("====================================")
                     tests_fail.append(test_name)
+                    raise
 
                 # oh hey, do it again after integrating the error
                 formStash.register_error_main_exception(
@@ -2743,8 +2737,8 @@ class _TestParsingApi040(object):
                     self.request, _print_form_simple, **_reprint_kwargs
                 )
                 try:
-                    assert rendered_alt.text == _expected_text
-                except:
+                    self.assertEqual(rendered_alt.text, _expected_text)
+                except:  # pragma: no cover
                     if DEBUG_PRINT:
                         print("------------")
                         print("alt, %s.test_fatal_field" % self.__class__)
@@ -2754,7 +2748,7 @@ class _TestParsingApi040(object):
 
             tests_completed.append(test_name)
 
-        if tests_fail:
+        if tests_fail:  # pragma: no cover
             raise ValueError(tests_fail)
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2795,7 +2789,7 @@ class _TestParsingApi040(object):
                         formStash, "OVERRIDE MESSAGE."
                     )
 
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
                 )
 
@@ -2805,7 +2799,7 @@ class _TestParsingApi040(object):
                 )
                 try:
                     assert rendered.text == _expected_text
-                except:
+                except:  # pragma: no cover
                     if DEBUG_PRINT:
                         print("============")
                         print("%s.test_raise_form_aware" % self.__class__)
@@ -2818,7 +2812,7 @@ class _TestParsingApi040(object):
                     tests_fail.append(test_name)
             tests_completed.append(test_name)
 
-        if tests_fail:
+        if tests_fail:  # pragma: no cover
             raise ValueError(tests_fail)
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2829,282 +2823,136 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 ):
     template = "fixtures/form_a-html_error_placeholder-default.mako"
 
-    # note: _test_manual_error_append__data
-    _test_manual_error_append__data = {
-        "test_formatter_default": {
-            # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
-            "error_formatters": None,
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">%s OVERRIDE MESSAGE.</span><br />
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
-        },
-        "test_formatter_nobr": {
-            "auto_error_formatter": formatters.formatter_nobr,
-            "error_formatters": {"default": formatters.formatter_nobr},
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">%s OVERRIDE MESSAGE.</span>
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
-        },
-        "test_formatter_is_none": {
-            "auto_error_formatter": None,
-            "error_formatters": None,
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">%s OVERRIDE MESSAGE.</span><br />
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span><br />
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span><br />
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
-        },
-        "formatter_comment": {
-            "auto_error_formatter": formatters.formatter_comment,
-            "error_formatters": {"default": formatters.formatter_comment},
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (%s OVERRIDE MESSAGE.)-->
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
-        },
-        "formatter_help_inline": {
-            "auto_error_formatter": formatters.formatter_help_inline,
-            "error_formatters": {"default": formatters.formatter_help_inline},
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="help-inline">%s OVERRIDE MESSAGE.</span>
-
-    <!-- for: email -->
-<span class="help-inline">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="help-inline">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
-        },
-        "formatter_empty_string": {
-            "auto_error_formatter": formatters.formatter_empty_string,
-            "error_formatters": {"default": formatters.formatter_empty_string},
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    
-    <!-- for: email -->
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-        },
-        "formatter_hidden": {
-            "auto_error_formatter": formatters.formatter_hidden,
-            "error_formatters": {"default": formatters.formatter_hidden},
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <input type="hidden" value="%s OVERRIDE MESSAGE." />
-
-    <!-- for: email -->
-<input type="hidden" value="Missing value" />
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<input type="hidden" value="Missing value" />
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
-        },
-    }
-
-    # note: _test_manual_error_prepend__data
-    _test_manual_error_prepend__data = {
-        "test_formatter_default": {
-            # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
-            "error_formatters": None,
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">OVERRIDE MESSAGE. %s</span><br />
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
-        },
-        "test_formatter_nobr": {
-            "auto_error_formatter": formatters.formatter_nobr,
-            "error_formatters": {"default": formatters.formatter_nobr},
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">OVERRIDE MESSAGE. %s</span>
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
-        },
-        "test_formatter_is_none": {
-            "auto_error_formatter": None,
-            "error_formatters": None,
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="error-message">OVERRIDE MESSAGE. %s</span><br />
-
-    <!-- for: email -->
-<span class="error-message">Missing value</span><br />
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="error-message">Missing value</span><br />
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
-        },
-        "formatter_comment": {
-            "auto_error_formatter": formatters.formatter_comment,
-            "error_formatters": {"default": formatters.formatter_comment},
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <!-- formatter_comment (OVERRIDE MESSAGE. %s)-->
-    <!-- for: email -->
-<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
-        },
-        "formatter_help_inline": {
-            "auto_error_formatter": formatters.formatter_help_inline,
-            "error_formatters": {"default": formatters.formatter_help_inline},
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <span class="help-inline">OVERRIDE MESSAGE. %s</span>
-
-    <!-- for: email -->
-<span class="help-inline">Missing value</span>
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<span class="help-inline">Missing value</span>
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
-        },
-        "formatter_empty_string": {
-            "auto_error_formatter": formatters.formatter_empty_string,
-            "error_formatters": {"default": formatters.formatter_empty_string},
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    
-    <!-- for: email -->
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-""",
-        },
-        "formatter_hidden": {
-            "auto_error_formatter": formatters.formatter_hidden,
-            "error_formatters": {"default": formatters.formatter_hidden},
-            "response_text": """\
-<html><head></head><body><div>
-<form action="/" method="POST">
-    
-    <input type="hidden" value="OVERRIDE MESSAGE. %s" />
-
-    <!-- for: email -->
-<input type="hidden" value="Missing value" />
-<input type="text" name="email" value="" class="error" />
-    <!-- for: username -->
-<input type="hidden" value="Missing value" />
-<input type="text" name="username" value="" class="error" />
-</form>
-</div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
-        },
-    }
-
     # note: _test_manual_error_default__data
-    _test_manual_error_default__data = _test_manual_error_append__data
+    _test_manual_error_default__data = {
+        "test_formatter_default": {
+            # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">OVERRIDE MESSAGE.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "test_formatter_nobr": {
+            "auto_error_formatter": formatters.formatter_nobr,
+            "error_formatters": {"default": formatters.formatter_nobr},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">OVERRIDE MESSAGE.</span>
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "test_formatter_is_none": {
+            "auto_error_formatter": None,
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">OVERRIDE MESSAGE.</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span><br />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_comment": {
+            "auto_error_formatter": formatters.formatter_comment,
+            "error_formatters": {"default": formatters.formatter_comment},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <!-- formatter_comment (OVERRIDE MESSAGE.)-->
+    <!-- for: email -->
+<!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_help_inline": {
+            "auto_error_formatter": formatters.formatter_help_inline,
+            "error_formatters": {"default": formatters.formatter_help_inline},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="help-inline">OVERRIDE MESSAGE.</span>
+
+    <!-- for: email -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="help-inline">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_empty_string": {
+            "auto_error_formatter": formatters.formatter_empty_string,
+            "error_formatters": {"default": formatters.formatter_empty_string},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    
+    <!-- for: email -->
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+        "formatter_hidden": {
+            "auto_error_formatter": formatters.formatter_hidden,
+            "error_formatters": {"default": formatters.formatter_hidden},
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <input type="hidden" value="OVERRIDE MESSAGE." />
+
+    <!-- for: email -->
+<input type="hidden" value="Missing value" />
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<input type="hidden" value="Missing value" />
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+""",
+        },
+    }
 
     # note: _test_fatal_form__data
     _test_fatal_form__data = {
@@ -3249,7 +3097,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
     <span class="error-message">%s</span><br />
 
     <!-- for: email -->
-<span class="error-message">Missing value THIS FIELD CAUSED A FATAL ERROR.</span>
+<span class="error-message">THIS FIELD CAUSED A FATAL ERROR.</span>
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
 <span class="error-message">Missing value</span>
@@ -3269,7 +3117,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
     <span class="error-message">%s</span>
 
     <!-- for: email -->
-<span class="error-message">Missing value THIS FIELD CAUSED A FATAL ERROR.</span>
+<span class="error-message">THIS FIELD CAUSED A FATAL ERROR.</span>
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
 <span class="error-message">Missing value</span>
@@ -3289,7 +3137,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
     <span class="error-message">%s</span><br />
 
     <!-- for: email -->
-<span class="error-message">Missing value THIS FIELD CAUSED A FATAL ERROR.</span><br />
+<span class="error-message">THIS FIELD CAUSED A FATAL ERROR.</span><br />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
 <span class="error-message">Missing value</span><br />
@@ -3308,7 +3156,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
     
     <!-- formatter_comment (%s)-->
     <!-- for: email -->
-<!-- formatter_comment (Missing value THIS FIELD CAUSED A FATAL ERROR.)--><input type="text" name="email" value="" class="error" />
+<!-- formatter_comment (THIS FIELD CAUSED A FATAL ERROR.)--><input type="text" name="email" value="" class="error" />
     <!-- for: username -->
 <!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
 </form>
@@ -3326,7 +3174,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
     <span class="help-inline">%s</span>
 
     <!-- for: email -->
-<span class="help-inline">Missing value THIS FIELD CAUSED A FATAL ERROR.</span>
+<span class="help-inline">THIS FIELD CAUSED A FATAL ERROR.</span>
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
 <span class="help-inline">Missing value</span>
@@ -3362,7 +3210,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
     <input type="hidden" value="%s" />
 
     <!-- for: email -->
-<input type="hidden" value="Missing value THIS FIELD CAUSED A FATAL ERROR." />
+<input type="hidden" value="THIS FIELD CAUSED A FATAL ERROR." />
 <input type="text" name="email" value="" class="error" />
     <!-- for: username -->
 <input type="hidden" value="Missing value" />
@@ -3383,7 +3231,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s OVERRIDE MESSAGE.</span><br />
+    <span class="error-message">OVERRIDE MESSAGE.</span><br />
 
     <!-- for: email -->
 <span class="error-message">Missing value</span>
@@ -3393,8 +3241,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+""",
         },
         "test_formatter_nobr": {
             "auto_error_formatter": formatters.formatter_nobr,
@@ -3403,7 +3250,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s OVERRIDE MESSAGE.</span>
+    <span class="error-message">OVERRIDE MESSAGE.</span>
 
     <!-- for: email -->
 <span class="error-message">Missing value</span>
@@ -3413,8 +3260,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+""",
         },
         "test_formatter_is_none": {
             "auto_error_formatter": None,
@@ -3423,7 +3269,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="error-message">%s OVERRIDE MESSAGE.</span><br />
+    <span class="error-message">OVERRIDE MESSAGE.</span><br />
 
     <!-- for: email -->
 <span class="error-message">Missing value</span><br />
@@ -3433,8 +3279,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+""",
         },
         "formatter_comment": {
             "auto_error_formatter": formatters.formatter_comment,
@@ -3443,15 +3288,14 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <!-- formatter_comment (%s OVERRIDE MESSAGE.)-->
+    <!-- formatter_comment (OVERRIDE MESSAGE.)-->
     <!-- for: email -->
 <!-- formatter_comment (Missing value)--><input type="text" name="email" value="" class="error" />
     <!-- for: username -->
 <!-- formatter_comment (Missing value)--><input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+""",
         },
         "formatter_help_inline": {
             "auto_error_formatter": formatters.formatter_help_inline,
@@ -3460,7 +3304,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <span class="help-inline">%s OVERRIDE MESSAGE.</span>
+    <span class="help-inline">OVERRIDE MESSAGE.</span>
 
     <!-- for: email -->
 <span class="help-inline">Missing value</span>
@@ -3470,8 +3314,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+""",
         },
         "formatter_empty_string": {
             "auto_error_formatter": formatters.formatter_empty_string,
@@ -3496,7 +3339,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <html><head></head><body><div>
 <form action="/" method="POST">
     
-    <input type="hidden" value="%s OVERRIDE MESSAGE." />
+    <input type="hidden" value="OVERRIDE MESSAGE." />
 
     <!-- for: email -->
 <input type="hidden" value="Missing value" />
@@ -3506,8 +3349,7 @@ class TestParsingApi040_FormA_HtmlErrorPlaceholder_Default(
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
-"""
-            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+""",
         },
     }
 
@@ -3563,7 +3405,7 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
             if not result:
                 raise pyramid_formencode_classic.FormInvalid(formStash)
 
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
 
@@ -3584,7 +3426,7 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
             if not result:
                 raise pyramid_formencode_classic.FormInvalid(formStash)
 
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
 
@@ -3594,7 +3436,9 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
                 rendered = pyramid_formencode_classic.form_reprint(
                     self.request, _print_form__fail, **_reprint_kwargs
                 )
-                raise ValueError("`form_reprint` should have raised a `ValueError`")
+                raise ValueError(  # pragma: no cover
+                    "`form_reprint` should have raised a `ValueError`"
+                )
             except ValueError as exc:
                 print(exc.args[0])
                 assert (
@@ -3614,10 +3458,10 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 self.request,
                 schema=Form_Email,
             )
-            if not result:
+            if not result:  # pragma: no cover
                 raise pyramid_formencode_classic.FormInvalid(formStash)
             assert result
-        except Exception:
+        except Exception:  # pragma: no cover
             raise
 
     def test_valid_automatic(self):
@@ -3631,12 +3475,35 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 raise_FormInvalid=True,
             )
             assert result
-        except Exception:
+        except Exception:  # pragma: no cover
             raise
 
     # ==========================================================================
 
-    def test_raise_FormInvalid_manual(self):
+    def test_schema_mismatch(self):
+
+        self.request.POST["email"] = "a@example.com"
+        self.request.POST["username"] = "abcdefg"
+        try:
+            formStashA = pyramid_formencode_classic.FormStash(
+                schema=Form_EmailUsername,
+                name="alt_name",
+            )
+            (result, formStash) = pyramid_formencode_classic.form_validate(
+                self.request,
+                schema=Form_Email,
+                formStash=formStashA,
+            )
+            raise ValueError("`form_validate` should have raised `ValueError`")
+        except ValueError as exc:
+            self.assertEqual(
+                exc.args[0],
+                "`formStash.schema`[<class 'tests.test_core.Form_EmailUsername'>] is not `schema`[<class 'tests.test_core.Form_Email'>]",
+            )
+
+    # ==========================================================================
+
+    def test_raise_FormInvalid_nothingSubmitted_manual(self):
         try:
             (result, formStash) = pyramid_formencode_classic.form_validate(
                 self.request,
@@ -3645,7 +3512,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             if not result:
                 raise pyramid_formencode_classic.FormInvalid(formStash)
 
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
 
@@ -3659,10 +3526,16 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             assert len(exc.formStash.errors) == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
-                ("%s Nothing submitted." % _defaults.DEFAULT_ERROR_MAIN_TEXT),
+                (
+                    "%s %s"
+                    % (
+                        _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                        _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+                    )
+                ),
             )
 
-    def test_raise_FormInvalid_automatic(self):
+    def test_raise_FormInvalid_nothingSubmitted_automatic(self):
         try:
             (result, formStash) = pyramid_formencode_classic.form_validate(
                 self.request,
@@ -3670,7 +3543,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 raise_FormInvalid=True,
             )
 
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "`form_validate[raise_FormInvalid]` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
 
@@ -3684,10 +3557,16 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             assert len(exc.formStash.errors) == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
-                ("%s Nothing submitted." % _defaults.DEFAULT_ERROR_MAIN_TEXT),
+                (
+                    "%s %s"
+                    % (
+                        _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                        _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+                    )
+                ),
             )
 
-    def test_raise_FormInvalid_manual__custom_message(self):
+    def test_raise_FormInvalid_manual_nothingSubmitted__custom_message(self):
         message = "GarfieldMinusGarfield"
         try:
             (result, formStash) = pyramid_formencode_classic.form_validate(
@@ -3699,7 +3578,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                     formStash, error_main=message
                 )
 
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
 
@@ -3710,7 +3589,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             assert len(exc.formStash.errors) == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
-                ("%s Nothing submitted." % message),
+                ("%s %s" % (message, _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED)),
             )
 
     # ==========================================================================
@@ -3723,12 +3602,12 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 self.request,
                 schema=Form_Email,
             )
-            if not result:
+            if not result:  # pragma: no cover
                 raise pyramid_formencode_classic.FormInvalid(formStash)
 
             formStash.fatal_form()
 
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "`fatal_form` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
 
@@ -3754,12 +3633,12 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 self.request,
                 schema=Form_Email,
             )
-            if not result:
+            if not result:  # pragma: no cover
                 raise pyramid_formencode_classic.FormInvalid(formStash)
 
             formStash.fatal_form(message)
 
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "`fatal_form` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
 
@@ -3787,7 +3666,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
             formStash.fatal_field(field=field, error_field=message)
 
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "`formStash.fatal_field` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
 
@@ -3816,7 +3695,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
             try:
                 formStash.fatal_field(error_field=message)  # type:ignore[call-arg]
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`formStash.fatal_field` should have raised `TypeError`"
                 )
             except TypeError as exc:
@@ -3832,7 +3711,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
             try:
                 formStash.fatal_field(field="unknown", error_field=message)
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`formStash.fatal_field` should have raised `ValueError`"
                 )
             except ValueError as exc:
@@ -3845,7 +3724,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 formStash.fatal_field(
                     field="unknown", error_field=message, allow_unknown_fields=True
                 )
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`formStash.fatal_field` should have raised `FormInvalid`"
                 )
             except pyramid_formencode_classic.FormInvalid as exc:
@@ -3857,7 +3736,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                     == _defaults.DEFAULT_ERROR_MAIN_TEXT
                 )
                 assert exc.formStash.errors["unknown"] == message
-        except Exception:
+        except Exception:  # pragma: no cover
             raise
 
     def test_FormStash_fatalField_args(self):
@@ -3865,7 +3744,6 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
         self.request.POST["username"] = "abcdefg"
         message = "THIS FIELD CAUSED A FATAL ERROR"
         message_alt = "[[this field caused a fatal error]]"
-        error_main = "[{{[CUSTOM_ERROR_MAIN]}}]"
 
         # note: base
         try:
@@ -3876,7 +3754,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             )
             try:
                 formStash.fatal_field(field="email", error_field=message)
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`formStash.fatal_field` should have raised `FormInvalid`"
                 )
             except pyramid_formencode_classic.FormInvalid as exc:
@@ -3888,7 +3766,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                     == _defaults.DEFAULT_ERROR_MAIN_TEXT
                 )
                 assert exc.formStash.errors["email"] == message
-        except Exception:
+        except Exception:  # pragma: no cover
             raise
 
         # note: error_main
@@ -3900,21 +3778,21 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             )
             try:
                 formStash.fatal_field(
-                    field="email", error_field=message, error_main=error_main
+                    field="email", error_field=message, error_main=CUSTOM_ERROR_MAIN
                 )
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`formStash.fatal_field` should have raised `FormInvalid`"
                 )
             except pyramid_formencode_classic.FormInvalid as exc:
                 assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
                 assert exc.raised_by == "fatal_field"
-                assert exc.error_main == error_main
-                assert exc.formStash.errors["Error_Main"] == error_main
+                assert exc.error_main == CUSTOM_ERROR_MAIN
+                assert exc.formStash.errors["Error_Main"] == CUSTOM_ERROR_MAIN
                 assert exc.formStash.errors["email"] == message
-        except Exception:
+        except Exception:  # pragma: no cover
             raise
 
-        # note: message_overwrite
+        # note: message_overwrites
         try:
             (result, formStash) = pyramid_formencode_classic.form_validate(
                 self.request,
@@ -3923,36 +3801,9 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             )
             try:
                 formStash.set_error(field="email", message=message_alt)
-                formStash.fatal_field(
-                    field="email",
-                    error_field=message,
-                    error_main=error_main,
-                    message_overwrite=True,
-                    message_append=False,
-                )
-                raise ValueError(
-                    "`formStash.fatal_field` should have raised `FormInvalid`"
-                )
-            except pyramid_formencode_classic.FormInvalid as exc:
-                assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
-                assert exc.raised_by == "fatal_field"
-                assert exc.error_main == error_main
-                assert exc.formStash.errors["Error_Main"] == error_main
-                assert exc.formStash.errors["email"] == message
-        except Exception:
-            raise
-
-        # note: message_append - implicit
-        try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
-                self.request,
-                schema=Form_Email,
-                raise_FormInvalid=True,
-            )
-            try:
-                formStash.set_error(field="email", message=message_alt)
+                assert formStash.get_error("email") == message_alt
                 formStash.fatal_field(field="email", error_field=message)
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "`formStash.fatal_field` should have raised `FormInvalid`"
                 )
             except pyramid_formencode_classic.FormInvalid as exc:
@@ -3963,65 +3814,8 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                     exc.formStash.errors["Error_Main"]
                     == _defaults.DEFAULT_ERROR_MAIN_TEXT
                 )
-                assert exc.formStash.errors["email"] == "%s %s" % (message_alt, message)
-        except Exception:
-            raise
-
-        # note: message_append - explicit
-        try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
-                self.request,
-                schema=Form_Email,
-                raise_FormInvalid=True,
-            )
-            try:
-                formStash.set_error(field="email", message=message_alt)
-                formStash.fatal_field(
-                    field="email", error_field=message, message_append=True
-                )
-                raise ValueError(
-                    "`formStash.fatal_field` should have raised `FormInvalid`"
-                )
-            except pyramid_formencode_classic.FormInvalid as exc:
-                assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
-                assert exc.raised_by == "fatal_field"
-                assert exc.error_main == _defaults.DEFAULT_ERROR_MAIN_TEXT
-                assert (
-                    exc.formStash.errors["Error_Main"]
-                    == _defaults.DEFAULT_ERROR_MAIN_TEXT
-                )
-                assert exc.formStash.errors["email"] == "%s %s" % (message_alt, message)
-        except Exception:
-            raise
-
-        # note: message_prepend
-        try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
-                self.request,
-                schema=Form_Email,
-                raise_FormInvalid=True,
-            )
-            try:
-                formStash.set_error(field="email", message=message_alt)
-                formStash.fatal_field(
-                    field="email",
-                    error_field=message,
-                    message_append=False,
-                    message_prepend=True,
-                )
-                raise ValueError(
-                    "`formStash.fatal_field` should have raised `FormInvalid`"
-                )
-            except pyramid_formencode_classic.FormInvalid as exc:
-                assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
-                assert exc.raised_by == "fatal_field"
-                assert exc.error_main == _defaults.DEFAULT_ERROR_MAIN_TEXT
-                assert (
-                    exc.formStash.errors["Error_Main"]
-                    == _defaults.DEFAULT_ERROR_MAIN_TEXT
-                )
-                assert exc.formStash.errors["email"] == "%s %s" % (message, message_alt)
-        except Exception:
+                assert exc.formStash.errors["email"] == message
+        except Exception:  # pragma: no cover
             raise
 
         # note: allow_unknown_fields
@@ -4029,7 +3823,9 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             formStash.fatal_field(
                 field="unknown", error_field=message, allow_unknown_fields=True
             )
-            raise ValueError("`formStash.fatal_field` should have raised `FormInvalid`")
+            raise ValueError(  # pragma: no cover
+                "`formStash.fatal_field` should have raised `FormInvalid`"
+            )
         except pyramid_formencode_classic.FormInvalid as exc:
             assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
             assert exc.raised_by == "fatal_field"
@@ -4042,8 +3838,6 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
     def test_FormStash_fatalForm_args(self):
         self.request.POST["email"] = "a@example.com"
         self.request.POST["username"] = "abcdefg"
-        error_main = "[{{[CUSTOM_ERROR_MAIN]}}]"
-        alt_error_main = "(((ALT_CUSTOM_ERROR_MAIN)))"
 
         # note: base
         try:
@@ -4053,16 +3847,16 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 raise_FormInvalid=True,
             )
             try:
-                formStash.fatal_form(error_main=error_main)
-                raise ValueError(
+                formStash.fatal_form(error_main=CUSTOM_ERROR_MAIN)
+                raise ValueError(  # pragma: no cover
                     "`formStash.fatal_form` should have raised `FormInvalid`"
                 )
             except pyramid_formencode_classic.FormInvalid as exc:
                 assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
                 assert exc.raised_by == "fatal_form"
-                assert exc.error_main == error_main
-                assert exc.formStash.errors["Error_Main"] == error_main
-        except Exception:
+                assert exc.error_main == CUSTOM_ERROR_MAIN
+                assert exc.formStash.errors["Error_Main"] == CUSTOM_ERROR_MAIN
+        except Exception:  # pragma: no cover
             raise
 
         # note: message_overwrite, implicit
@@ -4074,16 +3868,16 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 raise_FormInvalid=True,
             )
             try:
-                formStash.set_error(message=error_main)
-                formStash.fatal_form(error_main=error_main)
-                raise ValueError(
+                formStash.set_error(message=CUSTOM_ERROR_MAIN)
+                formStash.fatal_form(error_main=CUSTOM_ERROR_MAIN)
+                raise ValueError(  # pragma: no cover
                     "`formStash.fatal_form` should have raised `FormInvalid`"
                 )
             except pyramid_formencode_classic.FormInvalid as exc:
                 assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
                 assert exc.raised_by == "fatal_form"
-                assert exc.error_main == error_main
-                assert exc.formStash.errors["Error_Main"] == error_main
+                assert exc.error_main == CUSTOM_ERROR_MAIN
+                assert exc.formStash.errors["Error_Main"] == CUSTOM_ERROR_MAIN
 
             # error_main, alt_error_main
             (result, formStash) = pyramid_formencode_classic.form_validate(
@@ -4092,157 +3886,116 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 raise_FormInvalid=True,
             )
             try:
-                formStash.set_error(message=error_main)
-                formStash.fatal_form(error_main=alt_error_main)
-                raise ValueError(
+                formStash.set_error(message=CUSTOM_ERROR_MAIN)
+                formStash.fatal_form(error_main=ALT_CUSTOM_ERROR_MAIN)
+                raise ValueError(  # pragma: no cover
                     "`formStash.fatal_form` should have raised `FormInvalid`"
                 )
             except pyramid_formencode_classic.FormInvalid as exc:
                 assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
                 assert exc.raised_by == "fatal_form"
-                assert exc.error_main == alt_error_main
-                assert exc.formStash.errors["Error_Main"] == alt_error_main
-        except Exception:
+                assert exc.error_main == ALT_CUSTOM_ERROR_MAIN
+                assert exc.formStash.errors["Error_Main"] == ALT_CUSTOM_ERROR_MAIN
+        except Exception:  # pragma: no cover
             raise
 
-        # note: message_overwrite, explicit
+    def test_raise_FormInvalid_nothingSubmitted_variants(self):
+
+        # note: default
         try:
-            # error_main, error_main
             (result, formStash) = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
-                raise_FormInvalid=True,
             )
-            try:
-                formStash.set_error(message=error_main)
-                formStash.fatal_form(error_main=error_main, message_overwrite=True)
-                raise ValueError(
-                    "`formStash.fatal_form` should have raised `FormInvalid`"
-                )
-            except pyramid_formencode_classic.FormInvalid as exc:
-                assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
-                assert exc.raised_by == "fatal_form"
-                assert exc.error_main == error_main
-                assert exc.formStash.errors["Error_Main"] == error_main
+            if not result:
+                raise pyramid_formencode_classic.FormInvalid(formStash)
 
-            # error_main, alt_error_main
-            (result, formStash) = pyramid_formencode_classic.form_validate(
-                self.request,
-                schema=Form_Email,
-                raise_FormInvalid=True,
+            raise ValueError(  # pragma: no cover
+                "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
-            try:
-                formStash.set_error(message=error_main)
-                formStash.fatal_form(error_main=alt_error_main, message_overwrite=True)
-                raise ValueError(
-                    "`formStash.fatal_form` should have raised `FormInvalid`"
-                )
-            except pyramid_formencode_classic.FormInvalid as exc:
-                assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
-                assert exc.raised_by == "fatal_form"
-                assert exc.error_main == alt_error_main
-                assert exc.formStash.errors["Error_Main"] == alt_error_main
-        except Exception:
-            raise
 
-        # note: message_append
+        except pyramid_formencode_classic.FormInvalid as exc:
+            assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
+            assert exc.raised_by is None
+            self.assertEqual(
+                exc.error_main,
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            )
+            assert len(exc.formStash.errors) == 1
+            self.assertEqual(
+                exc.formStash.errors["Error_Main"],
+                (
+                    "%s %s"
+                    % (
+                        _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                        _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+                    )
+                ),
+            )
+
+        # note: form_validate
         try:
-            # error_main, error_main
             (result, formStash) = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
-                raise_FormInvalid=True,
+                error_no_submission_text=CUTOM_ERROR_NOTHING_SUBMITTED,
             )
-            try:
-                formStash.set_error(message=error_main)
-                formStash.fatal_form(
-                    error_main=error_main,
-                    message_overwrite=False,
-                    message_append=True,
-                )
-                raise ValueError(
-                    "`formStash.fatal_form` should have raised `FormInvalid`"
-                )
-            except pyramid_formencode_classic.FormInvalid as exc:
-                assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
-                assert exc.raised_by == "fatal_form"
-                assert exc.error_main == error_main
-                assert exc.formStash.errors["Error_Main"] == error_main
+            if not result:
+                raise pyramid_formencode_classic.FormInvalid(formStash)
 
-            # error_main, alt_error_main
-            (result, formStash) = pyramid_formencode_classic.form_validate(
-                self.request,
-                schema=Form_Email,
-                raise_FormInvalid=True,
+            raise ValueError(  # pragma: no cover
+                "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
-            try:
-                formStash.set_error(message=error_main)
-                formStash.fatal_form(
-                    error_main=alt_error_main,
-                    message_overwrite=False,
-                    message_append=True,
-                )
-                raise ValueError(
-                    "`formStash.fatal_form` should have raised `FormInvalid`"
-                )
-            except pyramid_formencode_classic.FormInvalid as exc:
-                assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
-                assert exc.raised_by == "fatal_form"
-                assert exc.error_main == alt_error_main
-                self.assertEqual(
-                    exc.formStash.errors["Error_Main"],
-                    "%s %s" % (error_main, alt_error_main),
-                )
-        except Exception:
-            raise
 
-        # note: message_prepend
+        except pyramid_formencode_classic.FormInvalid as exc:
+            assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
+            assert exc.raised_by is None
+            self.assertEqual(
+                exc.error_main,
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            )
+            assert len(exc.formStash.errors) == 1
+            self.assertEqual(
+                exc.formStash.errors["Error_Main"],
+                (
+                    "%s %s"
+                    % (
+                        _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                        CUTOM_ERROR_NOTHING_SUBMITTED,
+                    )
+                ),
+            )
+
+        # note: raise FormInvalid
         try:
-            # error_main, error_main
             (result, formStash) = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
-                raise_FormInvalid=True,
             )
-            try:
-                formStash.set_error(message=error_main)
-                formStash.fatal_form(
-                    error_main=error_main,
-                    message_overwrite=False,
-                    message_prepend=True,
+            if not result:
+                raise pyramid_formencode_classic.FormInvalid(
+                    formStash, error_no_submission_text=CUTOM_ERROR_NOTHING_SUBMITTED
                 )
-                raise ValueError(
-                    "`formStash.fatal_form` should have raised `FormInvalid`"
-                )
-            except pyramid_formencode_classic.FormInvalid as exc:
-                assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
-                assert exc.raised_by == "fatal_form"
-                assert exc.error_main == error_main
-                assert exc.formStash.errors["Error_Main"] == error_main
 
-            # error_main, alt_error_main
-            (result, formStash) = pyramid_formencode_classic.form_validate(
-                self.request,
-                schema=Form_Email,
-                raise_FormInvalid=True,
+            raise ValueError(  # pragma: no cover
+                "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
             )
-            try:
-                formStash.set_error(message=error_main)
-                formStash.fatal_form(
-                    error_main=alt_error_main,
-                    message_overwrite=False,
-                    message_prepend=True,
-                )
-                raise ValueError(
-                    "`formStash.fatal_form` should have raised `FormInvalid`"
-                )
-            except pyramid_formencode_classic.FormInvalid as exc:
-                assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
-                assert exc.raised_by == "fatal_form"
-                assert exc.error_main == alt_error_main
-                self.assertEqual(
-                    exc.formStash.errors["Error_Main"],
-                    "%s %s" % (alt_error_main, error_main),
-                )
-        except Exception:
-            raise
+
+        except pyramid_formencode_classic.FormInvalid as exc:
+            assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
+            assert exc.raised_by is None
+            self.assertEqual(
+                exc.error_main,
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            )
+            assert len(exc.formStash.errors) == 1
+            self.assertEqual(
+                exc.formStash.errors["Error_Main"],
+                (
+                    "%s %s"
+                    % (
+                        _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                        CUTOM_ERROR_NOTHING_SUBMITTED,
+                    )
+                ),
+            )
