@@ -291,6 +291,10 @@ class FormStash(object):
             if error_message is None:
                 error_message = self.error_no_submission_text
             self.parsed_form["special_errors"]["nothing_submitted"] = error_message
+        else:
+            if not error_message:
+                raise ValueError("`error_message` is required")
+            self.parsed_form["special_errors"][error_name] = error_message
 
         self.set_error(
             field=self.error_main_key,
@@ -329,11 +333,10 @@ class FormStash(object):
         if field == self.error_main_key:
             # message = _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED
             if integrate_special_errors:
-                _error_no_submission_text = self.parsed_form["special_errors"].get(
-                    "nothing_submitted", None
-                )
-                if _error_no_submission_text:
-                    message = " ".join([message, _error_no_submission_text])
+                for _field, _field_error in sorted(
+                    self.parsed_form["special_errors"].items()
+                ):
+                    message = " ".join([message, _field_error])
 
         self.parsed_form["errors"][field] = message
 
