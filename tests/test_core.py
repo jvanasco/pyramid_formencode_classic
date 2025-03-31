@@ -3821,7 +3821,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 )
             except TypeError as exc:
                 _exc_expected_msg: str
-                if sys.version_info() < 3.9:
+                if sys.version_info < 3.9:
                     # this affects py38
                     _exc_expected_msg = (
                         "fatal_field() missing 1 required positional argument: 'field'"
