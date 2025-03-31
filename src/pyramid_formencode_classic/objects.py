@@ -249,6 +249,7 @@ class FormStash(object):
         message_overwrite: bool = False,
         message_append: bool = False,
         message_prepend: bool = False,
+        error_main: Optional[str] = None,
         is_error_csrf: Optional[bool] = None,
     ) -> None:
         """
@@ -271,6 +272,8 @@ class FormStash(object):
         if field is None:
             field = self.error_main_key
 
+        _error_main_text = self.error_main_text
+
         # pass 1 - "'Nothing submitted.'"
 
         if not message:  # None or ''
@@ -290,7 +293,7 @@ class FormStash(object):
         if _message_existing and not message_overwrite:
             if field == self.error_main_key:
                 if not message_append and not message_prepend:
-                    if _message_existing == self.error_main_text:
+                    if _message_existing == _error_main_text:
                         message_append = True
                         message_prepend = False
                     else:
@@ -298,7 +301,7 @@ class FormStash(object):
                         message_prepend = True
 
             if not _message_existing and (field == self.error_main_key):
-                _message_existing = self.error_main_text
+                _message_existing = error_main or _error_main_text
 
             if self.is_submitted_vars is False:
                 if _message_existing == self.nothing_submitted_error_text:
@@ -324,7 +327,7 @@ class FormStash(object):
 
         # set the main error if needed
         if self.error_main_key not in self.errors:
-            self.errors[self.error_main_key] = self.error_main_text
+            self.errors[self.error_main_key] = error_main or _error_main_text
 
         if is_error_csrf:
             self.is_error_csrf = True
@@ -374,13 +377,24 @@ class FormStash(object):
             _kwargs["message_append"] = message_append
         if message_prepend is not None:
             _kwargs["message_prepend"] = message_prepend
-        self.set_error(field=self.error_main_key, message=error_main, **_kwargs)
-        self._raise_unique_FormInvalid(error_main=error_main, raised_by="fatal_form")
+        self.set_error(
+            field=self.error_main_key,
+            message=error_main,
+            error_main=error_main,
+            **_kwargs,
+        )
+        self._raise_unique_FormInvalid(
+            error_main=error_main,
+            error_main_overwrite=message_overwrite,
+            error_main_append=message_append,
+            error_main_prepend=message_prepend,
+            raised_by="fatal_form",
+        )
 
     def fatal_field(
         self,
         field: str,
-        message: Optional[str] = None,
+        error_field: Optional[str] = None,
         error_main: Optional[str] = None,
         message_overwrite: bool = False,
         message_append: bool = True,  # don't overwrite a formencode error here
@@ -405,7 +419,7 @@ class FormStash(object):
                 ...
             except formhandling.FormInvalid as exc:
                 formStash.set_error(field='Error_Main',
-                                    message="There was an error with your form.",
+                                    error_field="There was an error with your form.",
                                     message_prepend=True,
                                     )
                 return formhandling.form_reprint(...)
@@ -425,8 +439,8 @@ class FormStash(object):
                 raise ValueError(
                     "field `%s` is not in schema: `%s`" % (field, self.schema)
                 )
-        if not message:
-            message = _defaults.DEFAULT_ERROR_FIELD_TEXT
+        if not error_field:
+            error_field = _defaults.DEFAULT_ERROR_FIELD_TEXT
         _kwargs = {}
         if message_overwrite is not None:
             _kwargs["message_overwrite"] = message_overwrite
@@ -434,12 +448,23 @@ class FormStash(object):
             _kwargs["message_append"] = message_append
         if message_prepend is not None:
             _kwargs["message_prepend"] = message_prepend
-        self.set_error(field=field, message=message, **_kwargs)
-        self._raise_unique_FormInvalid(error_main=error_main, raised_by="fatal_field")
+        self.set_error(
+            field=field, message=error_field, error_main=error_main, **_kwargs
+        )
+        self._raise_unique_FormInvalid(
+            error_main=error_main,
+            error_main_overwrite=message_overwrite,
+            error_main_append=message_append,
+            error_main_prepend=message_prepend,
+            raised_by="fatal_field",
+        )
 
     def _raise_unique_FormInvalid(
         self,
         error_main: Optional[str] = None,
+        error_main_overwrite: bool = False,
+        error_main_append: bool = True,
+        error_main_prepend: bool = False,
         raised_by: Optional[str] = None,
     ) -> NoReturn:
         """
@@ -447,7 +472,14 @@ class FormStash(object):
         via `register_error_main_exception` after being created in
         `fatal_form` or `fatal_field`.
         """
-        _FormInvalid = FormInvalid(self, error_main=error_main, raised_by=raised_by)
+        _FormInvalid = FormInvalid(
+            self,
+            error_main=error_main,
+            error_main_overwrite=error_main_overwrite,
+            error_main_append=error_main_append,
+            error_main_prepend=error_main_prepend,
+            raised_by=raised_by,
+        )
         if self._exceptions_integrated is None:
             self._exceptions_integrated = []
         self._exceptions_integrated.append(_FormInvalid)

@@ -54,13 +54,13 @@ class FormFieldInvalid(FormInvalid):
     """Raise in your code when a Form's Field is invalid"""
 
     field: str
-    field_error_text: str
+    error_field: str
 
     def __init__(
         self,
         formStash: "FormStash",
         field: str = "",
-        field_error_text: Optional[str] = None,
+        error_field: Optional[str] = None,
         error_main: Optional[str] = None,
         message_append: bool = False,
         message_prepend: bool = False,
@@ -76,14 +76,14 @@ class FormFieldInvalid(FormInvalid):
                     "field `%s` is not in schema: `%s`" % (field, formStash.schema)
                 )
         self.field = field
-        if field_error_text is None:
-            field_error_text = _defaults.DEFAULT_ERROR_FIELD_TEXT
-        self.field_error_text = field_error_text
+        if error_field is None:
+            error_field = _defaults.DEFAULT_ERROR_FIELD_TEXT
+        self.error_field = error_field
 
         # set the error so it appears in `formStash.results`
         formStash.set_error(
             field=field,
-            message=field_error_text,
+            message=error_field,
             message_append=message_append,
             message_prepend=message_prepend,
         )
@@ -96,7 +96,7 @@ class FormFieldInvalid(FormInvalid):
         )
 
     def __repr__(self) -> str:
-        return "<FormFieldInvalid %s: `%s`>" % (self.field, self.field_error_text)
+        return "<FormFieldInvalid %s: `%s`>" % (self.field, self.error_field)
 
 
 class CsrfInvalid(FormFieldInvalid):

@@ -2,7 +2,57 @@
 
 `pyramid_formencode_classic` is a port of some classic `Pylons` form validation concepts onto the `Pyramid` framework.
 
-The package automates `formencode`'s validation of their Schemas under Pyramid, and offers a `FormStash` object to manag the validation results.
+The package automates validation of `.formencode.Schema` objects under Pyramid, and offers its own `FormStash` object to manage the validation results.
+
+## Lighweight Validation
+
+Formencode validators offer lightweight validation.  They essentially check to see if submitted data matches certain formats, regexes and options.  They can be chained together for complex tasks, however they do not do advanced validation: they can be used to determine if a login/password meet required input characteristics, but do not check to see if this information is in the database or not.
+
+To handle complex situations, this package offers a FormStash object that can be used to persist data around business logic
+
+## The FormStash object
+
+A `FormStash` object is created when validating a form and used to manage the results.
+
+There are several key attributes:
+
+* `FormStash.results` - a dict of successfully validated field values
+* `FormStash.errors` - a dict of fields that failed validation, along with the errors
+* `FormStash.defaults` - a dict of containing the pre-validated form data, which is used as the defaults when rendering the form.
+
+There are several helpful utility functions that can be used to check the validation state:
+
+* `FormStash.set_error`
+* `FormStash.get_error`
+* `FormStash.has_errors`
+
+And there are several functions that can be used to Fail validation after processing:
+
+* `FormStash.fatal_form`
+* `FormStash.fatal_field`
+
+
+## Advanced (Common) Usage
+
+Here is an example of validating a form with advanced logic:
+
+	try:
+		(result, formStash) = form_validate(
+		    request, schema=Form_Login, raise_FormInvalid=True
+		)
+		dbUser = ctx.load_user(
+		    username=formStash.results["username"],
+		    raw_password_=formStash.results["password"],
+		)
+		if not dbUser:
+		    # fatal_form and fatal_field will both raise a FormInvlalid
+		    #     formStash.fatal_form("Invalid Credentials")
+		    # or ...
+		    formStash.fatal_field(field="password, error_field=""Password invalid.")
+	except FormInvalid as exc:
+	    # formStash is an attribute of FormInvalid
+		formStash = exc.formStash
+
 
 ## Installation
 
@@ -11,7 +61,8 @@ This requires the 2.0 branch of formencode.
 
 ### Current Version(s)
 
-Version 0.8.0 is current and recommended.  It has major breaking changes against earlier versions.
+Version 0.8.0 is current and recommended.  It has major breaking changes against earlier versions.  The API has slightly changed but should be easy to adapt.
+
 Version 0.7.0 offers minimal breaking changes against earlier versions while fixing some issues.
 
 

@@ -1,12 +1,46 @@
 0.8.0
+
+    (unreleased)
+
+    This release was made to make the API easier to manage, as such, major
+    breaking changes were required.
+
+    Most of the work, and uglyness, comes from trying to control how the
+    "Nothing Submitted." message persists.  A potential 0.9.0 is being tested
+    with a saner approach.
+
     BACKWARDS INCOMPATIBLE CHANGES
-    FormInvalid
+
     * `exceptions.FormInvalid`
-        `formStash` (formerly `form`) is now the first required arg
+        kwargs:
+            `formStash` (formerly `form`) is now the first required arg
+            `message` is now `error_main`
+            `error_main_overwrite` is new
+            `message_append` is now `error_main_append`
+            `message_prepend` is now `error_main_prepend`
+            `raised_by` is new
         `errors` arg and attribute are removed; use the formStash instead
     * `exceptions.FormFieldInvalid`
-        `formStash` (formerly `form`) is now the first required arg    
+        kwargs:
+            `formStash` (formerly `form`) is now the first required arg
+            `message` is now `error_field`
+            `error_main` is new
+            `error_main_append` is new
+            `error_main_prepend` is new
+            `allow_unknown_fields` is new
+            `raised_by` is new
         `errors` arg and attribute are removed; use the formStash instead
+    * `objects.FormStash.fatal_form`
+        kwargs:
+            `message` is now `error_main`
+            `error_main_overwrite` is new
+    * `objects.FormStash.fatal_field`
+        kwargs:
+            `field` arg[0] is now required
+            `message` is now `error_field`
+            `error_main` is new
+            `message_overwrite` is new
+                `allow_unknown_fields` is new
     * removed `form_validate_simple`
     * formatter_hidden
         now stores error in "value" instead of "name"
@@ -14,7 +48,7 @@
     Other changes:
         `objects.FormStash::fatal_field`
         * function typed to raise exception with `typing.NoReturn`
-        
+
         `objects.FormStash::fatal_form`
         * `message` renamed to `error_main`
         * function typed to raise exception with `typing.NoReturn`
@@ -41,7 +75,7 @@
         kwarg `form` is now `formStash`
     * `FormFieldInvalid`
         kwarg `form` is now `formStash`
-    
+
     New:
         beware that raising a `FormInvalid(formStash)` will invoke the seterror and utilize the append/prepend args
 
@@ -184,7 +218,7 @@
 		form_validate(raise_form_invalid=)  # use raise_FormInvalid
 		form_validate(raise_field_invalid=)  # use raise_FieldInvalid
 	- marked as deprecated
-		init_request  
+		init_request
 			use the pyramid includeme instead
 			the new version invokes the modern method
 		formerrors_set
@@ -194,8 +228,6 @@
 			use either:
 				* FormStash.html_error_placeholder()
 				* FormStash.render_html_error_main()
-					  
-		
 
 0.1.10
 	2017.08.16
