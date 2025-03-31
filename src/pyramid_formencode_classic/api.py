@@ -182,7 +182,10 @@ def _form_validate_core(
             elif not validate_post and validate_get:
                 validate_params = request.GET
             elif not validate_post and not validate_get:
-                formStash._set_error__nothing_submitted()
+                formStash.set_special_error(
+                    error_name="nothing_submitted",
+                    error_message=error_no_submission_text,
+                )
                 raise ValidationStop("no `validate_params`")
         if TYPE_CHECKING:
             assert isinstance(validate_params, MultiDict)
@@ -201,7 +204,10 @@ def _form_validate_core(
         # TODO: test how there are no `decoded_params` after
         #       determining there are `validate_params`
         if not decoded_params:
-            formStash._set_error__nothing_submitted()
+            formStash.set_special_error(
+                error_name="nothing_submitted",
+                error_message=error_no_submission_text,
+            )
             raise ValidationStop("no `decoded_params`")
         formStash.is_submitted_vars = True
 

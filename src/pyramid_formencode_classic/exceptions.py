@@ -21,22 +21,25 @@ class FormInvalid(BaseException):
     """Raise in your code when a Form is invalid"""
 
     error_main: str
-    error_no_submission_text: str
+    error_no_submission_text: Optional[str]
     formStash: "FormStash"
     raised_by: Optional[str]
+    integrate_special_errors: bool
 
     def __init__(
         self,
         formStash: "FormStash",
         error_main: Optional[str] = None,
-        raised_by: Optional[str] = None,
-        integrate_special_errors: bool = True,
         error_no_submission_text: Optional[str] = None,
+        integrate_special_errors: bool = True,
+        raised_by: Optional[str] = None,
     ):
         self.formStash = formStash
         if error_main is None:
             error_main = _defaults.DEFAULT_ERROR_MAIN_TEXT
         self.error_main = error_main
+        self.error_no_submission_text = error_no_submission_text
+        self.integrate_special_errors = integrate_special_errors
         self.raised_by = raised_by
         super(FormInvalid, self).__init__()
         formStash.register_error_main_exception(
@@ -67,7 +70,7 @@ class FormFieldInvalid(FormInvalid):
         error_no_submission_text: Optional[str] = None,
     ):
         if not field:
-            raise ValueError("field `%s` must be provided")
+            raise ValueError("`field` must be provided")
         if field not in formStash.schema.fields:
             if not allow_unknown_fields:
                 raise ValueError(

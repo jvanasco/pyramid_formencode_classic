@@ -6,9 +6,9 @@ from typing import List
 from typing import NoReturn
 from typing import Optional
 from typing import TYPE_CHECKING
-from typing import Union
 
 # pypi
+from typing_extensions import Literal
 from typing_extensions import TypedDict
 
 # local
@@ -30,7 +30,7 @@ class ParsedForm(TypedDict):
     errors: Dict[str, str]
     results: Dict[str, str]
     defaults: Dict[str, str]
-    special_errors: Dict[str, Union[str, bool]]
+    special_errors: Dict[str, str]
 
 
 class FormStash(object):
@@ -45,7 +45,7 @@ class FormStash(object):
     is_parsed: bool = False
     is_unicode_params: bool = False
     is_submitted_vars: Optional[bool] = None
-    error_no_submission_text: Optional[str] = None
+    error_no_submission_text: str
     parsed_form: ParsedForm
 
     # protected attribute; use property to access
@@ -103,6 +103,7 @@ class FormStash(object):
         self.error_main_text = error_main_text
 
         if error_no_submission_text is None:
+            # e.g. "Nothing submitted."
             error_no_submission_text = _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED
         self.error_no_submission_text = error_no_submission_text
 
@@ -277,18 +278,19 @@ class FormStash(object):
             return self.parsed_form["errors"][field]
         return None
 
-    def _set_error__nothing_submitted(
+    def set_special_error(
         self,
-        error_no_submission_text: Optional[str] = None,
+        error_name: Literal["nothing_submitted"],
+        error_message: Optional[str] = None,
     ):
         if __debug__:
-            log.debug("`FormStash._set_error__nothing_submitted`")
-        # note the form has nothing submitted
-        self.is_submitted_vars = False
-        self.parsed_form["special_errors"]["nothing_submitted"] = True
-
-        if error_no_submission_text is not None:
-            self.error_no_submission_text = error_no_submission_text
+            log.debug("`FormStash.set_special_error`")
+        if error_name == "nothing_submitted":
+            # note the form has nothing submitted
+            self.is_submitted_vars = False
+            if error_message is None:
+                error_message = self.error_no_submission_text
+            self.parsed_form["special_errors"]["nothing_submitted"] = error_message
 
         self.set_error(
             field=self.error_main_key,
@@ -327,9 +329,11 @@ class FormStash(object):
         if field == self.error_main_key:
             # message = _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED
             if integrate_special_errors:
-                if self.parsed_form["special_errors"].get("nothing_submitted", False):
-                    message_ns = self.error_no_submission_text
-                    message = " ".join([message, message_ns])
+                _error_no_submission_text = self.parsed_form["special_errors"].get(
+                    "nothing_submitted", None
+                )
+                if _error_no_submission_text:
+                    message = " ".join([message, _error_no_submission_text])
 
         self.parsed_form["errors"][field] = message
 
@@ -470,6 +474,10 @@ class FormStash(object):
         """
         if error_no_submission_text is not None:
             self.error_no_submission_text = error_no_submission_text
+            if self.parsed_form["special_errors"].get("nothing_submitted"):
+                self.parsed_form["special_errors"][
+                    "nothing_submitted"
+                ] = error_no_submission_text
 
         if isinstance(exc, FormInvalid):
             if self._exceptions_integrated is None:

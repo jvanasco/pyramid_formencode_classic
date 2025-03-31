@@ -36,7 +36,7 @@ _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED = "//DEFAULT_ERROR_NOTHING_SUBMITTED//
 CUSTOM_ERROR_MAIN = "[{{[CUSTOM_ERROR_MAIN]}}]"
 ALT_CUSTOM_ERROR_MAIN = "(((ALT_CUSTOM_ERROR_MAIN)))"
 CUTOM_ERROR_NOTHING_SUBMITTED = "(((CUSTOM_NOTHING_SUBMITTED)))"
-
+CUSTOM_FIELD_ERROR = "{{{CUSTOM_FIELD_ERROR}}}"
 
 DEBUG_PRINT = True
 DEBUG_LOGGING = True
@@ -3989,6 +3989,154 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 _defaults.DEFAULT_ERROR_MAIN_TEXT,
             )
             assert len(exc.formStash.errors) == 1
+            self.assertEqual(
+                exc.formStash.errors["Error_Main"],
+                (
+                    "%s %s"
+                    % (
+                        _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                        CUTOM_ERROR_NOTHING_SUBMITTED,
+                    )
+                ),
+            )
+
+    def test_raise_FormFieldInvalid_nothingSubmitted_variants(self):
+
+        # note: error
+        try:
+            (result, formStash) = pyramid_formencode_classic.form_validate(
+                self.request,
+                schema=Form_Email,
+            )
+            if not result:
+                raise pyramid_formencode_classic.FormFieldInvalid(formStash)
+
+            raise ValueError(  # pragma: no cover
+                "`pyramid_formencode_classic.FormFieldInvalid` whould have raised `ValueError`"
+            )
+
+        except ValueError as exc:
+            assert exc.args[0] == "`field` must be provided"
+
+        # note: invalid
+        try:
+            (result, formStash) = pyramid_formencode_classic.form_validate(
+                self.request,
+                schema=Form_Email,
+            )
+            if not result:
+                raise pyramid_formencode_classic.FormFieldInvalid(
+                    formStash, field="unknown"
+                )
+
+            raise ValueError(  # pragma: no cover
+                "`pyramid_formencode_classic.FormFieldInvalid` whould have raised `ValueError`"
+            )
+
+        except ValueError as exc:
+            assert (
+                exc.args[0]
+                == "field `unknown` is not in schema: `<class 'tests.test_core.Form_Email'>`"
+            )
+
+        # note: default
+        try:
+            (result, formStash) = pyramid_formencode_classic.form_validate(
+                self.request,
+                schema=Form_Email,
+            )
+            if not result:
+                raise pyramid_formencode_classic.FormFieldInvalid(
+                    formStash, field="email", error_field=CUSTOM_FIELD_ERROR
+                )
+
+            raise ValueError(  # pragma: no cover
+                "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
+            )
+
+        except pyramid_formencode_classic.FormInvalid as exc:
+            assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
+            assert exc.raised_by is None
+            self.assertEqual(
+                exc.error_main,
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            )
+            assert len(exc.formStash.errors) == 2
+            assert exc.formStash.errors["email"] == CUSTOM_FIELD_ERROR
+            self.assertEqual(
+                exc.formStash.errors["Error_Main"],
+                (
+                    "%s %s"
+                    % (
+                        _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                        _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+                    )
+                ),
+            )
+
+        # note: form_validate
+        try:
+            (result, formStash) = pyramid_formencode_classic.form_validate(
+                self.request,
+                schema=Form_Email,
+                error_no_submission_text=CUTOM_ERROR_NOTHING_SUBMITTED,
+            )
+            if not result:
+                raise pyramid_formencode_classic.FormFieldInvalid(
+                    formStash, field="email", error_field=CUSTOM_FIELD_ERROR
+                )
+
+            raise ValueError(  # pragma: no cover
+                "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
+            )
+
+        except pyramid_formencode_classic.FormInvalid as exc:
+            assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
+            assert exc.raised_by is None
+            self.assertEqual(
+                exc.error_main,
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            )
+            assert len(exc.formStash.errors) == 2
+            assert exc.formStash.errors["email"] == CUSTOM_FIELD_ERROR
+            self.assertEqual(
+                exc.formStash.errors["Error_Main"],
+                (
+                    "%s %s"
+                    % (
+                        _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                        CUTOM_ERROR_NOTHING_SUBMITTED,
+                    )
+                ),
+            )
+
+        # note: raise FormFieldInvalid
+        try:
+            (result, formStash) = pyramid_formencode_classic.form_validate(
+                self.request,
+                schema=Form_Email,
+            )
+            if not result:
+                raise pyramid_formencode_classic.FormFieldInvalid(
+                    formStash,
+                    field="email",
+                    error_field=CUSTOM_FIELD_ERROR,
+                    error_no_submission_text=CUTOM_ERROR_NOTHING_SUBMITTED,
+                )
+
+            raise ValueError(  # pragma: no cover
+                "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
+            )
+
+        except pyramid_formencode_classic.FormInvalid as exc:
+            assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
+            assert exc.raised_by is None
+            self.assertEqual(
+                exc.error_main,
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+            )
+            assert len(exc.formStash.errors) == 2
+            assert exc.formStash.errors["email"] == CUSTOM_FIELD_ERROR
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 (
