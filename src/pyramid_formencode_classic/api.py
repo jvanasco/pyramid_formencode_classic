@@ -269,7 +269,9 @@ def _form_validate_core(
         if raise_FormInvalid:
             raise FormInvalid(
                 formStash,
-                error_main=_defaults.DEFAULT_ERROR_MAIN_TEXT,
+                error_main=error_main_text,
+                error_no_submission_text=error_no_submission_text,
+                integrate_special_errors=True,
                 raised_by="_form_validate_core",
             )
 
