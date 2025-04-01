@@ -121,7 +121,86 @@ This project using a Semantic Versioning Policy: `Major.Minor.Patch`.
 
 The recommended usage is to pin versioning within the `Major.Minor` range:
 
-	pyramid_formencode_classic >=0.8.0, <0.9.0
+	pyramid_formencode_classic >=0.9.0, <0.10.0
+
+
+## This looks more complicated than it should be.
+
+Yes, it is.
+
+This library tries to generate and manage useful errors.
+
+Assume we have a login for that is just email/password::
+
+    class Form_Login(formencode.Schema):
+        username = formencode.validators.UnicodeString(not_empty=True)
+        password = formencode.validators.UnicodeString(not_empty=True)
+
+And this is our basic validation pattern::
+
+    (result, formStash) = pyramid_formencode_classic.form_validate(
+        request,
+        schema=Form_Login,
+    )
+
+What should happen if we don't fill anything out?
+
+We don't just want to simply indicate an error, we also need to note there was
+nothing submitted to the form.
+
+This package offers defaults, but can customize messages like such:
+
+    (result, formStash) = pyramid_formencode_classic.form_validate(
+        request,
+        schema=Form_Login,
+        error_main_text = "There was an error with your form",
+        error_no_submission_text = "Nothing submitted.",
+    )
+
+The package will then merge the `error_main_text` and `error_no_submission_text`
+into `FormStash.errors["error_main"] = "There was an error with your form. Nothing submitted."`
+
+Now imagine you need to set a form error yourself:
+
+    (result, formStash) = pyramid_formencode_classic.form_validate(
+        request,
+        schema=Form_Login,
+        error_main_text = "There was an error with your form",
+        error_no_submission_text = "Nothing submitted.",
+    )
+    user = get_user_by_login(formStash.results["username"], formStash.results["password"])
+    if not user:
+        formStash.fatal_form("Invalid credentials")
+        # or
+        # raise FormInvalid(formStash, "Invalid credentials")
+
+How should that render?
+
+We don't want to just see:
+
+    Invalid Credentials.
+
+We want to see as the "form error":
+
+     There was an error with your form. Invalid credentials.
+
+So this package tries to do the right thing, and merges `error_main_text` with `Invalid credentials`.
+
+If you only want to show a specific message though, you can invoke:
+    
+    if not user:
+        formStash.fatal_form("Invalid credentials", error_main_overwrite=True)
+        # or
+        # raise FormInvalid(formStash, "Invalid credentials", error_main_overwrite=True)
+
+Which will render:
+
+    Invalid Credentials.
+
+Most of the work put into this package over the past decade has been to keep a
+simple interface to achieve this type of error rendering, while also giving the
+flexibility to be more interactive.
+
 
 ## Debugtoolbar Support?
 

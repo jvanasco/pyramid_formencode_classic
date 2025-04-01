@@ -3,31 +3,35 @@ TODO:
     coverage run --include src/*,tests/* -m pytest tests
     coverage report && coverage html
 
+0.9.1
+	* `FormStash.register_error_main_exception` is now `FormStash.register_FormInvalid`
+    addressed several regressions; expanded tests
+
 
 0.9.0
     BACKWARDS INCOMPATIBLE CHANGES
 
     Releases `0.7.0`, `0.8.0` and `0.9.0` were released in quick succession to
     make significant changes to the API and functionality easier to adopt.
-    
+
     For most users, the general change will be this:
 
         `FormInvalid` and `FormFieldInvalid` now require a `formStash`
         `FormStash.__init__` now requires a schema
         `FormStash.fatal_form` message is now `error_main`
         `FormStash.fatal_field` message is now `error_field`
-    
+
     There are a few other changes, but the above are the most significant.
-    
+
     These changes were done to make the package more maintainable and usable - as Field exceptions can cascade onto Forms.
-    
+
     The 0.8.0 branch offers some additional control allowing complex error messages to
     append, prepend, or overwrite existing errors.  This control was stripped out
     of the 0.9.0 branch, in favor of introducing special "meta-errors" about the form.
-    
+
     This release continues the work of 0.8.0 in trying to minimize and simplify
     the API while still giving control of the meta/special errors.
-    
+
     FormStash-
         the processed form data is now within a dict, ``ParsedForm```
             Changes:
