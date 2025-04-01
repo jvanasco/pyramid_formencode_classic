@@ -79,8 +79,11 @@ TODO:
     breaking changes were required.
 
     Most of the work, and uglyness, comes from trying to control how the
-    "Nothing Submitted." message persists.  A potential 0.9.0 is being tested
-    with a saner approach.
+    "Nothing Submitted." message persists.
+    
+    To maintain control of how this message renders, some kwargs were renamed
+    and others were added.  A 0.9.0 branch removes many of these for an
+    alternate strategy.
 
     BACKWARDS INCOMPATIBLE CHANGES
 

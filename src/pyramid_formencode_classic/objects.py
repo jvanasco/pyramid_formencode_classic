@@ -107,6 +107,11 @@ class FormStash(object):
             "nothing_submitted": error_no_submission_text,
         }
 
+        if error_no_submission_text is None:
+            # e.g. "Nothing submitted."
+            error_no_submission_text = _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED
+        self.error_no_submission_text = error_no_submission_text
+
         self.is_unicode_params = is_unicode_params
         self._reprints = []
 
