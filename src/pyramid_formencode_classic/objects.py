@@ -133,11 +133,7 @@ class FormStash(object):
 
     @property
     def errors(self):
-        return self.parsed_form["errors"]
-
-    @property
-    def errors_normal(self):
-        return {k: v for k, v in self.parsed_form["errors"].items() if k[0] != "*"}
+        return self.errors_normal
 
     @property
     def results(self):
@@ -145,10 +141,24 @@ class FormStash(object):
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+    @property
+    def errors_all(self):
+        return self.parsed_form["errors"]
+
+    @property
+    def errors_normal(self):
+        return {k: v for k, v in self.parsed_form["errors"].items() if k[0] != "*"}
+
+    @property
+    def errors_special(self):
+        return {k: v for k, v in self.parsed_form["errors"].items() if k[0] == "*"}
+
     def count_errors(self, include_special: bool = False) -> int:
         if include_special:
-            return len(self.parsed_form["errors"])
+            return len(self.errors_all)
         return len(self.errors_normal)
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     def set_css_error(self, css_error: str) -> None:
         """Set the css error field for the form."""

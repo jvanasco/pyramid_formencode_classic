@@ -72,17 +72,23 @@ A `FormStash` object saves the parsed form data into a `ParsedForm` dict.
 
     FormStash.parsed_form: ParsedForm = {}
 
-The `ParsedForm` dict has 4 entries, which are all dicts:
+The `ParsedForm` dict has 3 entries, which are all dicts:
 
     results
     errors
     defaults
-    special_errors
 
 `results`, `errors` and `defaults` have accessor properties on the FormStash object.
 
-The `special_errors` entry saves information about special errors, such as "nothing_submitted".
+"special_errors", such as "nothing_submitted", are stored in the main "errors" dict
+with an asterisk prefix (e.g. "*nothing_submitted")
 
+The errors have multiple accessors:
+
+    `FormStash.errors` - returns `FormStash.errors_normal`
+    `FormStash.errors_normal` - only returns `ParsedForm["errors"]` without a "*" prefix
+    `FormStash.errors_special` - only returns `ParsedForm["errors"]` with a "*" prefix
+    `FormStash.errors_all` - returns all `ParsedForm["errors"]`
 
 ### Error Concepts
 
