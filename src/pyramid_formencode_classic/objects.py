@@ -466,6 +466,12 @@ class FormStash(object):
         if not field:
             raise ValueError("field `%s` must be provided" % field)
         if field not in self.schema.fields:
+            if field == self.error_main_key:
+                raise ValueError(
+                    "field `%s` is not in schema: `%s`; "
+                    "and field is `self.error_main_key`."
+                    "invoke `FormStash.fatal_form()` instead." % (field, self.schema)
+                )
             if not allow_unknown_fields:
                 raise ValueError(
                     "field `%s` is not in schema: `%s`" % (field, self.schema)

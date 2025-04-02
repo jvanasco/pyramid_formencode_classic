@@ -4478,6 +4478,26 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             )
             assert exc.formStash.errors["unknown"] == message
 
+        # note: field=="Error_Main"
+        try:
+            (result, formStash) = pyramid_formencode_classic.form_validate(
+                self.request,
+                schema=Form_Email,
+                raise_FormInvalid=True,
+            )
+            try:
+                formStash.fatal_field(field="Error_Main", error_field=message)
+                raise ValueError(  # pragma: no cover
+                    "`formStash.fatal_field` should have raised `FormInvalid`"
+                )
+            except ValueError as exc:
+                assert (
+                    exc.args[0]
+                    == "field `Error_Main` is not in schema: `<class 'tests.test_core.Form_Email'>`; and field is `self.error_main_key`.invoke `FormStash.fatal_form()` instead."
+                )
+        except Exception:  # pragma: no cover
+            raise
+
     def test_FormStash_fatalForm_args(self):
         self.request.POST["email"] = "a@example.com"
         self.request.POST["username"] = "abcdefg"
