@@ -4204,7 +4204,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 exc.error_main,
                 _defaults.DEFAULT_ERROR_MAIN_TEXT,
             )
-            assert len(exc.formStash.errors) == 1
+            assert exc.formStash.count_errors() == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 _defaults.DEFAULT_ERROR_MAIN_TEXT,
@@ -4235,7 +4235,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
             assert exc.raised_by == "fatal_form"
             assert exc.error_main == message
-            assert len(exc.formStash.errors) == 1
+            assert exc.formStash.count_errors() == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 "%s %s" % (_defaults.DEFAULT_ERROR_MAIN_TEXT, message),
@@ -4260,7 +4260,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
             assert exc.raised_by == "fatal_form"
             assert exc.error_main == message
-            assert len(exc.formStash.errors) == 1
+            assert exc.formStash.count_errors() == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 message,
@@ -4288,7 +4288,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
             assert exc.raised_by == "fatal_field"
             self.assertEqual(exc.error_main, _defaults.DEFAULT_ERROR_MAIN_TEXT)
-            assert len(exc.formStash.errors) == 2
+            assert exc.formStash.count_errors() == 2
             self.assertEqual(exc.formStash.errors[field], message)
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
@@ -4691,7 +4691,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 exc.error_main,
                 _defaults.DEFAULT_ERROR_MAIN_TEXT,
             )
-            assert len(exc.formStash.errors) == 2
+            assert exc.formStash.count_errors() == 2
             assert exc.formStash.errors["email"] == CUSTOM_FIELD_ERROR
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
@@ -4727,7 +4727,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 exc.error_main,
                 _defaults.DEFAULT_ERROR_MAIN_TEXT,
             )
-            assert len(exc.formStash.errors) == 2
+            assert exc.formStash.count_errors() == 2
             assert exc.formStash.errors["email"] == CUSTOM_FIELD_ERROR
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
@@ -4765,7 +4765,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 exc.error_main,
                 _defaults.DEFAULT_ERROR_MAIN_TEXT,
             )
-            assert len(exc.formStash.errors) == 2
+            assert exc.formStash.count_errors() == 2
             assert exc.formStash.errors["email"] == CUSTOM_FIELD_ERROR
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
@@ -4842,7 +4842,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
                 exc.error_main,
                 _defaults.DEFAULT_ERROR_MAIN_TEXT,
             )
-            assert len(exc.formStash.errors) == 1
+            assert exc.formStash.count_errors() == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 (
@@ -4876,7 +4876,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
                 exc.error_main,
                 _defaults.DEFAULT_ERROR_MAIN_TEXT,
             )
-            assert len(exc.formStash.errors) == 1
+            assert exc.formStash.count_errors() == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 (
@@ -4911,7 +4911,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
                 exc.error_main,
                 _defaults.DEFAULT_ERROR_MAIN_TEXT,
             )
-            assert len(exc.formStash.errors) == 1
+            assert exc.formStash.count_errors() == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 (
@@ -4946,7 +4946,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
                 exc.error_main,
                 _defaults.DEFAULT_ERROR_MAIN_TEXT,
             )
-            assert len(exc.formStash.errors) == 1
+            assert exc.formStash.count_errors() == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 (
@@ -4979,7 +4979,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
             assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
             assert exc.raised_by is None
             assert exc.error_main == message
-            assert len(exc.formStash.errors) == 1
+            assert exc.formStash.count_errors() == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 (
@@ -5014,7 +5014,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
             assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
             assert exc.raised_by is None
             assert exc.error_main == message
-            assert len(exc.formStash.errors) == 1
+            assert exc.formStash.count_errors() == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 ("%s %s" % (message, _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED)),
@@ -5040,7 +5040,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
                 exc.error_main,
                 _defaults.DEFAULT_ERROR_MAIN_TEXT,
             )
-            assert len(exc.formStash.errors) == 1
+            assert exc.formStash.count_errors() == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 (
@@ -5072,7 +5072,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
                 exc.error_main,
                 _defaults.DEFAULT_ERROR_MAIN_TEXT,
             )
-            assert len(exc.formStash.errors) == 1
+            assert exc.formStash.count_errors() == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 (
@@ -5102,7 +5102,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
             assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
             assert exc.raised_by == "_form_validate_core"
             assert exc.error_main == message
-            assert len(exc.formStash.errors) == 1
+            assert exc.formStash.count_errors() == 1
             self.assertEqual(
                 exc.formStash.errors["Error_Main"],
                 (

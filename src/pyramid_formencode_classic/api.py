@@ -183,7 +183,7 @@ def _form_validate_core(
                 validate_params = request.GET
             elif not validate_post and not validate_get:
                 formStash.set_special_error(
-                    error_name="nothing_submitted",
+                    error_name="*nothing_submitted",
                     error_message=error_no_submission_text,
                 )
                 raise ValidationStop("no `validate_params`")
@@ -205,7 +205,7 @@ def _form_validate_core(
         #       determining there are `validate_params`
         if not decoded_params:
             formStash.set_special_error(
-                error_name="nothing_submitted",
+                error_name="*nothing_submitted",
                 error_message=error_no_submission_text,
             )
             raise ValidationStop("no `decoded_params`")
@@ -395,7 +395,7 @@ def form_reprint(
     form_content = formencode.htmlfill.render(
         form_content,
         defaults=formStash.defaults,
-        errors=formStash.errors,
+        errors=formStash.errors_normal,
         auto_error_formatter=auto_error_formatter,
         **_htmlfill_kwargs,
     )

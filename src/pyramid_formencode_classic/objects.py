@@ -29,7 +29,6 @@ class ParsedForm(TypedDict):
     errors: Dict[str, str]
     results: Dict[str, str]
     defaults: Dict[str, str]
-    special_errors: Dict[str, str]
 
 
 class FormStash(object):
@@ -87,7 +86,6 @@ class FormStash(object):
             "errors": {},
             "results": {},
             "defaults": {},
-            "special_errors": {},
         }
 
         if error_main_key is None:
@@ -103,8 +101,8 @@ class FormStash(object):
             # e.g. "Nothing submitted."
             error_no_submission_text = _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED
         self.default_texts = {
-            "error_main": error_main_text,
-            "nothing_submitted": error_no_submission_text,
+            "*error_main": error_main_text,
+            "*nothing_submitted": error_no_submission_text,
         }
 
         if error_no_submission_text is None:
@@ -135,11 +133,30 @@ class FormStash(object):
 
     @property
     def errors(self):
-        return self.parsed_form["errors"]
+        return self.errors_normal
 
     @property
     def results(self):
         return self.parsed_form["results"]
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    @property
+    def errors_all(self):
+        return self.parsed_form["errors"]
+
+    @property
+    def errors_normal(self):
+        return {k: v for k, v in self.parsed_form["errors"].items() if k[0] != "*"}
+
+    @property
+    def errors_special(self):
+        return {k: v for k, v in self.parsed_form["errors"].items() if k[0] == "*"}
+
+    def count_errors(self, include_special: bool = False) -> int:
+        if include_special:
+            return len(self.errors_all)
+        return len(self.errors_normal)
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -289,31 +306,23 @@ class FormStash(object):
     def set_special_error(
         self,
         error_name: Literal[
-            "error_main",
-            "nothing_submitted",
+            "*error_main",
+            "*nothing_submitted",
         ],
         error_message: Optional[str] = None,
-    ):
+    ) -> None:
         if __debug__:
             log.debug("`FormStash.set_special_error`")
-        if error_name == "nothing_submitted":
+        if error_name == "*nothing_submitted":
             # note the form has nothing submitted
             self.is_submitted_vars = False
             if error_message is None:
-                error_message = self.default_texts["nothing_submitted"]
-            self.parsed_form["special_errors"]["nothing_submitted"] = error_message
+                error_message = self.default_texts["*nothing_submitted"]
         else:
             if not error_message:
                 raise ValueError("`error_message` is required")
-            self.parsed_form["special_errors"][error_name] = error_message
-
+        self.parsed_form["errors"][error_name] = error_message
         self.is_error = True
-        if False:
-            self.set_error(
-                field=self.error_main_key,
-                message=self.default_texts["error_main"],
-                integrate_special_errors=True,
-            )
 
     def set_error(
         self,
@@ -353,14 +362,14 @@ class FormStash(object):
             integrate_special_errors = True
             if error_main_overwrite:
                 self.set_special_error(
-                    error_name="error_main",
+                    error_name="*error_main",
                     error_message=message,
                 )
             else:
-                _existing_error = self.parsed_form["special_errors"].get("error_main")
+                _existing_error = self.parsed_form["errors"].get("*error_main")
                 if not _existing_error:
                     # set the prefix error
-                    _existing_error = self.default_texts["error_main"]
+                    _existing_error = self.default_texts["*error_main"]
                 # if _existing_error != message:
                 #     message = " ".join([_existing_error, message])
                 if not _existing_error.endswith(message):
@@ -368,7 +377,7 @@ class FormStash(object):
                 else:
                     message = _existing_error
                 self.set_special_error(
-                    error_name="error_main",
+                    error_name="*error_main",
                     error_message=message,
                 )
         else:
@@ -376,9 +385,10 @@ class FormStash(object):
 
         if integrate_special_errors:
             _errors_main = []
-            for _field, _field_error in sorted(
-                self.parsed_form["special_errors"].items()
-            ):
+            _special_errors = [
+                i for i in self.parsed_form["errors"].items() if i[0][0] == "*"
+            ]
+            for _field, _field_error in sorted(_special_errors):
                 _errors_main.append(_field_error)
             _error_main = " ".join(_errors_main)
             self.parsed_form["errors"][self.error_main_key] = _error_main
@@ -487,7 +497,7 @@ class FormStash(object):
         `fatal_form` or `fatal_field`.)
         """
         if error_main is None:
-            error_main = self.default_texts["error_main"]
+            error_main = self.default_texts["*error_main"]
         _FormInvalid = FormInvalid(
             self,
             error_main=error_main,
@@ -526,10 +536,10 @@ class FormStash(object):
             raise ValueError("Only `FormInvalid` exceptions are compatible")
 
         if exc.error_no_submission_text is not None:
-            self.default_texts["nothing_submitted"] = exc.error_no_submission_text
-            if self.parsed_form["special_errors"].get("nothing_submitted"):
-                self.parsed_form["special_errors"][
-                    "nothing_submitted"
+            self.default_texts["*nothing_submitted"] = exc.error_no_submission_text
+            if self.parsed_form["errors"].get("*nothing_submitted"):
+                self.parsed_form["errors"][
+                    "*nothing_submitted"
                 ] = exc.error_no_submission_text
 
         if exc.error_main:

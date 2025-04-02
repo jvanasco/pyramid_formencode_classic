@@ -3,6 +3,15 @@ TODO:
     coverage run --include src/*,tests/* -m pytest tests
     coverage report && coverage html
 
+0.9.2
+    addressed several regressions; expanded tests
+    * storing special errors within errors dict
+	* `FormStash.errors_normal` returns errors without * prefixes
+	* added `FormStash.count_errors`
+	* added `FormStash.errors_all`
+	* added `FormStash.errors_normal`
+	* added `FormStash.errors_special`
+	
 0.9.1
 	* `FormStash.register_error_main_exception` is now `FormStash.register_FormInvalid`
     addressed several regressions; expanded tests
