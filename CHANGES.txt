@@ -8,6 +8,7 @@ TODO:
       `FormStash.assets` is a dict that is reserved for developer use
     * drop python3.6 support;
       github has dropped ubuntu-20.04, which was the last image to have py36
+    * changed packaging configuration to get rid of alerts
 
 0.9.2
     addressed several regressions; expanded tests
