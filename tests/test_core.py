@@ -5133,3 +5133,183 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
                     )
                 ),
             )
+
+
+class TestAssets(_TestHarness, unittest.TestCase):
+    """ """
+
+    _test_submit__data: Dict  # placeholder
+
+    # note: _test_no_params__data
+    _test_no_params__data: Dict = {
+        "test_formatter_default": {
+            # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">%s %s</span><br />
+
+    <input type="text" name="email" value="" />
+    <input type="text" name="username" value="" />
+</form>
+</div></body></html>
+"""
+            % (
+                _defaults.DEFAULT_ERROR_MAIN_TEXT,
+                _defaults.DEFAULT_ERROR_NOTHING_SUBMITTED,
+            ),
+        },
+    }
+    _test_submit__data = {
+        "test_formatter_default": {
+            # 'auto_error_formatter': None,  # don't supply in this test, this should default to formatter_nobr
+            "error_formatters": None,
+            "response_text": """\
+<html><head></head><body><div>
+<form action="/" method="POST">
+    
+    <span class="error-message">%s</span><br />
+
+    <!-- for: email -->
+<span class="error-message">Missing value</span>
+<input type="text" name="email" value="" class="error" />
+    <!-- for: username -->
+<span class="error-message">Missing value</span>
+<input type="text" name="username" value="" class="error" />
+</form>
+</div></body></html>
+"""
+            % _defaults.DEFAULT_ERROR_MAIN_TEXT,
+        },
+    }
+
+    error_main_key: Optional[str] = "Error_Alt"
+    template: str = "fixtures/form_a-html_error_placeholder-default.mako"
+    request: Request
+
+    def test_no_params(self):
+        tests_completed = []
+        tests_fail = []
+
+        for test_name, test_data in self._test_no_params__data.items():
+            _template = self.template
+            _expected_text = test_data["response_text"]
+            _reprint_kwargs: Dict = {}
+            if "auto_error_formatter" in test_data:
+                _reprint_kwargs["auto_error_formatter"] = test_data[
+                    "auto_error_formatter"
+                ]
+            if "error_formatters" in test_data:
+                if test_data["error_formatters"] is not None:
+                    _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
+            _validate_kwargs: Dict = {}
+            if self.error_main_key is not None:
+                _validate_kwargs["error_main_key"] = self.error_main_key
+
+            def _print_form_simple():
+                rendered = render_to_response(_template, {"request": self.request})
+                return rendered
+
+            try:
+                (result, formStash) = pyramid_formencode_classic.form_validate(
+                    self.request,
+                    schema=Form_EmailUsername,
+                    **_validate_kwargs,
+                )
+                assert isinstance(formStash.assets, dict)
+                formStash.assets["test"] = "ok"
+                if not result:
+                    raise pyramid_formencode_classic.FormInvalid(formStash)
+
+                raise ValueError(  # pragma: no cover
+                    "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
+                )
+
+            except pyramid_formencode_classic.FormInvalid as exc:
+                assert "test" in formStash.assets
+                assert formStash.assets["test"] == "ok"
+                formStash.register_FormInvalid(exc)
+                rendered = pyramid_formencode_classic.form_reprint(
+                    self.request, _print_form_simple, **_reprint_kwargs
+                )
+                try:
+                    assert rendered.text == _expected_text
+                except:  # pragma: no cover
+                    if DEBUG_PRINT:
+                        print("=============")
+                        print("%s.test_no_params" % self.__class__)
+                        print(test_name)
+                        print("------------")
+                        print(rendered.text)
+                        print("------------")
+                        print(_expected_text)
+                        print("=============")
+                    tests_fail.append(test_name)
+            tests_completed.append(test_name)
+
+        if tests_fail:  # pragma: no cover
+            raise ValueError(tests_fail)
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    def test_submit(self):
+        # set the submit
+        self.request.POST["submit"] = "submit"
+
+        tests_completed = []
+        tests_fail = []
+        for test_name, test_data in self._test_submit__data.items():
+            _template = self.template
+            _expected_text = test_data["response_text"]
+            _reprint_kwargs: Dict = {}
+            if "auto_error_formatter" in test_data:
+                _reprint_kwargs["auto_error_formatter"] = test_data[
+                    "auto_error_formatter"
+                ]
+            if "error_formatters" in test_data:
+                if test_data["error_formatters"] is not None:
+                    _reprint_kwargs["error_formatters"] = test_data["error_formatters"]
+            _validate_kwargs: Dict = {}
+            if self.error_main_key is not None:
+                _validate_kwargs["error_main_key"] = self.error_main_key
+
+            def _print_form_simple():
+                rendered = render_to_response(_template, {"request": self.request})
+                return rendered
+
+            try:
+                (result, formStash) = pyramid_formencode_classic.form_validate(
+                    self.request,
+                    schema=Form_EmailUsername,
+                    **_validate_kwargs,
+                )
+                assert isinstance(formStash.assets, dict)
+                formStash.assets["test"] = "ok"
+                if not result:
+                    raise pyramid_formencode_classic.FormInvalid(formStash)
+
+                raise ValueError(  # pragma: no cover
+                    "`if not result:` should have raised `pyramid_formencode_classic.FormInvalid`"
+                )
+
+            except pyramid_formencode_classic.FormInvalid as exc:
+                assert "test" in formStash.assets
+                assert formStash.assets["test"] == "ok"
+                formStash.register_FormInvalid(exc)
+                rendered = pyramid_formencode_classic.form_reprint(
+                    self.request, _print_form_simple, **_reprint_kwargs
+                )
+                try:
+                    assert rendered.text == _expected_text
+                except:  # pragma: no cover
+                    if DEBUG_PRINT:
+                        print("------------")
+                        print("%s.test_submit" % self.__class__)
+                        print(test_name)
+                        print(rendered.text)
+                    tests_fail.append(test_name)
+            tests_completed.append(test_name)
+
+        if tests_fail:  # pragma: no cover
+            raise ValueError(tests_fail)

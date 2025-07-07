@@ -69,6 +69,7 @@ class FormStash(object):
     csrf_error_field = csrf_error_section = "Error_Main"
 
     _reprints: Iterable  # internal use for debugging
+    assets: Dict  # namespace used to house extra data for developers
 
     def __init__(
         self,
@@ -112,6 +113,7 @@ class FormStash(object):
 
         self.is_unicode_params = is_unicode_params
         self._reprints = []
+        self.assets = {}
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
