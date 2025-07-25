@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 # pypi
 from pyramid_debugtoolbar.panels import DebugPanel
 
-# typing
 if TYPE_CHECKING:
     from pyramid.request import Request
     from pyramid.response import Response

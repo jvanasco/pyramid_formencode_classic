@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 # local
 from .panels.formencode_classic import FormencodeClassicDebugPanel
 
-# typing
 if TYPE_CHECKING:
     from pyramid.config import Configurator
 

@@ -3,6 +3,16 @@ TODO:
     coverage run --include src/*,tests/* -m pytest tests
     coverage report && coverage html
 
+0.10.1
+    * Support "appending" error messages onto fields when there are complex errors
+      By default, set_error/fatal_field will overwrite an existing error.
+      When submitting `error_field_overwrite=False`, the error will be appended to any existing error.
+
+        added kwarg to `formStash.set_error`
+            error_field_overwrite: bool = True
+        added kwarg to `formStash.fatal_field`
+            error_field_overwrite: bool = True
+
 0.10.0
     * added `FormStash.assets` namespace for user controlled assets
       `FormStash.assets` is a dict that is reserved for developer use
