@@ -333,6 +333,7 @@ class FormStash(object):
         is_error_csrf: Optional[bool] = None,
         integrate_special_errors: bool = False,
         error_main_overwrite: bool = False,
+        error_field_overwrite: bool = True,
     ) -> None:
         """
         Manages entries in the dict of errors
@@ -383,7 +384,15 @@ class FormStash(object):
                     error_message=message,
                 )
         else:
-            self.parsed_form["errors"][field] = message
+            if error_field_overwrite:
+                self.parsed_form["errors"][field] = message
+            else:
+                _existing_error = self.parsed_form["errors"].get(field, "")
+                if not _existing_error.endswith(message):
+                    message = " ".join([_existing_error, message])
+                else:
+                    message = _existing_error
+                self.parsed_form["errors"][field] = message
 
         if integrate_special_errors:
             _errors_main = []
@@ -439,6 +448,7 @@ class FormStash(object):
         error_field: Optional[str] = None,
         error_main: Optional[str] = None,
         error_main_overwrite: bool = False,
+        error_field_overwrite: bool = True,
         allow_unknown_fields: bool = False,
     ) -> NoReturn:
         """
@@ -484,6 +494,7 @@ class FormStash(object):
         self.set_error(
             field=field,
             message=error_field,
+            error_field_overwrite=error_field_overwrite,
         )
 
         self._raise_unique_FormInvalid(

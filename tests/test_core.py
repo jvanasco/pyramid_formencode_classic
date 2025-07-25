@@ -5313,3 +5313,83 @@ class TestAssets(_TestHarness, unittest.TestCase):
 
         if tests_fail:  # pragma: no cover
             raise ValueError(tests_fail)
+
+
+class TestAppend(_TestHarness, unittest.TestCase):
+
+    def test_submit(self):
+        # set the submit
+        self.request.POST["email"] = "a@example.com"
+        self.request.POST["username"] = "abcdefg"
+        message = "THIS FIELD CAUSED A FATAL ERROR"
+        message_alt = "[[this field caused a fatal error]]"
+        self.request.POST["submit"] = "submit"
+
+        # note: TestCase 1
+
+        (result, formStash) = pyramid_formencode_classic.form_validate(
+            self.request,
+            schema=Form_Email,
+            raise_FormInvalid=True,
+        )
+        try:
+            # set + append
+            formStash.set_error(field="email", message=message)
+            formStash.set_error(
+                field="email", message=message_alt, error_field_overwrite=False
+            )
+            assert formStash.get_error("email") == " ".join((message, message_alt))
+
+            # reset + append
+            formStash.set_error(field="email", message=message_alt)
+            formStash.set_error(
+                field="email", message=message, error_field_overwrite=False
+            )
+            assert formStash.get_error("email") == " ".join((message_alt, message))
+
+            # main
+            formStash.fatal_field(field="email", error_field=message)
+            raise ValueError(  # pragma: no cover
+                "`formStash.fatal_field` should have raised `FormInvalid`"
+            )
+        except pyramid_formencode_classic.FormInvalid as exc:
+            assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
+            assert exc.raised_by == "fatal_field"
+            assert exc.error_main == _defaults.DEFAULT_ERROR_MAIN_TEXT
+            assert (
+                exc.formStash.errors["Error_Main"] == _defaults.DEFAULT_ERROR_MAIN_TEXT
+            )
+            assert exc.formStash.errors["email"] == message
+
+        # note: TestCase 2
+
+        (result, formStash) = pyramid_formencode_classic.form_validate(
+            self.request,
+            schema=Form_Email,
+            raise_FormInvalid=True,
+        )
+        try:
+            # set + append
+            formStash.set_error(field="email", message=message)
+            formStash.set_error(
+                field="email", message=message_alt, error_field_overwrite=False
+            )
+            assert formStash.get_error("email") == " ".join((message, message_alt))
+
+            # main
+            formStash.fatal_field(
+                field="email", error_field=message, error_field_overwrite=False
+            )
+            raise ValueError(  # pragma: no cover
+                "`formStash.fatal_field` should have raised `FormInvalid`"
+            )
+        except pyramid_formencode_classic.FormInvalid as exc:
+            assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
+            assert exc.raised_by == "fatal_field"
+            assert exc.error_main == _defaults.DEFAULT_ERROR_MAIN_TEXT
+            assert (
+                exc.formStash.errors["Error_Main"] == _defaults.DEFAULT_ERROR_MAIN_TEXT
+            )
+            assert exc.formStash.errors["email"] == " ".join(
+                (message, message_alt, message)
+            )
