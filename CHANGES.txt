@@ -6,6 +6,7 @@ TODO:
 0.10.2
     * Added typing to FormStash
     * added `FormStash.error_main` property
+    * fixed debugtoolbar template
 
 0.10.1
     * Support "appending" error messages onto fields when there are complex errors
