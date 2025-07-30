@@ -3,6 +3,11 @@ TODO:
     coverage run --include src/*,tests/* -m pytest tests
     coverage report && coverage html
 
+0.10.2
+    * Added typing to FormStash
+    * added `FormStash.error_main` property
+    * fixed debugtoolbar template
+
 0.10.1
     * Support "appending" error messages onto fields when there are complex errors
       By default, set_error/fatal_field will overwrite an existing error.

@@ -130,29 +130,35 @@ class FormStash(object):
     # Proxy methods to maintain compatibility
 
     @property
-    def defaults(self):
+    def defaults(self) -> Dict:
         return self.parsed_form["defaults"]
 
     @property
-    def errors(self):
+    def errors(self) -> Dict:
         return self.errors_normal
 
     @property
-    def results(self):
+    def results(self) -> Dict:
         return self.parsed_form["results"]
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     @property
-    def errors_all(self):
+    def error_main(self) -> Optional[str]:
+        if self.error_main_key in self.parsed_form["errors"]:
+            return self.parsed_form["errors"][self.error_main_key]
+        return None
+
+    @property
+    def errors_all(self) -> Dict:
         return self.parsed_form["errors"]
 
     @property
-    def errors_normal(self):
+    def errors_normal(self) -> Dict:
         return {k: v for k, v in self.parsed_form["errors"].items() if k[0] != "*"}
 
     @property
-    def errors_special(self):
+    def errors_special(self) -> Dict:
         return {k: v for k, v in self.parsed_form["errors"].items() if k[0] == "*"}
 
     def count_errors(self, include_special: bool = False) -> int:

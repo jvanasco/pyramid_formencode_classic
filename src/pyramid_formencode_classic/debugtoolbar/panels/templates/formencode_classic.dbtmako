@@ -71,8 +71,8 @@
 					<td><code>${form.error_main_key}</code></td>
 				</tr>
 				<tr>
-					<th>error_main_text</th>
-					<td><code>${form.error_main_text or '' }</code></td>
+					<th>error_main [text]</th>
+					<td><code>${form.error_main or '' }</code></td>
 				</tr>
 				<tr>
 					<th>html_error_main_template</th>
