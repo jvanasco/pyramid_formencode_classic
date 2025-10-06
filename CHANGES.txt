@@ -3,6 +3,22 @@ TODO:
     coverage run --include src/*,tests/* -m pytest tests
     coverage report && coverage html
 
+0.11.0
+    * consolidated all logging into "pyramid_formencode_classic" namespace
+    * add debug mode. To enable::
+
+        `form_validate(debug_fails=True)`
+
+        or
+
+        `FormStash(debug_fails=True)`
+
+        or
+
+        `pyramid_formencode_classic.DEBUG_FAILS = True`
+
+      This will log, at `logging.DEBUG` level, a stacktrace via the traceback module
+
 0.10.2
     * Added typing to FormStash
     * added `FormStash.error_main` property

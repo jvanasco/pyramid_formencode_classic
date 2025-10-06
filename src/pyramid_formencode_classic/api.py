@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 # ==============================================================================
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("pyramid_formencode_classic")
 
 # ------------------------------------------------------------------------------
 
@@ -57,6 +57,7 @@ def _form_validate_core(
     csrf_token: Optional[str] = None,
     is_unicode_params: bool = False,
     foreach_defense: bool = True,
+    debug_fails: Optional[bool] = None,
 ) -> Tuple[bool, FormStash]:
     """form validation only: returns True/False ; sets up Errors ;
 
@@ -136,6 +137,8 @@ def _form_validate_core(
         generate a LIST of errors instead of a single error.
         When `True`, this is detected and consolidated into a single error.
 
+    ``debug_fails`` (None)
+        Boolean. Used to instantiate ``FormStash`` objects.
     """
     if __debug__:
         log.debug("form_validate - starting...")
@@ -163,6 +166,7 @@ def _form_validate_core(
             error_main_text=error_main_text,
             is_unicode_params=is_unicode_params,
             error_no_submission_text=error_no_submission_text,
+            debug_fails=debug_fails,
         )
     else:
         if formStash.schema != schema:
