@@ -1,5 +1,6 @@
 # stdlib
 import logging
+import traceback
 from typing import Dict
 from typing import Iterable
 from typing import NoReturn
@@ -20,7 +21,9 @@ if TYPE_CHECKING:
 
 # ==============================================================================
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("pyramid_formencode_classic")
+
+DEBUG_FAILS = False
 
 # ------------------------------------------------------------------------------
 
@@ -44,7 +47,7 @@ class FormStash(object):
     is_submitted_vars: Optional[bool] = None
     parsed_form: ParsedForm
     default_texts: Dict[str, str]
-    DEBUG_ME: bool = False  # for testing
+    debug_fails: Optional[bool] = None
 
     # protected attribute; use property to access
     _css_error: str = "error"
@@ -79,6 +82,7 @@ class FormStash(object):
         error_main_text: Optional[str] = None,
         error_no_submission_text: Optional[str] = None,
         is_unicode_params: bool = False,
+        debug_fails: Optional[bool] = None,
     ):
         self.schema = schema
         if name:
@@ -114,6 +118,7 @@ class FormStash(object):
         self.is_unicode_params = is_unicode_params
         self._reprints = []
         self.assets = {}
+        self.debug_fails = debug_fails
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -352,10 +357,6 @@ class FormStash(object):
         if __debug__:
             log.debug("`FormStash.set_error`")
 
-        # if self.DEBUG_ME:
-        #    import pdb; pdb.set_trace()
-        #    print(self._debug())
-
         if field is None:
             field = self.error_main_key
 
@@ -529,6 +530,15 @@ class FormStash(object):
             error_main_overwrite=error_main_overwrite,
             raised_by=raised_by,
         )
+        if DEBUG_FAILS or self.debug_fails:
+            stack = traceback.extract_stack()
+            formatted = traceback.format_list(stack)
+            log.info(
+                "`FormStash._raise_unique_FormInvalid()`; stacktrace available via `logging.debug`"
+            )
+            for _line in formatted:
+                log.debug(_line)
+
         raise _FormInvalid
 
     def register_FormInvalid(

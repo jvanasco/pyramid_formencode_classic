@@ -37,12 +37,11 @@ def warn_user(message):
 
 
 # defaults
-__VERSION__ = "0.10.2"
+__VERSION__ = "0.11.0"
 
 AUTOMATIC_CLEANUP = True
 
-log = logging.getLogger(__name__)
-
+log = logging.getLogger("pyramid_formencode_classic")
 
 # ------------------------------------------------------------------------------
 
