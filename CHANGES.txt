@@ -3,6 +3,11 @@ TODO:
     coverage run --include src/*,tests/* -m pytest tests
     coverage report && coverage html
 
+0.11.1
+    * add `allow_empty` kwarg to form_validate;
+      this will allow for forms to have an empty POST, and defer to the
+      formencode `if_missing` default values
+
 0.11.0
     * consolidated all logging into "pyramid_formencode_classic" namespace
     * add debug mode. To enable::

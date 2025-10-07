@@ -58,6 +58,7 @@ def _form_validate_core(
     is_unicode_params: bool = False,
     foreach_defense: bool = True,
     debug_fails: Optional[bool] = None,
+    allow_empty: Optional[bool] = None,
 ) -> Tuple[bool, FormStash]:
     """form validation only: returns True/False ; sets up Errors ;
 
@@ -139,6 +140,11 @@ def _form_validate_core(
 
     ``debug_fails`` (None)
         Boolean. Used to instantiate ``FormStash`` objects.
+
+    ``allow_empty``` (None)
+        Boolean. If true, will not raise an special `*nothing_submitted` error if
+        no params are presented.  This allows for the package to process empty POSTs
+        which will use formencode's `if_mising` to supply a default value.
     """
     if __debug__:
         log.debug("form_validate - starting...")
@@ -207,7 +213,7 @@ def _form_validate_core(
         # if there are no params to validate against, then just stop
         # TODO: test how there are no `decoded_params` after
         #       determining there are `validate_params`
-        if not decoded_params:
+        if not decoded_params and not allow_empty:
             formStash.set_special_error(
                 error_name="*nothing_submitted",
                 error_message=error_no_submission_text,
