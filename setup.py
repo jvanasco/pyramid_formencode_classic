@@ -4,8 +4,8 @@
 import os
 import re
 
-from setuptools import setup
 from setuptools import find_packages
+from setuptools import setup
 
 HERE = os.path.dirname(__file__)
 
