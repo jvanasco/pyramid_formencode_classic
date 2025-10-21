@@ -37,7 +37,7 @@ def warn_user(message):
 
 
 # defaults
-__VERSION__ = "0.11.2"
+__VERSION__ = "0.11.3"
 
 AUTOMATIC_CLEANUP = True
 
