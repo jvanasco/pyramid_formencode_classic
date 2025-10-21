@@ -3,6 +3,10 @@ TODO:
     coverage run --include src/*,tests/* -m pytest tests
     coverage report && coverage html
 
+0.11.3
+    * introduce validators.RequireEmptyIfMissing
+    * introduce validators.RequireEmptyIfPresent
+
 0.11.2
     * introduce tools.document_form
     * introduce validators.OnlyOneOf
