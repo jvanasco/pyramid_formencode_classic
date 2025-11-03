@@ -90,6 +90,37 @@ The errors have multiple accessors:
     `FormStash.errors_special` - only returns `ParsedForm["errors"]` with a "*" prefix
     `FormStash.errors_all` - returns all `ParsedForm["errors"]`
 
+
+### Debugging
+
+Debug logging was introduced in the 0.11.x branch and updated in 0.12.x branch.
+
+The main ways to trigger debugging:
+
+1- Monkeypatch the library
+
+    import pyramid_formencode_classic._defaults
+
+    pyramid_formencode_classic._defaults.DEBUG_FAILS = True
+
+
+2- Set an ENV variable
+
+    export PYRAMID_FORMENCODE_CLASSIC__DEBUG_FAILS=1
+    python myapp.py
+
+
+3- Use as needed; the debugging occurs on
+
+    # populate objects/methods for automatic debug logging
+    pyramid_formencode_classic.form_validate(debug_fails=True)
+    pyramid_formencode_classic.objects.FormStash(debug_fails=True)
+    pyramid_formencode_classic.exceptions.FormInvalid(debug_fails=True)
+
+    # manual debug on demand
+    pyramid_formencode_classic.exceptions.FormInvalid.debug()
+
+
 ### Error Concepts
 
 For the purpose of this package, errors can be grouped into two concepts:
@@ -193,7 +224,7 @@ We want to see as the "form error":
 So this package tries to do the right thing, and merges `error_main_text` with `Invalid credentials`.
 
 If you only want to show a specific message though, you can invoke:
-    
+
     if not user:
         formStash.fatal_form("Invalid credentials", error_main_overwrite=True)
         # or
