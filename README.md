@@ -395,7 +395,7 @@ the default behavior is somewhat irrelevant.
                 	# set a custom error and raise an exception to reprint
                     # `formStash.fatal_field(` will raise `formhandling.FormInvalid(`
                     formStash.fatal_field(field="email_address",
-										  message="Email not registered",
+										  error_field_="Email not registered",
 										  )
 
                 if not useraccount.verify_submitted_password(results['password']):
@@ -403,7 +403,7 @@ the default behavior is somewhat irrelevant.
                     # `formStash.fatal_field(` will raise `formhandling.FormInvalid(`
                     formStash.fatal_field(
                         field="email_address",
-                        message="Wrong password",
+                        error_field_="Wrong password",
                     )
 
 				do_login()
