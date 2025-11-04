@@ -15,10 +15,13 @@ from .test_core import _TestHarness
 
 # ==============================================================================
 
-
+# two notes for GithubActions, which installs into
+#    /home/runner/work/pyramid_formencode_classic/pyramid_formencode_classic/.tox/py/lib/python3.10/site-packages/
+# 1) note the `/.tox/` - the regex requires a "."
+# 2) note installed under "/.tox/py/lib/python3.10/site-packages/" and not using the src version
 RE_DEBUG_EXECUTED = re.compile(
     r"""DEBUG:pyramid_formencode_classic:  File """
-    r""""/[\w\-\/\.]+/pyramid_formencode_classic/src/pyramid_formencode_classic/exceptions\.py", """
+    r""""/(?:.+)/pyramid_formencode_classic/exceptions\.py", """
     r"""line \d+, in debug\n    stack = traceback.extract_stack\(\)\n"""
 )
 
@@ -225,6 +228,11 @@ class _TestDebugs(_TestHarness):
 
             # trigger stacktrace info line
             formInvalid = pyramid_formencode_classic.FormInvalid(formStash)
+
+            print("=" * 60)
+            for _line in logged.output:
+                print(_line)
+            print("=" * 60)
 
             if self.ENV__PYRAMID_FORMENCODE_CLASSIC__DEBUG_FAILS:
                 # these will still log based on global controls
