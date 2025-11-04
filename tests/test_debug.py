@@ -229,11 +229,6 @@ class _TestDebugs(_TestHarness):
             # trigger stacktrace info line
             formInvalid = pyramid_formencode_classic.FormInvalid(formStash)
 
-            print("=" * 60)
-            for _line in logged.output:
-                print(_line)
-            print("=" * 60)
-
             if self.ENV__PYRAMID_FORMENCODE_CLASSIC__DEBUG_FAILS:
                 # these will still log based on global controls
                 self.assertIn(
