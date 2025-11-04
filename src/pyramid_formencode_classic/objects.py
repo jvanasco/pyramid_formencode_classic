@@ -1,6 +1,5 @@
 # stdlib
 import logging
-import traceback
 from typing import Dict
 from typing import Iterable
 from typing import NoReturn
@@ -22,8 +21,6 @@ if TYPE_CHECKING:
 # ==============================================================================
 
 log = logging.getLogger("pyramid_formencode_classic")
-
-DEBUG_FAILS = False
 
 # ------------------------------------------------------------------------------
 
@@ -265,8 +262,9 @@ class FormStash(object):
                  <input type="text" name="email" value="" />
                  <input type="text" name="username" value="" />
              </form>
-        :param field: the field of the error. will default to `self.error_main_key`
-        :formencode_form: the name of the form.
+
+        :param field: string. the field of the error. will default to `self.error_main_key`
+        :formencode_form: string. the name of the form.
             used to discriminate when multiple forms are on a page
         """
         if self.has_errors():
@@ -529,16 +527,8 @@ class FormStash(object):
             error_main=error_main,
             error_main_overwrite=error_main_overwrite,
             raised_by=raised_by,
+            debug_fails=self.debug_fails,
         )
-        if DEBUG_FAILS or self.debug_fails:
-            stack = traceback.extract_stack()
-            formatted = traceback.format_list(stack)
-            log.info(
-                "`FormStash._raise_unique_FormInvalid()`; stacktrace available via `logging.debug`"
-            )
-            for _line in formatted:
-                log.debug(_line)
-
         raise _FormInvalid
 
     def register_FormInvalid(

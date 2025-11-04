@@ -1,4 +1,6 @@
 # stdlib
+import logging
+import traceback
 from typing import Optional
 from typing import TYPE_CHECKING
 
@@ -12,6 +14,10 @@ if TYPE_CHECKING:
     from .objects import FormStash
 
 # ==============================================================================
+
+log = logging.getLogger("pyramid_formencode_classic")
+
+# ------------------------------------------------------------------------------
 
 
 class BaseException(Exception):
@@ -29,6 +35,7 @@ class FormInvalid(BaseException):
     raised_by: Literal["fatal_form", "fatal_field", "_form_validate_core", None]
     integrate_special_errors: bool
     error_main_overwrite: bool
+    debug_fails: Optional[bool]
 
     def __init__(
         self,
@@ -40,17 +47,40 @@ class FormInvalid(BaseException):
         raised_by: Literal[
             "fatal_form", "fatal_field", "_form_validate_core", None
         ] = None,
+        debug_fails: Optional[bool] = None,
     ):
+        """
+        :param formStash: ``.objects.FormStash``
+        :param error_main: string. the default form error message.
+        :param error_main_overwrite: bool. default ``False``.
+            should the error overwrite or append by default?
+        :param error_no_submission_text: string.
+            the default form message when nothing is submitted.
+        :param raised_by: string. what raised this? (internal usage)
+        :param debug_fails: bool. controls debug logging.
+        """
         self.formStash = formStash
         self.error_main = (
             error_main if error_main is not None else _defaults.DEFAULT_ERROR_MAIN_TEXT
         )
+        self.error_main_overwrite = error_main_overwrite
         self.error_no_submission_text = error_no_submission_text
         self.integrate_special_errors = integrate_special_errors
-        self.error_main_overwrite = error_main_overwrite
         self.raised_by = raised_by
+        self.debug_fails = debug_fails
         super(FormInvalid, self).__init__()
         formStash.register_FormInvalid(self)
+
+        if _defaults.DEBUG_FAILS or self.debug_fails:
+            log.info("`FormInvalid()` instantiated.")
+            self.debug()
+
+    def debug(self) -> None:
+        stack = traceback.extract_stack()
+        formatted = traceback.format_list(stack)
+        log.info("`FormInvalid().debug()`; stacktrace available via `logging.debug`.")
+        for _line in formatted:
+            log.debug(_line)
 
     def __repr__(self) -> str:
         return "<FormInvalid `%s`>" % self.error_main
