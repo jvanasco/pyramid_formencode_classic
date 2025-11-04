@@ -18,7 +18,7 @@ from .test_core import _TestHarness
 
 RE_DEBUG_EXECUTED = re.compile(
     r"""DEBUG:pyramid_formencode_classic:  File """
-    r""""/[\w\-\/]+/pyramid_formencode_classic/src/pyramid_formencode_classic/exceptions\.py", """
+    r""""/[\w\-\/\.]+/pyramid_formencode_classic/src/pyramid_formencode_classic/exceptions\.py", """
     r"""line \d+, in debug\n    stack = traceback.extract_stack\(\)\n"""
 )
 
@@ -225,11 +225,6 @@ class _TestDebugs(_TestHarness):
 
             # trigger stacktrace info line
             formInvalid = pyramid_formencode_classic.FormInvalid(formStash)
-
-            print("=" * 60)
-            for _line in logged.output:
-                print(_line)
-            print("=" * 60)
 
             if self.ENV__PYRAMID_FORMENCODE_CLASSIC__DEBUG_FAILS:
                 # these will still log based on global controls
