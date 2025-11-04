@@ -10,7 +10,7 @@ from setuptools import setup
 HERE = os.path.dirname(__file__)
 
 long_description = description = (
-    "An implementation of the classic Pylons formencode validation, for Pyramid",
+    "An implementation of the classic Pylons formencode validation, for Pyramid."
 )
 with open(os.path.join(HERE, "README.md")) as r_file:
     long_description = r_file.read()
@@ -22,6 +22,7 @@ with open(
     VERSION = (
         re.compile(r'''.*__VERSION__ = "(.*?)"''', re.S).match(v_file.read()).group(1)
     )
+    assert VERSION
 
 
 requires = [
@@ -29,13 +30,11 @@ requires = [
     "formencode>=2.0.0",
     "typing_extensions",  # TypedDict
 ]
-tests_require = [
+testing_extras = [
+    "pytest",
     "mypy",
     "pyramid_mako",
     "webob",
-]
-testing_extras = tests_require + [
-    "pytest",
 ]
 
 setup(
@@ -58,11 +57,9 @@ setup(
     },
     zip_safe=False,
     install_requires=requires,
-    tests_require=tests_require,
     extras_require={
         "testing": testing_extras,
     },
-    test_suite="tests",
     classifiers=[
         "Intended Audience :: Developers",
         "Framework :: Pyramid",
