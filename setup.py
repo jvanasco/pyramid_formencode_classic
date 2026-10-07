@@ -1,5 +1,4 @@
-"""pyramid_formencode_classic installation script.
-"""
+"""pyramid_formencode_classic installation script."""
 
 import os
 import re
@@ -34,6 +33,7 @@ testing_extras = [
     "pytest",
     "mypy",
     "pyramid_mako",
+    "setuptools<82.0.0",  # This is due to Pyramid.
     "webob",
 ]
 
@@ -58,7 +58,7 @@ setup(
     zip_safe=False,
     install_requires=requires,
     extras_require={
-        "testing": testing_extras,
+        "tests": testing_extras,
     },
     classifiers=[
         "Intended Audience :: Developers",
@@ -72,5 +72,6 @@ setup(
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
     ],
 )

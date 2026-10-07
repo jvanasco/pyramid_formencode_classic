@@ -57,7 +57,7 @@ class Form_RequireEmptyIfPresent(formencode.Schema):
 class Test_OnlyOneOf(_TestHarness, unittest.TestCase):
 
     def _test_actual(self):
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             self.request,
             schema=Form_OnlyOneOf,
         )
@@ -111,7 +111,7 @@ class Test_OnlyOneOf(_TestHarness, unittest.TestCase):
 class Test_RequireEmptyIfMissing(_TestHarness, unittest.TestCase):
 
     def _test_actual(self):
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             self.request,
             schema=Form_RequireEmptyIfMissing,
         )
@@ -163,7 +163,7 @@ class Test_RequireEmptyIfMissing(_TestHarness, unittest.TestCase):
 class Test_RequireEmptyIfPresent(_TestHarness, unittest.TestCase):
 
     def _test_actual(self):
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             self.request,
             schema=Form_RequireEmptyIfPresent,
         )

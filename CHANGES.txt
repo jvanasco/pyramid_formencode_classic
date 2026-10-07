@@ -3,6 +3,14 @@ TODO:
     coverage run --include src/*,tests/* -m pytest tests
     coverage report && coverage html
 
+0.13.0
+    * add python3.14 to tests
+    * installation: `testing` extras renamed to `tests`
+    * bumped up black
+    * Changed kwarg default `FormStash.fatal_field(allow_unknown_field=?)` to True; was False.
+      Within the context of invoking this function:
+      It makes most sense to allow Developers to set the error without requiring the field to be present
+
 0.12.0
     * migrate DEBUG_FAILS to _defaults
     * debug tests
