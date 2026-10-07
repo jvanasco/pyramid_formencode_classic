@@ -4312,17 +4312,23 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                     _exc_expected_msg = "FormStash.fatal_field() missing 1 required positional argument: 'field'"
                 self.assertEqual(exc.args[0], _exc_expected_msg)
 
+            # note: No `allow_unknown_fields`[default]
             try:
                 formStash.fatal_field(field="unknown", error_field=message)
                 raise ValueError(  # pragma: no cover
-                    "`formStash.fatal_field` should have raised `ValueError`"
+                    "`formStash.fatal_field` should have raised `FormInvalid`"
                 )
-            except ValueError as exc:
+            except pyramid_formencode_classic.FormInvalid as exc:
+                assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
+                assert exc.raised_by == "fatal_field"
+                assert exc.error_main == _defaults.DEFAULT_ERROR_MAIN_TEXT
                 assert (
-                    exc.args[0]
-                    == "field `unknown` is not in schema: `<class 'tests.test_core.Form_Email'>`"
+                    exc.formStash.errors["Error_Main"]
+                    == _defaults.DEFAULT_ERROR_MAIN_TEXT
                 )
+                assert exc.formStash.errors["unknown"] == message
 
+            # note: allow_unknown_fields=True
             try:
                 formStash.fatal_field(
                     field="unknown", error_field=message, allow_unknown_fields=True
@@ -4339,6 +4345,21 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                     == _defaults.DEFAULT_ERROR_MAIN_TEXT
                 )
                 assert exc.formStash.errors["unknown"] == message
+
+            # note: allow_unknown_fields=False
+            try:
+                formStash.fatal_field(
+                    field="unknown", error_field=message, allow_unknown_fields=False
+                )
+                raise ValueError(  # pragma: no cover
+                    "`formStash.fatal_field` should have raised `ValueError`"
+                )
+            except ValueError as exc:
+                assert (
+                    exc.args[0]
+                    == f"field `unknown` is not in schema: `{formStash.schema}`"
+                )
+
         except Exception:  # pragma: no cover
             raise
 
@@ -4450,7 +4471,25 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
         except Exception:  # pragma: no cover
             raise
 
-        # note: allow_unknown_fields
+        # note: No `allow_unknown_fields`[default]
+        try:
+            formStash.fatal_field(
+                field="unknown",
+                error_field=message,
+            )
+            raise ValueError(  # pragma: no cover
+                "`formStash.fatal_field` should have raised `FormInvalid`"
+            )
+        except pyramid_formencode_classic.FormInvalid as exc:
+            assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
+            assert exc.raised_by == "fatal_field"
+            assert exc.error_main == _defaults.DEFAULT_ERROR_MAIN_TEXT
+            assert (
+                exc.formStash.errors["Error_Main"] == _defaults.DEFAULT_ERROR_MAIN_TEXT
+            )
+            assert exc.formStash.errors["unknown"] == message
+
+        # note: allow_unknown_fields=True
         try:
             formStash.fatal_field(
                 field="unknown", error_field=message, allow_unknown_fields=True
@@ -4466,6 +4505,19 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 exc.formStash.errors["Error_Main"] == _defaults.DEFAULT_ERROR_MAIN_TEXT
             )
             assert exc.formStash.errors["unknown"] == message
+
+        # note: allow_unknown_fields=False
+        try:
+            formStash.fatal_field(
+                field="unknown", error_field=message, allow_unknown_fields=False
+            )
+            raise ValueError(  # pragma: no cover
+                "`formStash.fatal_field` should have raised `ValueError`"
+            )
+        except ValueError as exc:
+            assert (
+                exc.args[0] == f"field `unknown` is not in schema: `{formStash.schema}`"
+            )
 
         # note: field=="Error_Main"
         try:

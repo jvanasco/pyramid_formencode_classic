@@ -454,7 +454,7 @@ class FormStash(object):
         error_main: Optional[str] = None,
         error_main_overwrite: bool = False,
         error_field_overwrite: bool = True,
-        allow_unknown_fields: Optional[bool] = None,
+        allow_unknown_fields: Optional[bool] = True,
     ) -> NoReturn:
         """
         Sets an error for ``field``, then raises a `FormInvalid`.
