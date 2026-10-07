@@ -33,6 +33,7 @@ testing_extras = [
     "pytest",
     "mypy",
     "pyramid_mako",
+    "setuptools<82.0.0",  # This is due to Pyramid.
     "webob",
 ]
 
