@@ -3,6 +3,11 @@ TODO:
     coverage run --include src/*,tests/* -m pytest tests
     coverage report && coverage html
 
+0.13.0
+    * add python3.14 to tests
+    * installation: `testing` extras renamed to `tests`
+    * bumped up black
+
 0.12.0
     * migrate DEBUG_FAILS to _defaults
     * debug tests

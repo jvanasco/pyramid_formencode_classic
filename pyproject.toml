@@ -2,10 +2,24 @@
 requires = ["setuptools",]
 
 [tool.black]
-target-version = ['py36']
+target-version = ['py314']
+exclude = '''
+(
+    /(
+	 	  \.eggs
+		| \.github
+		| \.mypy_cache
+		| \.pytest_cache
+		| \.tox
+		| build
+		| dist
+    )
+)
+'''
 
 # pyproject.toml
 [tool.pytest.ini_options]
 filterwarnings = [
-    "ignore::DeprecationWarning",
+    "ignore:pkg_resources is deprecated as an API.:UserWarning:pyramid.asset",
+    "ignore:Deprecated call to `pkg_resources.declare_namespace.*:DeprecationWarning:pkg_resources",
 ]

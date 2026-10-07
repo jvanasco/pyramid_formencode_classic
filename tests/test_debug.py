@@ -54,7 +54,7 @@ class _TestDebugs(_TestHarness):
     def test_explicit_raise(self):
         with self.assertLogs("pyramid_formencode_classic", level="DEBUG") as logged:
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_Example,
                 )
@@ -92,7 +92,7 @@ class _TestDebugs(_TestHarness):
     def test_implicit_raise(self):
         with self.assertLogs("pyramid_formencode_classic", level="DEBUG") as logged:
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_Example,
                     raise_FormInvalid=True,
@@ -130,7 +130,7 @@ class _TestDebugs(_TestHarness):
         with self.assertLogs("pyramid_formencode_classic", level="DEBUG") as logged:
             try:
                 self.request.POST["id"] = "1"
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_Example,
                 )
@@ -171,7 +171,7 @@ class _TestDebugs(_TestHarness):
         with self.assertLogs("pyramid_formencode_classic", level="DEBUG") as logged:
             try:
                 self.request.POST["id"] = "1"
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_Example,
                 )
@@ -210,7 +210,7 @@ class _TestDebugs(_TestHarness):
     def test_explicit_debug(self):
         with self.assertLogs("pyramid_formencode_classic", level="DEBUG") as logged:
             self.request.POST["id"] = "1"
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Example,
             )
