@@ -3,6 +3,11 @@ TODO:
     coverage run --include src/*,tests/* -m pytest tests
     coverage report && coverage html
 
+Unreleased
+    * Update GitHub Actions and run the test suite on Python 3.7 through 3.15.
+    * Move setuptools and tox configuration to setup.cfg and mypy configuration
+      to pyproject.toml.
+
 0.13.0
     * add python3.14 to tests
     * installation: `testing` extras renamed to `tests`
