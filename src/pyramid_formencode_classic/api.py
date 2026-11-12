@@ -17,6 +17,7 @@ from webob.multidict import MultiDict
 
 # local
 from . import _defaults
+from ._utils import SchemaType
 from .exceptions import FormInvalid
 from .exceptions import ValidationStop
 from .formatters import formatter_nobr  # default formatter
@@ -25,7 +26,6 @@ from .utils import determine_response_charset
 from .utils import encode_formencode_errors
 
 if TYPE_CHECKING:
-    from formencode import Schema
     from pyramid.request import Request
     from pyramid.response import Response
 
@@ -38,7 +38,7 @@ log = logging.getLogger("pyramid_formencode_classic")
 
 def _form_validate_core(
     request: "Request",
-    schema: "Schema",
+    schema: SchemaType,
     form_stash: Optional[str] = None,  # name of stash
     formStash: Optional[FormStash] = None,  # a subclassed object; WHY?
     validate_post: bool = True,
@@ -305,8 +305,15 @@ def _form_validate_core(
 
 
 def form_validate(
-    request: "Request", schema: "Schema", **kwargs
+    request: "Request", schema: SchemaType, **kwargs: Any
 ) -> Tuple[bool, FormStash]:
+    """Validate a submission and return its success flag and request form stash.
+
+    Accept a FormEncode schema class or instance. By default, validation reads
+    POST data. Use ``validate_get`` to include query parameters or
+    ``validate_params`` to supply a WebOb MultiDict explicitly. Set
+    ``raise_FormInvalid`` to raise after storing a failed submission's stash.
+    """
     result = _form_validate_core(request, schema, **kwargs)
     if TYPE_CHECKING:
         assert isinstance(result, tuple)
@@ -315,26 +322,25 @@ def form_validate(
 
 def form_reprint(
     request: "Request",
-    form_print_method: Optional[Callable],
-    form_stash=_defaults.DEFAULT_FORM_STASH,  # name of stash
-    render_view: Optional[Callable] = None,
+    form_print_method: Optional[Callable[[], Any]],
+    form_stash: str = _defaults.DEFAULT_FORM_STASH,
+    render_view: Optional[Callable[[], Any]] = None,
     render_view_template: Optional[str] = None,
-    auto_error_formatter: Callable = formatter_nobr,
-    error_formatters: Optional[Dict[str, Callable]] = None,
-    **htmlfill_kwargs,
+    auto_error_formatter: Optional[Callable[[str], str]] = formatter_nobr,
+    error_formatters: Optional[Dict[str, Callable[[str], str]]] = None,
+    **htmlfill_kwargs: Any,
 ) -> "Response":
-    """reprint a form
-    args:
-    ``request`` -- request instance
-    ``form_print_method`` -- bound method to execute
-    kwargs:
-    ``form_stash`` (pyramid_formencode_classic._defaults.DEFAULT_FORM_STASH = _default) -- specify a stash
-    ``auto_error_formatter`` (formatter_nobr) -- specify a formatter for rendering
-        errors this is an htmlfill_kwargs, but we default to one without a br
-    ``error_formatters`` (default None) is a dict of error formatters to be passed into
-        htmlfill. in order to ensure compatibilty, this dict will be merged with a copy
-        of the htmlfill defaults, allowing you to override them or add extras.
-    `**htmlfill_kwargs` -- passed on to htmlfill
+    """Fill a rendered form with submitted values and validation errors.
+
+    Supply a callback that returns a Pyramid response or implements its response
+    interface, or pass ``None`` and supply both ``render_view``
+    and ``render_view_template``. The view callback supplies the template context.
+    The named ``form_stash`` on the request provides values and errors.
+    Exception responses are returned directly.
+
+    ``auto_error_formatter`` formats automatically inserted errors. Custom named
+    ``error_formatters`` extend or override the htmlfill defaults.
+    Additional keyword arguments are passed to FormEncode's htmlfill renderer.
     """
     if __debug__:
         log.debug("form_reprint - starting...")

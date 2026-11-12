@@ -1,6 +1,7 @@
 # stdlib
 import logging
 import traceback
+from typing import cast
 from typing import Optional
 from typing import TYPE_CHECKING
 
@@ -9,6 +10,7 @@ from typing_extensions import Literal
 
 # local
 from . import _defaults
+from ._utils import SchemaType
 
 if TYPE_CHECKING:
     from .objects import FormStash
@@ -48,7 +50,7 @@ class FormInvalid(BaseException):
             "fatal_form", "fatal_field", "_form_validate_core", None
         ] = None,
         debug_fails: Optional[bool] = None,
-    ):
+    ) -> None:
         """
         :param formStash: ``.objects.FormStash``
         :param error_main: string. the default form error message.
@@ -76,6 +78,7 @@ class FormInvalid(BaseException):
             self.debug()
 
     def debug(self) -> None:
+        """Log the current stack at debug level."""
         stack = traceback.extract_stack()
         formatted = traceback.format_list(stack)
         log.info("`FormInvalid().debug()`; stacktrace available via `logging.debug`.")
@@ -104,10 +107,11 @@ class FormFieldInvalid(FormInvalid):
         ] = None,
         integrate_special_errors: bool = True,
         error_no_submission_text: Optional[str] = None,
-    ):
+    ) -> None:
         if not field:
             raise ValueError("`field` must be provided")
-        if field not in formStash.schema.fields:
+        schema = cast(SchemaType, formStash.schema)
+        if field not in schema.fields:
             if not allow_unknown_fields:
                 raise ValueError(
                     "field `%s` is not in schema: `%s`" % (field, formStash.schema)

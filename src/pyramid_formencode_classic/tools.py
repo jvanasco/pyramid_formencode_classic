@@ -4,18 +4,23 @@ from typing import Dict
 from typing import Union
 
 # pypi
-import formencode
 from formencode.api import NoDefault
 from formencode.validators import FancyValidator
 from formencode.validators import FormValidator
 from formencode.validators import OneOf
 
+# local
+from ._utils import SchemaType
+
 # ==============================================================================
 
 
-def document_form(form: formencode.schema.Schema) -> Dict:
+def document_form(form: SchemaType) -> Dict[str, Any]:
+    """Describe the field and chained validators configured on a schema."""
 
-    def _document_validator(validator: Union[FancyValidator, FormValidator]) -> Dict:
+    def _document_validator(
+        validator: Union[FancyValidator, FormValidator],
+    ) -> Dict[str, Any]:
         subdict: Dict[str, Any] = {"type": None}
         if isinstance(validator, FancyValidator):
             if_missing = validator.if_missing

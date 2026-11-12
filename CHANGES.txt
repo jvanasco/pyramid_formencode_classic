@@ -1,9 +1,5 @@
-TODO:
-    # coverage run --source tests -m pytest tests
-    coverage run --include src/*,tests/* -m pytest tests
-    coverage report && coverage html
-
-Unreleased
+1.0.0
+    * Clarify public API type annotations and docstrings.
     * Document how to check untrusted input before variable decoding.
     * Require a single matching CSRF token across the query and POST data.
     * Report repeated or nested input to a built-in Email validator as a
