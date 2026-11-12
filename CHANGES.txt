@@ -4,7 +4,8 @@ TODO:
     coverage report && coverage html
 
 Unreleased
-    * Report branch coverage in the Python 3.14 CI job and via tox -e cover.
+    * Report branch coverage in the Python 3.14 CI job and via tox -e cover,
+      including an HTML report downloadable from GitHub Actions.
     * Keep FormStash.is_error in sync when clearing the last validation error.
     * Update GitHub Actions and run the test suite on Python 3.7 through 3.15.
     * Move setuptools and tox configuration to setup.cfg and mypy configuration

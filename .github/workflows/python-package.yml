@@ -48,3 +48,11 @@ jobs:
           python -m pip install coverage
           python -m coverage run --branch --source=pyramid_formencode_classic -m pytest
           python -m coverage report --show-missing
+          python -m coverage html
+      - name: Upload HTML coverage report
+        if: matrix.python-version == '3.14'
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-html
+          path: htmlcov/
+          if-no-files-found: error
