@@ -40,4 +40,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install ".[tests]"
       - name: Run tests
+        if: matrix.python-version != '3.14'
         run: python -m pytest
+      - name: Run tests with branch coverage
+        if: matrix.python-version == '3.14'
+        run: |
+          python -m pip install coverage
+          python -m coverage run --branch --source=pyramid_formencode_classic -m pytest
+          python -m coverage report --show-missing

@@ -5434,3 +5434,64 @@ class TestAppend(_TestHarness, unittest.TestCase):
             assert exc.formStash.errors["email"] == " ".join(
                 (message, message_alt, message)
             )
+
+
+class TestValidationErrors(unittest.TestCase):
+    """Exercise validation errors and how callers recover from them."""
+
+    def test_clear_error_updates_invalid_state(self) -> None:
+        """Keep the stash invalid until its last field error is cleared."""
+        stash = pyramid_formencode_classic.FormStash(Form_Email())
+        stash.set_error("email", "Invalid email")
+        stash.set_error("username", "Invalid username")
+
+        stash.clear_error("email")
+        assert stash.is_error
+        assert stash.errors == {"username": "Invalid username"}
+
+        stash.clear_error("username")
+        assert not stash.has_errors()
+        assert not stash.is_error
+
+    def test_csrf_mismatch_stashes_error_before_raising(self) -> None:
+        """Make the CSRF error available on the request when validation raises."""
+        request = Request.blank("/?email=person%40example.com&csrf_=incorrect")
+        request.pyramid_formencode_classic = {}
+
+        with self.assertRaises(pyramid_formencode_classic.FormInvalid):
+            pyramid_formencode_classic.form_validate(
+                request,
+                Form_Email(),
+                form_stash="contact",
+                validate_post=False,
+                validate_get=True,
+                csrf_token="expected",
+                raise_FormInvalid=True,
+            )
+
+        stash = request.pyramid_formencode_classic["contact"]
+        assert stash.is_error
+        assert stash.is_error_csrf
+        message = stash.get_error(stash.csrf_error_field)
+        assert isinstance(message, str)
+        assert stash.csrf_error_string in message
+
+    def test_disabled_request_sources_do_not_validate_query(self) -> None:
+        """Treat query data as unsubmitted when both request sources are disabled."""
+        request = Request.blank("/?email=person%40example.com")
+        request.pyramid_formencode_classic = {}
+
+        valid, stash = pyramid_formencode_classic.form_validate(
+            request,
+            Form_Email(),
+            form_stash="contact",
+            validate_post=False,
+            validate_get=False,
+            error_no_submission_text="No submission",
+        )
+
+        assert not valid
+        assert stash is request.pyramid_formencode_classic["contact"]
+        assert stash.is_submitted_vars is False
+        assert not stash.is_parsed
+        assert stash.get_error("*nothing_submitted") == "No submission"

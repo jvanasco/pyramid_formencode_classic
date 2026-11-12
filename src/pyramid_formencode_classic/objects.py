@@ -418,7 +418,7 @@ class FormStash(object):
         self,
         field: Optional[str] = None,
     ) -> None:
-        """clear the dict of errors"""
+        """Clear the requested errors and update the invalid state."""
         if self.parsed_form["errors"]:
             if field:
                 if field in self.parsed_form["errors"]:
@@ -428,8 +428,7 @@ class FormStash(object):
                         del self.parsed_form["errors"][self.error_main_key]
             else:
                 self.parsed_form["errors"] = {}
-        if self.parsed_form["errors"]:
-            self.is_error = True
+        self.is_error = bool(self.parsed_form["errors"])
 
     def fatal_form(
         self,
