@@ -195,7 +195,7 @@ class _TestParsing(object):
                 return rendered
 
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
                     **_validate_kwargs,
@@ -258,7 +258,7 @@ class _TestParsing(object):
                 return rendered
 
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
                     **_validate_kwargs,
@@ -303,8 +303,7 @@ class TestRenderSimple_FormA_HtmlErrorPlaceholder_Alt(
     template = "fixtures/form_a-html_error_placeholder-alt.mako"
 
     # note: _test_render_simple__data
-    _test_render_simple__data = {
-        "response_text": """\
+    _test_render_simple__data = {"response_text": """\
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -313,8 +312,7 @@ class TestRenderSimple_FormA_HtmlErrorPlaceholder_Alt(
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
-"""
-    }
+"""}
 
 
 class TestRenderSimple_FormA_HtmlErrorPlaceholder_Explicit(
@@ -323,8 +321,7 @@ class TestRenderSimple_FormA_HtmlErrorPlaceholder_Explicit(
     template = "fixtures/form_a-html_error_placeholder-explicit.mako"
 
     # note: _test_render_simple__data
-    _test_render_simple__data = {
-        "response_text": """\
+    _test_render_simple__data = {"response_text": """\
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -333,8 +330,7 @@ class TestRenderSimple_FormA_HtmlErrorPlaceholder_Explicit(
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
-"""
-    }
+"""}
 
 
 class TestRenderSimple_FormA_HtmlErrorPlaceholder_Default(
@@ -343,8 +339,7 @@ class TestRenderSimple_FormA_HtmlErrorPlaceholder_Default(
     template = "fixtures/form_a-html_error_placeholder-default.mako"
 
     # note: _test_render_simple__data
-    _test_render_simple__data = {
-        "response_text": """\
+    _test_render_simple__data = {"response_text": """\
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -353,8 +348,7 @@ class TestRenderSimple_FormA_HtmlErrorPlaceholder_Default(
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
-"""
-    }
+"""}
 
 
 class TestRenderSimple_FormA_ErrorPlaceholder_None(
@@ -363,8 +357,7 @@ class TestRenderSimple_FormA_ErrorPlaceholder_None(
     template = "fixtures/form_a-html_error_placeholder-none.mako"
 
     # note: _test_render_simple__data
-    _test_render_simple__data = {
-        "response_text": """\
+    _test_render_simple__data = {"response_text": """\
 <html><head></head><body><div>
 <form action="/" method="POST">
     
@@ -372,8 +365,7 @@ class TestRenderSimple_FormA_ErrorPlaceholder_None(
     <input type="text" name="username" value="" />
 </form>
 </div></body></html>
-"""
-    }
+"""}
 
 
 class TestParsing_FormA_HtmlErrorPlaceholder_Default(
@@ -2112,7 +2104,7 @@ class TestCustomError(_TestHarness, unittest.TestCase):
                 return rendered
 
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
                     **_validate_kwargs,
@@ -2235,7 +2227,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
 
         # render form A
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_EmailUsername,
                 form_stash="a",
@@ -2271,7 +2263,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
 
         # render form B
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_EmailUsername,
                 form_stash="b",
@@ -2322,7 +2314,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
 
         # render form A
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_EmailUsername,
                 form_stash="a",
@@ -2362,7 +2354,7 @@ class TestMultiForm(_TestHarness, unittest.TestCase):
 
         # render form B
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_EmailUsername,
                 form_stash="b",
@@ -2560,7 +2552,7 @@ class _TestParsingApi040(object):
                 return rendered
 
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
                     **_validate_kwargs,
@@ -2630,7 +2622,7 @@ class _TestParsingApi040(object):
                 return rendered
 
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
                     **_validate_kwargs,
@@ -2703,7 +2695,7 @@ class _TestParsingApi040(object):
                 return rendered
 
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
                     **_validate_kwargs,
@@ -2796,7 +2788,7 @@ class _TestParsingApi040(object):
                 return rendered
 
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
                     **_validate_kwargs,
@@ -2884,7 +2876,7 @@ class _TestParsingApi040(object):
                 return rendered
 
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
                     **_validate_kwargs,
@@ -2967,7 +2959,7 @@ class _TestParsingApi040(object):
                 return rendered
 
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
                     **_validate_kwargs,
@@ -3029,7 +3021,7 @@ class _TestParsingApi040(object):
                 return rendered
 
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
                     **_validate_kwargs,
@@ -4035,8 +4027,7 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
     """
 
     template = "fixtures/form_a-html_error_placeholder-default.mako"
-    rendered = (
-        """<html><head></head><body><div>
+    rendered = """<html><head></head><body><div>
 <form action="/" method="POST">
     
     <span class="error-message">%s</span><br />
@@ -4049,9 +4040,7 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
 <input type="text" name="username" value="" class="error" />
 </form>
 </div></body></html>
-"""
-        % _defaults.DEFAULT_ERROR_MAIN_TEXT
-    )
+""" % _defaults.DEFAULT_ERROR_MAIN_TEXT
 
     def test_submit(self):
         # set the submit
@@ -4072,7 +4061,7 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
 
         # first print this RIGHT
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_EmailUsername,
                 **_validate_kwargs,
@@ -4093,7 +4082,7 @@ class TestRenderJson(_TestHarness, unittest.TestCase):
 
         # then print this WRONG
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_EmailUsername,
                 **_validate_kwargs,
@@ -4129,7 +4118,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
         self.request.POST["email"] = "a@example.com"
         self.request.POST["username"] = "abcdefg"
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4144,7 +4133,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
         self.request.POST["email"] = "a@example.com"
         self.request.POST["username"] = "abcdefg"
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 raise_FormInvalid=True,
@@ -4164,7 +4153,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                 schema=Form_EmailUsername,
                 name="alt_name",
             )
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 formStash=formStashA,
@@ -4184,7 +4173,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
         self.request.POST["email"] = "a@example.com"
         self.request.POST["username"] = "abcdefg"
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4218,7 +4207,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # no args
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4243,7 +4232,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # overwrite
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4272,7 +4261,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
         message = "THIS FIELD CAUSED A FATAL ERROR"
         field = "email"
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 raise_FormInvalid=True,
@@ -4301,14 +4290,14 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
         message = "THIS FIELD CAUSED A FATAL ERROR"
         # field = "email"
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 raise_FormInvalid=True,
             )
 
             try:
-                formStash.fatal_field(error_field=message)  # type:ignore[call-arg]
+                formStash.fatal_field(error_field=message)  # type: ignore[call-arg]
                 raise ValueError(  # pragma: no cover
                     "`formStash.fatal_field` should have raised `TypeError`"
                 )
@@ -4323,17 +4312,23 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                     _exc_expected_msg = "FormStash.fatal_field() missing 1 required positional argument: 'field'"
                 self.assertEqual(exc.args[0], _exc_expected_msg)
 
+            # note: No `allow_unknown_fields`[default]
             try:
                 formStash.fatal_field(field="unknown", error_field=message)
                 raise ValueError(  # pragma: no cover
-                    "`formStash.fatal_field` should have raised `ValueError`"
+                    "`formStash.fatal_field` should have raised `FormInvalid`"
                 )
-            except ValueError as exc:
+            except pyramid_formencode_classic.FormInvalid as exc:
+                assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
+                assert exc.raised_by == "fatal_field"
+                assert exc.error_main == _defaults.DEFAULT_ERROR_MAIN_TEXT
                 assert (
-                    exc.args[0]
-                    == "field `unknown` is not in schema: `<class 'tests.test_core.Form_Email'>`"
+                    exc.formStash.errors["Error_Main"]
+                    == _defaults.DEFAULT_ERROR_MAIN_TEXT
                 )
+                assert exc.formStash.errors["unknown"] == message
 
+            # note: allow_unknown_fields=True
             try:
                 formStash.fatal_field(
                     field="unknown", error_field=message, allow_unknown_fields=True
@@ -4350,6 +4345,21 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
                     == _defaults.DEFAULT_ERROR_MAIN_TEXT
                 )
                 assert exc.formStash.errors["unknown"] == message
+
+            # note: allow_unknown_fields=False
+            try:
+                formStash.fatal_field(
+                    field="unknown", error_field=message, allow_unknown_fields=False
+                )
+                raise ValueError(  # pragma: no cover
+                    "`formStash.fatal_field` should have raised `ValueError`"
+                )
+            except ValueError as exc:
+                assert (
+                    exc.args[0]
+                    == f"field `unknown` is not in schema: `{formStash.schema}`"
+                )
+
         except Exception:  # pragma: no cover
             raise
 
@@ -4361,7 +4371,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # note: base
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 raise_FormInvalid=True,
@@ -4385,7 +4395,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # note: error_main
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 raise_FormInvalid=True,
@@ -4411,7 +4421,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # note: error_main error_main_overwrite
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 raise_FormInvalid=True,
@@ -4437,7 +4447,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # note: message_overwrites
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 raise_FormInvalid=True,
@@ -4461,7 +4471,25 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
         except Exception:  # pragma: no cover
             raise
 
-        # note: allow_unknown_fields
+        # note: No `allow_unknown_fields`[default]
+        try:
+            formStash.fatal_field(
+                field="unknown",
+                error_field=message,
+            )
+            raise ValueError(  # pragma: no cover
+                "`formStash.fatal_field` should have raised `FormInvalid`"
+            )
+        except pyramid_formencode_classic.FormInvalid as exc:
+            assert isinstance(exc.formStash, pyramid_formencode_classic.FormStash)
+            assert exc.raised_by == "fatal_field"
+            assert exc.error_main == _defaults.DEFAULT_ERROR_MAIN_TEXT
+            assert (
+                exc.formStash.errors["Error_Main"] == _defaults.DEFAULT_ERROR_MAIN_TEXT
+            )
+            assert exc.formStash.errors["unknown"] == message
+
+        # note: allow_unknown_fields=True
         try:
             formStash.fatal_field(
                 field="unknown", error_field=message, allow_unknown_fields=True
@@ -4478,9 +4506,22 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             )
             assert exc.formStash.errors["unknown"] == message
 
+        # note: allow_unknown_fields=False
+        try:
+            formStash.fatal_field(
+                field="unknown", error_field=message, allow_unknown_fields=False
+            )
+            raise ValueError(  # pragma: no cover
+                "`formStash.fatal_field` should have raised `ValueError`"
+            )
+        except ValueError as exc:
+            assert (
+                exc.args[0] == f"field `unknown` is not in schema: `{formStash.schema}`"
+            )
+
         # note: field=="Error_Main"
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 raise_FormInvalid=True,
@@ -4503,7 +4544,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
         self.request.POST["username"] = "abcdefg"
 
         # note: base
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             self.request,
             schema=Form_Email,
             raise_FormInvalid=True,
@@ -4524,7 +4565,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # note: first `set_error`
         # error_main, error_main
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             self.request,
             schema=Form_Email,
             raise_FormInvalid=True,
@@ -4546,7 +4587,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # note: first `set_error`, then overwrite
         # error_main, error_main
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             self.request,
             schema=Form_Email,
             raise_FormInvalid=True,
@@ -4566,7 +4607,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             assert exc.formStash.errors["Error_Main"] == CUSTOM_ERROR_MAIN
 
         # error_main, alt_error_main
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             self.request,
             schema=Form_Email,
             raise_FormInvalid=True,
@@ -4589,7 +4630,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # we would NEVER want the above, but we might want:
         # error_main, alt_error_main: FIX A
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             self.request,
             schema=Form_Email,
             raise_FormInvalid=True,
@@ -4609,7 +4650,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             assert exc.formStash.errors["Error_Main"] == ALT_CUSTOM_ERROR_MAIN
 
         # error_main, alt_error_main: FIX B
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             self.request,
             schema=Form_Email,
             raise_FormInvalid=True,
@@ -4630,7 +4671,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
             )
 
         # error_main, alt_error_main: FIX C
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             self.request,
             schema=Form_Email,
             raise_FormInvalid=True,
@@ -4653,7 +4694,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # note: error
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4669,7 +4710,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # note: invalid
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4690,7 +4731,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # note: default
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4726,7 +4767,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # note: form_validate
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 error_no_submission_text=CUTOM_ERROR_NOTHING_SUBMITTED,
@@ -4762,7 +4803,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
 
         # note: raise FormFieldInvalid
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4803,7 +4844,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
         self.request.POST["email"] = "a@example.com"
         self.request.POST["username"] = "abcdefg"
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4821,7 +4862,7 @@ class Test_ExceptionsApi(_TestHarness, unittest.TestCase):
         self.request.POST["email"] = "a@example.com"
         self.request.POST["username"] = "abcdefg"
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4844,7 +4885,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
 
         # note: default
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4878,7 +4919,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
 
         # note: default
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4912,7 +4953,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
 
         # note: custom NS on `form_validate`
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 error_no_submission_text=CUTOM_ERROR_NOTHING_SUBMITTED,
@@ -4945,7 +4986,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
 
         # note: custom NS on `FormInvalid`
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -4981,7 +5022,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
         # note: custom ER on `FormInvalid`
         message = "GarfieldMinusGarfield"
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -5015,7 +5056,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
         # note: custom ER on `FormInvalid`; overwrite
         message = "GarfieldMinusGarfield"
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
             )
@@ -5043,7 +5084,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
     def test_raise_FormInvalid_automatic(self):
         # default
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 raise_FormInvalid=True,
@@ -5074,7 +5115,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
 
         # note: custom NS on `form_validate`
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 raise_FormInvalid=True,
@@ -5107,7 +5148,7 @@ class Test_ExceptionsApi_NothingSubmitted(_TestHarness, unittest.TestCase):
         # note: custom ER on `form_validate`
         message = "GarfieldMinusGarfield"
         try:
-            (result, formStash) = pyramid_formencode_classic.form_validate(
+            result, formStash = pyramid_formencode_classic.form_validate(
                 self.request,
                 schema=Form_Email,
                 raise_FormInvalid=True,
@@ -5212,7 +5253,7 @@ class TestAssets(_TestHarness, unittest.TestCase):
                 return rendered
 
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
                     **_validate_kwargs,
@@ -5279,7 +5320,7 @@ class TestAssets(_TestHarness, unittest.TestCase):
                 return rendered
 
             try:
-                (result, formStash) = pyramid_formencode_classic.form_validate(
+                result, formStash = pyramid_formencode_classic.form_validate(
                     self.request,
                     schema=Form_EmailUsername,
                     **_validate_kwargs,
@@ -5327,7 +5368,7 @@ class TestAppend(_TestHarness, unittest.TestCase):
 
         # note: TestCase 1
 
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             self.request,
             schema=Form_Email,
             raise_FormInvalid=True,
@@ -5363,7 +5404,7 @@ class TestAppend(_TestHarness, unittest.TestCase):
 
         # note: TestCase 2
 
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             self.request,
             schema=Form_Email,
             raise_FormInvalid=True,

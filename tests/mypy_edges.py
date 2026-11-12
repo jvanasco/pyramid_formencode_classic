@@ -26,7 +26,7 @@ def prevent_MissingReturnStatement(request: Request) -> int:
     Exception; otherwise we can get `missing return statement` errors.
     """
     try:
-        (result, formStash) = pyramid_formencode_classic.form_validate(
+        result, formStash = pyramid_formencode_classic.form_validate(
             request,
             schema=Form_Email,
         )
