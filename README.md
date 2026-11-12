@@ -294,6 +294,27 @@ If you want to specify a particular stash, because you use multiple forms on a p
 
 ## Caveats, Oddities, Etc
 
+### Decoding nested form fields
+
+`variable_decode` defaults to `False`. Enable it only for forms that need
+FormEncode's nested field syntax.
+
+**Warning:** FormEncode can allocate large lists from submitted field metadata
+before the schema validates any values. Request body size limits alone cannot
+bound the size of the decoded data.
+
+For untrusted requests, check the original WebOb parameters before calling
+`form_validate()`. Allow only the field names and nesting patterns your form
+expects. Reject excessive field counts, nesting depth, and list expansion.
+Reject list-length metadata entirely if the form does not need it. Apply these
+checks before decoding.
+
+Pass the checked values as a WebOb `MultiDict` through
+`form_validate(request, schema, validate_params=checked_params, variable_decode=True)`.
+`validate_params` supplies the data for schema validation in place of the
+request's GET and POST fields. If you pass `csrf_token`, the CSRF check still
+reads the original request parameters.
+
 ### Custom Errors, Custom Error Displays and Missing Fields
 
 #### Where are errors placed?  What about missing fields?

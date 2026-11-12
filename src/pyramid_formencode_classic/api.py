@@ -105,6 +105,9 @@ def _form_validate_core(
     ``variable_decode`` (False)
         Boolean to indicate whether FormEncode's variable decode
         function should be run on the form input before validation.
+        FormEncode can expand lists before schema validation. For untrusted
+        input, enforce the form's limits on nesting and expansion first, and
+        pass the checked MultiDict as ``validate_params``.
 
     ``dict_char`` ('.')
         Passed through to FormEncode. Toggles the form field naming

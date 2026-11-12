@@ -4,6 +4,7 @@ TODO:
     coverage report && coverage html
 
 Unreleased
+    * Document how to check untrusted input before variable decoding.
     * Require a single matching CSRF token across the query and POST data.
     * Report repeated or nested input to a built-in Email validator as a
       field error.
