@@ -377,8 +377,8 @@ def form_reprint(
         encoding = determine_response_charset(response)
 
         if hasattr(response, "errors"):
-            # FormEncode>=0.7 errors are unicode (due to being localized via ugettext). Convert any of the possible formencode unpack_errors formats to contain raw strings
-            response.errors = encode_formencode_errors({}, encoding, response.errors)
+            # Encode localized FormEncode errors in the response charset.
+            response.errors = encode_formencode_errors(response.errors, encoding)
 
     elif not isinstance(form_content, str):
         if __debug__:

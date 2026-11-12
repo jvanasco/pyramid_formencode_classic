@@ -16,9 +16,11 @@ import unittest
 # pypi
 import formencode
 from pyramid import testing
+from pyramid.httpexceptions import HTTPFound
 from pyramid.interfaces import IRequestExtensions
 from pyramid.renderers import render_to_response
 from pyramid.request import Request
+from pyramid.response import Response
 from webob.multidict import MultiDict
 
 # local
@@ -5495,3 +5497,98 @@ class TestValidationErrors(unittest.TestCase):
         assert stash.is_submitted_vars is False
         assert not stash.is_parsed
         assert stash.get_error("*nothing_submitted") == "No submission"
+
+
+class TestFormCoverage(unittest.TestCase):
+    """Check public validation and rendering behavior at the request boundary."""
+
+    def test_reprint_encodes_response_errors(self) -> None:
+        """Preserve the errors attached to the response when encoding them."""
+        request = Request.blank("/")
+        request.pyramid_formencode_classic = {
+            _defaults.DEFAULT_FORM_STASH: pyramid_formencode_classic.FormStash(
+                Form_Email()
+            )
+        }
+        response = Response(text="<form></form>", charset="utf-8")
+        response.errors = {"email": "Déjà utilisé"}
+
+        def print_form() -> Response:
+            return response
+
+        rendered = pyramid_formencode_classic.form_reprint(request, print_form)
+
+        assert rendered is response
+        assert rendered.errors == {"email": "Déjà utilisé".encode("utf-8")}
+
+    def test_reprint_preserves_redirect(self) -> None:
+        """Pass a redirect through without requiring a form stash."""
+        request = Request.blank("/")
+        redirect = HTTPFound(location="/next")
+
+        def print_form() -> HTTPFound:
+            return redirect
+
+        rendered = pyramid_formencode_classic.form_reprint(request, print_form)
+
+        assert rendered is redirect
+        assert rendered.status_int == 302
+        assert rendered.headers["Location"] == "/next"
+
+    def test_foreach_error_modes(self) -> None:
+        """Join repeated field errors by default and preserve lists on request."""
+
+        class Form_Numbers(formencode.Schema):
+            numbers = formencode.ForEach(formencode.validators.Int())
+
+        message = "Please enter an integer value"
+        for options, expected in (
+            ({}, ", ".join([message, message])),
+            ({"foreach_defense": False}, [message, message]),
+        ):
+            with self.subTest(options=options):
+                request = Request.blank("/")
+                request.pyramid_formencode_classic = {}
+                valid, stash = pyramid_formencode_classic.form_validate(
+                    request,
+                    Form_Numbers(),
+                    validate_params=MultiDict(
+                        [("numbers", "bad"), ("numbers", "worse")]
+                    ),
+                    **options,
+                )
+
+                assert not valid
+                assert stash.get_error("numbers") == expected
+
+    def test_stash_properties_across_validation_states(self) -> None:
+        """Expose defaults, converted results, and public and special errors."""
+        for params, expected_results, expected_error_fields, expected_special in (
+            ({}, {}, set(), {"*nothing_submitted"}),
+            ({"email": "invalid"}, {}, {"Error_Main", "email"}, {"*error_main"}),
+            (
+                {"email": "person@example.com"},
+                {"email": "person@example.com"},
+                set(),
+                set(),
+            ),
+        ):
+            with self.subTest(params=params):
+                request = Request.blank("/")
+                request.pyramid_formencode_classic = {}
+                valid, stash = pyramid_formencode_classic.form_validate(
+                    request, Form_Email(), validate_params=MultiDict(params)
+                )
+
+                assert valid == (not (expected_error_fields or expected_special))
+                assert stash.defaults == params
+                assert stash.results == expected_results
+                assert stash.errors == stash.errors_normal
+                assert set(stash.errors_normal) == expected_error_fields
+                assert set(stash.errors_special) == expected_special
+                assert stash.errors_all == {**stash.errors_normal, **stash.errors_special}
+                assert stash.error_main == stash.errors_normal.get(stash.error_main_key)
+                assert stash.count_errors() == len(expected_error_fields)
+                assert stash.count_errors(include_special=True) == (
+                    len(expected_error_fields) + len(expected_special)
+                )
