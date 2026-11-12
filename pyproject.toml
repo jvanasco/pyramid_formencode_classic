@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools",]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
 [tool.black]
 target-version = ['py314']
@@ -23,3 +24,10 @@ filterwarnings = [
     "ignore:pkg_resources is deprecated as an API.:UserWarning:pyramid.asset",
     "ignore:Deprecated call to `pkg_resources.declare_namespace.*:DeprecationWarning:pkg_resources",
 ]
+
+[tool.mypy]
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["formencode.*", "pyramid.*", "pyramid_debugtoolbar.*", "webob.*"]
+ignore_missing_imports = true

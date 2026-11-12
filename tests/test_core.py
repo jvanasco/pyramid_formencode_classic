@@ -12,13 +12,16 @@ from typing import Callable
 from typing import Dict
 from typing import Optional
 import unittest
+from xml.etree import ElementTree
 
 # pypi
 import formencode
 from pyramid import testing
+from pyramid.httpexceptions import HTTPFound
 from pyramid.interfaces import IRequestExtensions
 from pyramid.renderers import render_to_response
 from pyramid.request import Request
+from pyramid.response import Response
 from webob.multidict import MultiDict
 
 # local
@@ -5434,3 +5437,305 @@ class TestAppend(_TestHarness, unittest.TestCase):
             assert exc.formStash.errors["email"] == " ".join(
                 (message, message_alt, message)
             )
+
+
+class TestValidationErrors(unittest.TestCase):
+    """Exercise validation errors and how callers recover from them."""
+
+    def test_clear_error_updates_invalid_state(self) -> None:
+        """Keep the stash invalid until its last field error is cleared."""
+        stash = pyramid_formencode_classic.FormStash(Form_Email())
+        stash.set_error("email", "Invalid email")
+        stash.set_error("username", "Invalid username")
+
+        stash.clear_error("email")
+        assert stash.is_error
+        assert stash.errors == {"username": "Invalid username"}
+
+        stash.clear_error("username")
+        assert not stash.has_errors()
+        assert not stash.is_error
+
+    def test_csrf_mismatch_stashes_error_before_raising(self) -> None:
+        """Make the CSRF error available on the request when validation raises."""
+        request = Request.blank("/?email=person%40example.com&csrf_=incorrect")
+        request.pyramid_formencode_classic = {}
+
+        with self.assertRaises(pyramid_formencode_classic.FormInvalid):
+            pyramid_formencode_classic.form_validate(
+                request,
+                Form_Email(),
+                form_stash="contact",
+                validate_post=False,
+                validate_get=True,
+                csrf_token="expected",
+                raise_FormInvalid=True,
+            )
+
+        stash = request.pyramid_formencode_classic["contact"]
+        assert stash.is_error
+        assert stash.is_error_csrf
+        message = stash.get_error(stash.csrf_error_field)
+        assert isinstance(message, str)
+        assert stash.csrf_error_string in message
+
+    def test_disabled_request_sources_do_not_validate_query(self) -> None:
+        """Treat query data as unsubmitted when both request sources are disabled."""
+        request = Request.blank("/?email=person%40example.com")
+        request.pyramid_formencode_classic = {}
+
+        valid, stash = pyramid_formencode_classic.form_validate(
+            request,
+            Form_Email(),
+            form_stash="contact",
+            validate_post=False,
+            validate_get=False,
+            error_no_submission_text="No submission",
+        )
+
+        assert not valid
+        assert stash is request.pyramid_formencode_classic["contact"]
+        assert stash.is_submitted_vars is False
+        assert not stash.is_parsed
+        assert stash.get_error("*nothing_submitted") == "No submission"
+
+
+class TestFormCoverage(unittest.TestCase):
+    """Check public validation and rendering behavior at the request boundary."""
+
+    def test_reprint_encodes_response_errors(self) -> None:
+        """Preserve the errors attached to the response when encoding them."""
+        request = Request.blank("/")
+        request.pyramid_formencode_classic = {
+            _defaults.DEFAULT_FORM_STASH: pyramid_formencode_classic.FormStash(
+                Form_Email()
+            )
+        }
+        response = Response(text="<form></form>", charset="utf-8")
+        response.errors = {"email": "Déjà utilisé"}
+
+        def print_form() -> Response:
+            return response
+
+        rendered = pyramid_formencode_classic.form_reprint(request, print_form)
+
+        assert rendered is response
+        assert rendered.errors == {"email": "Déjà utilisé".encode("utf-8")}
+
+    def test_reprint_preserves_redirect(self) -> None:
+        """Pass a redirect through without requiring a form stash."""
+        request = Request.blank("/")
+        redirect = HTTPFound(location="/next")
+
+        def print_form() -> HTTPFound:
+            return redirect
+
+        rendered = pyramid_formencode_classic.form_reprint(request, print_form)
+
+        assert rendered is redirect
+        assert rendered.status_int == 302
+        assert rendered.headers["Location"] == "/next"
+
+    def test_foreach_error_modes(self) -> None:
+        """Join repeated field errors by default and preserve lists on request."""
+
+        class Form_Numbers(formencode.Schema):
+            numbers = formencode.ForEach(formencode.validators.Int())
+
+        message = "Please enter an integer value"
+        for options, expected in (
+            ({}, ", ".join([message, message])),
+            ({"foreach_defense": False}, [message, message]),
+        ):
+            with self.subTest(options=options):
+                request = Request.blank("/")
+                request.pyramid_formencode_classic = {}
+                valid, stash = pyramid_formencode_classic.form_validate(
+                    request,
+                    Form_Numbers(),
+                    validate_params=MultiDict(
+                        [("numbers", "bad"), ("numbers", "worse")]
+                    ),
+                    **options,
+                )
+
+                assert not valid
+                assert stash.get_error("numbers") == expected
+
+    def test_stash_properties_across_validation_states(self) -> None:
+        """Expose defaults, converted results, and public and special errors."""
+        for params, expected_results, expected_error_fields, expected_special in (
+            ({}, {}, set(), {"*nothing_submitted"}),
+            ({"email": "invalid"}, {}, {"Error_Main", "email"}, {"*error_main"}),
+            (
+                {"email": "person@example.com"},
+                {"email": "person@example.com"},
+                set(),
+                set(),
+            ),
+        ):
+            with self.subTest(params=params):
+                request = Request.blank("/")
+                request.pyramid_formencode_classic = {}
+                valid, stash = pyramid_formencode_classic.form_validate(
+                    request, Form_Email(), validate_params=MultiDict(params)
+                )
+
+                assert valid == (not (expected_error_fields or expected_special))
+                assert stash.defaults == params
+                assert stash.results == expected_results
+                assert stash.errors == stash.errors_normal
+                assert set(stash.errors_normal) == expected_error_fields
+                assert set(stash.errors_special) == expected_special
+                assert stash.errors_all == {**stash.errors_normal, **stash.errors_special}
+                assert stash.error_main == stash.errors_normal.get(stash.error_main_key)
+                assert stash.count_errors() == len(expected_error_fields)
+                assert stash.count_errors(include_special=True) == (
+                    len(expected_error_fields) + len(expected_special)
+                )
+
+
+class TestFormEntryPoints(_TestHarness, unittest.TestCase):
+    """Verify form rendering and request input through the public API."""
+
+    def test_csrf_input_field_escapes_attributes(self) -> None:
+        """Round-trip raw attribute values through the generated HTML."""
+        stash = pyramid_formencode_classic.FormStash(Form_Email())
+        raw_attributes = {
+            "id": 'csrf"id',
+            "name": "csrf&name",
+            "type": 'hidden" type="text',
+            "value": """a&b"c'd<e>""",
+        }
+
+        for htmlfill_ignore in (True, False):
+            with self.subTest(htmlfill_ignore=htmlfill_ignore):
+                markup = stash.csrf_input_field(
+                    id=raw_attributes["id"],
+                    name=raw_attributes["name"],
+                    type=raw_attributes["type"],
+                    csrf_token=raw_attributes["value"],
+                    htmlfill_ignore=htmlfill_ignore,
+                )
+                expected = raw_attributes.copy()
+                if htmlfill_ignore:
+                    expected["data-formencode-ignore"] = "1"
+
+                element = ElementTree.fromstring(markup)
+                assert element.tag == "input"
+                assert element.attrib == expected
+
+    def test_reprint_with_render_view_and_template(self) -> None:
+        """Render a Pyramid template with the rejected values and errors."""
+        self.request.POST.update({"email": "invalid", "username": "alice"})
+        valid, stash = pyramid_formencode_classic.form_validate(
+            self.request, Form_EmailUsername()
+        )
+        assert not valid
+        email_error = stash.get_error("email")
+        assert isinstance(email_error, str)
+
+        def render_view() -> Dict[str, DummyRequest]:
+            return {"request": self.request}
+
+        response = pyramid_formencode_classic.form_reprint(
+            self.request,
+            None,
+            render_view=render_view,
+            render_view_template="tests:fixtures/form_a-html_error_placeholder-default.mako",
+        )
+
+        assert response.status_int == 200
+        assert 'name="email" value="invalid"' in response.text
+        assert 'name="username" value="alice"' in response.text
+        assert email_error in response.text
+
+    def test_validate_combines_get_and_post(self) -> None:
+        """Validate a required field from each source when both are enabled."""
+        request = Request.blank(
+            "/?email=person%40example.com", POST={"username": "alice"}
+        )
+        request.pyramid_formencode_classic = {}
+
+        valid, stash = pyramid_formencode_classic.form_validate(
+            request, Form_EmailUsername(), validate_get=True, validate_post=True
+        )
+
+        assert valid
+        assert stash.results == {"email": "person@example.com", "username": "alice"}
+        assert not stash.has_errors()
+
+
+class TestUntrustedFormData(unittest.TestCase):
+    """Exercise validation and rendering with ambiguous or unusual input."""
+
+    def test_scalar_field_rejects_conflicting_input_shapes(self) -> None:
+        """Reject repeated scalar values and mixed nested field shapes."""
+        for fields, variable_decode in (
+            ([("email", "one@example.com"), ("email", "two@example.com")], False),
+            ([("email", "one@example.com"), ("email.part", "two@example.com")], True),
+            ([("email.part", "two@example.com"), ("email", "one@example.com")], True),
+            ([("email-0", "one@example.com"), ("email.part", "two@example.com")], True),
+        ):
+            with self.subTest(fields=fields):
+                request = Request.blank("/", POST=MultiDict(fields))
+                request.pyramid_formencode_classic = {}
+
+                valid, stash = pyramid_formencode_classic.form_validate(
+                    request, Form_Email(), variable_decode=variable_decode
+                )
+
+                assert not valid
+                assert stash.results == {}
+                assert stash.has_error("email")
+
+    def test_reprint_preserves_rejected_value_as_an_attribute(self) -> None:
+        """Keep submitted punctuation within the original input value."""
+        submitted = """A & B <sample> "quoted" 'text'"""
+        request = Request.blank("/", POST={"email": submitted})
+        request.pyramid_formencode_classic = {}
+        valid, stash = pyramid_formencode_classic.form_validate(request, Form_Email())
+        assert not valid
+
+        def print_form() -> Response:
+            return Response(text='<form><input name="email" type="text" /></form>')
+
+        response = pyramid_formencode_classic.form_reprint(request, print_form)
+        form = ElementTree.fromstring("<document>" + response.text + "</document>")
+        field = form.find("form/input")
+        assert field is not None
+        assert field.attrib == {
+            "name": "email",
+            "type": "text",
+            "value": submitted,
+            "class": "error",
+        }
+        assert form.find(".//sample") is None
+        assert stash.defaults["email"] == submitted
+
+    def test_csrf_rejects_duplicate_tokens(self) -> None:
+        """Accept exactly one matching token across the query and body."""
+        for query, tokens, expected_valid in (
+            ("", ["expected"], True),
+            ("?csrf_=expected", [], True),
+            ("?csrf_=expected&csrf_=expected", [], False),
+            ("", [], False),
+            ("", ["expected", "unexpected"], False),
+            ("", ["unexpected", "expected"], False),
+            ("", ["expected", "expected"], False),
+            ("?csrf_=expected", ["unexpected"], False),
+            ("?csrf_=unexpected", ["expected"], False),
+        ):
+            with self.subTest(query=query, tokens=tokens):
+                fields = MultiDict([("email", "person@example.com")])
+                for token in tokens:
+                    fields.add("csrf_", token)
+                request = Request.blank("/" + query, POST=fields)
+                request.pyramid_formencode_classic = {}
+
+                valid, stash = pyramid_formencode_classic.form_validate(
+                    request, Form_Email(), csrf_token="expected"
+                )
+
+                assert valid is expected_valid
+                assert stash.is_error_csrf is (not expected_valid)

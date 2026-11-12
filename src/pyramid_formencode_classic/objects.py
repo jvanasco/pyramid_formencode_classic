@@ -1,10 +1,12 @@
 # stdlib
+from html import escape
 import logging
+from typing import Any
+from typing import cast
 from typing import Dict
 from typing import Iterable
 from typing import NoReturn
 from typing import Optional
-from typing import TYPE_CHECKING
 
 # pypi
 from typing_extensions import Literal
@@ -12,11 +14,9 @@ from typing_extensions import TypedDict
 
 # local
 from . import _defaults
+from ._utils import SchemaType
 from ._utils import TYPES_ERRORS
 from .exceptions import FormInvalid
-
-if TYPE_CHECKING:
-    from formencode import Schema
 
 # ==============================================================================
 
@@ -26,15 +26,15 @@ log = logging.getLogger("pyramid_formencode_classic")
 
 
 class ParsedForm(TypedDict):
-    errors: Dict[str, str]
-    results: Dict[str, str]
-    defaults: Dict[str, str]
+    errors: Dict[str, Any]
+    results: Dict[str, Any]
+    defaults: Dict[str, Any]
 
 
 class FormStash(object):
     """Wrapper object, stores all the vars and objects surrounding a form validation"""
 
-    schema: "Schema"
+    schema: Optional[SchemaType]
     name: str
     error_main_key: str
     is_error: bool = False
@@ -73,14 +73,14 @@ class FormStash(object):
 
     def __init__(
         self,
-        schema: "Schema",
+        schema: Optional[SchemaType],
         name: Optional[str] = None,
         error_main_key: Optional[str] = None,
         error_main_text: Optional[str] = None,
         error_no_submission_text: Optional[str] = None,
         is_unicode_params: bool = False,
         debug_fails: Optional[bool] = None,
-    ):
+    ) -> None:
         self.schema = schema
         if name:
             self.name = name
@@ -132,38 +132,46 @@ class FormStash(object):
     # Proxy methods to maintain compatibility
 
     @property
-    def defaults(self) -> Dict:
+    def defaults(self) -> Dict[str, Any]:
+        """Return the submitted values used to fill the form again."""
         return self.parsed_form["defaults"]
 
     @property
-    def errors(self) -> Dict:
+    def errors(self) -> Dict[str, TYPES_ERRORS]:
+        """Return the public form and field errors."""
         return self.errors_normal
 
     @property
-    def results(self) -> Dict:
+    def results(self) -> Dict[str, Any]:
+        """Return the values produced by the schema."""
         return self.parsed_form["results"]
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     @property
     def error_main(self) -> Optional[str]:
+        """Return the main form error if one has been recorded."""
         if self.error_main_key in self.parsed_form["errors"]:
             return self.parsed_form["errors"][self.error_main_key]
         return None
 
     @property
-    def errors_all(self) -> Dict:
+    def errors_all(self) -> Dict[str, TYPES_ERRORS]:
+        """Return the stored dictionary of public and special errors."""
         return self.parsed_form["errors"]
 
     @property
-    def errors_normal(self) -> Dict:
+    def errors_normal(self) -> Dict[str, TYPES_ERRORS]:
+        """Return errors whose keys do not begin with an asterisk."""
         return {k: v for k, v in self.parsed_form["errors"].items() if k[0] != "*"}
 
     @property
-    def errors_special(self) -> Dict:
+    def errors_special(self) -> Dict[str, TYPES_ERRORS]:
+        """Return internal errors whose keys begin with an asterisk."""
         return {k: v for k, v in self.parsed_form["errors"].items() if k[0] == "*"}
 
     def count_errors(self, include_special: bool = False) -> int:
+        """Count error entries, including internal entries when requested."""
         if include_special:
             return len(self.errors_all)
         return len(self.errors_normal)
@@ -308,8 +316,8 @@ class FormStash(object):
             return template % {"error": error}
         return ""
 
-    def get_error(self, field: str) -> Optional[TYPES_ERRORS]:
-        """Returns the error."""
+    def get_error(self, field: str) -> TYPES_ERRORS:
+        """Return the stored error for a field, or None if it has no error."""
         if field in self.parsed_form["errors"]:
             return self.parsed_form["errors"][field]
         return None
@@ -322,6 +330,7 @@ class FormStash(object):
         ],
         error_message: Optional[str] = None,
     ) -> None:
+        """Record an internal form error and mark the stash invalid."""
         if __debug__:
             log.debug("`FormStash.set_special_error`")
         if error_name == "*nothing_submitted":
@@ -418,7 +427,7 @@ class FormStash(object):
         self,
         field: Optional[str] = None,
     ) -> None:
-        """clear the dict of errors"""
+        """Clear the requested errors and update the invalid state."""
         if self.parsed_form["errors"]:
             if field:
                 if field in self.parsed_form["errors"]:
@@ -428,8 +437,7 @@ class FormStash(object):
                         del self.parsed_form["errors"][self.error_main_key]
             else:
                 self.parsed_form["errors"] = {}
-        if self.parsed_form["errors"]:
-            self.is_error = True
+        self.is_error = bool(self.parsed_form["errors"])
 
     def fatal_form(
         self,
@@ -482,7 +490,8 @@ class FormStash(object):
 
         if not field:
             raise ValueError("field `%s` must be provided" % field)
-        if field not in self.schema.fields:
+        schema = cast(SchemaType, self.schema)
+        if field not in schema.fields:
             if field == self.error_main_key:
                 raise ValueError(
                     "field `%s` is not in schema: `%s`; "
@@ -585,13 +594,14 @@ class FormStash(object):
         csrf_token: str = "",
         htmlfill_ignore: bool = True,
     ) -> str:
+        """Render a CSRF input from raw attribute values, escaping them for HTML."""
         return (
             """<input id="%(id)s" type="%(type)s" name="%(name)s" value="%(csrf_token)s"%(htmlfill_ignore)s/>"""
             % {
-                "id": id,
-                "name": name,
-                "type": type,
-                "csrf_token": csrf_token,
+                "id": escape(id, quote=True),
+                "name": escape(name, quote=True),
+                "type": escape(type, quote=True),
+                "csrf_token": escape(csrf_token, quote=True),
                 "htmlfill_ignore": (
                     " data-formencode-ignore='1' " if htmlfill_ignore else ""
                 ),
@@ -613,11 +623,12 @@ class FormStashList(dict):
     def get_form(
         self,
         form_stash: str = _defaults.DEFAULT_FORM_STASH,
-        schema: Optional["Schema"] = None,
+        schema: Optional[SchemaType] = None,
         error_main_key: Optional[str] = None,
         error_main_text: Optional[str] = None,
         is_unicode_params: bool = False,
     ) -> FormStash:
+        """Return the named stash, creating it with the supplied settings if needed."""
         if form_stash not in self:
             if error_main_key is None:
                 error_main_key = _defaults.DEFAULT_ERROR_MAIN_KEY

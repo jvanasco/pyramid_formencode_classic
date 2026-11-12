@@ -80,6 +80,19 @@ class Test_OnlyOneOf(_TestHarness, unittest.TestCase):
             },
         )
 
+    def test_submitted_linked_fields_are_empty(self) -> None:
+        """Reject a submitted form when neither linked field has a value."""
+        self.request.POST.update({"id": "", "unicode_string": ""})
+        valid, stash = pyramid_formencode_classic.form_validate(
+            self.request, schema=Form_OnlyOneOf
+        )
+
+        assert not valid
+        assert stash.is_submitted_vars
+        message = "You must submit one and only one of these linked fields."
+        assert stash.get_error("id") == message
+        assert stash.get_error("unicode_string") == message
+
     def test_one(self):
         # first id
         self.request.POST["id"] = "1"

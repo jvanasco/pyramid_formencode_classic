@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class FormencodeClassicDebugPanel(DebugPanel):
-    """"""
+    """Show form stashes collected during the current request."""
 
     name: str = "FormencodeClassic"
     has_content: Optional[bool] = None
@@ -22,7 +22,7 @@ class FormencodeClassicDebugPanel(DebugPanel):
         "pyramid_formencode_classic.debugtoolbar.panels:templates/formencode_classic.dbtmako"
     )
 
-    def __init__(self, request: "Request"):
+    def __init__(self, request: "Request") -> None:
         self.data: Dict = {}
 
         # we need to process things AFTER the handler runs
@@ -30,6 +30,7 @@ class FormencodeClassicDebugPanel(DebugPanel):
         self.request = request
 
     def process_response(self, response: "Response") -> None:
+        """Collect the request form stashes after the view has run."""
         if "pyramid_formencode_classic" in self.request.__dict__.keys():
             self.has_content = True
             forms: Dict = {}
@@ -39,8 +40,10 @@ class FormencodeClassicDebugPanel(DebugPanel):
 
     @property
     def nav_title(self) -> str:
+        """Return the label used in the toolbar navigation."""
         return self.name
 
     @property
     def title(self) -> str:
+        """Return the title displayed in the panel."""
         return self.name
