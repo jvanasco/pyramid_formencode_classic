@@ -4,6 +4,10 @@ TODO:
     coverage report && coverage html
 
 Unreleased
+    * Require a single matching CSRF token across the query and POST data.
+    * Report repeated or nested input to a built-in Email validator as a
+      field error.
+    * Document the form validation and reprinting performance baseline.
     * Escape HTML attributes in FormStash.csrf_input_field. Callers should pass
       raw attribute values to the helper.
     * Preserve response errors when encoding them during form reprinting.

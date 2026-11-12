@@ -5664,3 +5664,78 @@ class TestFormEntryPoints(_TestHarness, unittest.TestCase):
         assert valid
         assert stash.results == {"email": "person@example.com", "username": "alice"}
         assert not stash.has_errors()
+
+
+class TestUntrustedFormData(unittest.TestCase):
+    """Exercise validation and rendering with ambiguous or unusual input."""
+
+    def test_scalar_field_rejects_conflicting_input_shapes(self) -> None:
+        """Reject repeated scalar values and mixed nested field shapes."""
+        for fields, variable_decode in (
+            ([("email", "one@example.com"), ("email", "two@example.com")], False),
+            ([("email", "one@example.com"), ("email.part", "two@example.com")], True),
+            ([("email.part", "two@example.com"), ("email", "one@example.com")], True),
+            ([("email-0", "one@example.com"), ("email.part", "two@example.com")], True),
+        ):
+            with self.subTest(fields=fields):
+                request = Request.blank("/", POST=MultiDict(fields))
+                request.pyramid_formencode_classic = {}
+
+                valid, stash = pyramid_formencode_classic.form_validate(
+                    request, Form_Email(), variable_decode=variable_decode
+                )
+
+                assert not valid
+                assert stash.results == {}
+                assert stash.has_error("email")
+
+    def test_reprint_preserves_rejected_value_as_an_attribute(self) -> None:
+        """Keep submitted punctuation within the original input value."""
+        submitted = """A & B <sample> "quoted" 'text'"""
+        request = Request.blank("/", POST={"email": submitted})
+        request.pyramid_formencode_classic = {}
+        valid, stash = pyramid_formencode_classic.form_validate(request, Form_Email())
+        assert not valid
+
+        def print_form() -> Response:
+            return Response(text='<form><input name="email" type="text" /></form>')
+
+        response = pyramid_formencode_classic.form_reprint(request, print_form)
+        form = ElementTree.fromstring("<document>" + response.text + "</document>")
+        field = form.find("form/input")
+        assert field is not None
+        assert field.attrib == {
+            "name": "email",
+            "type": "text",
+            "value": submitted,
+            "class": "error",
+        }
+        assert form.find(".//sample") is None
+        assert stash.defaults["email"] == submitted
+
+    def test_csrf_rejects_duplicate_tokens(self) -> None:
+        """Accept exactly one matching token across the query and body."""
+        for query, tokens, expected_valid in (
+            ("", ["expected"], True),
+            ("?csrf_=expected", [], True),
+            ("?csrf_=expected&csrf_=expected", [], False),
+            ("", [], False),
+            ("", ["expected", "unexpected"], False),
+            ("", ["unexpected", "expected"], False),
+            ("", ["expected", "expected"], False),
+            ("?csrf_=expected", ["unexpected"], False),
+            ("?csrf_=unexpected", ["expected"], False),
+        ):
+            with self.subTest(query=query, tokens=tokens):
+                fields = MultiDict([("email", "person@example.com")])
+                for token in tokens:
+                    fields.add("csrf_", token)
+                request = Request.blank("/" + query, POST=fields)
+                request.pyramid_formencode_classic = {}
+
+                valid, stash = pyramid_formencode_classic.form_validate(
+                    request, Form_Email(), csrf_token="expected"
+                )
+
+                assert valid is expected_valid
+                assert stash.is_error_csrf is (not expected_valid)

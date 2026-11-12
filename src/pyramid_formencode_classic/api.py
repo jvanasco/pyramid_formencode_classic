@@ -130,6 +130,10 @@ def _form_validate_core(
         If there are is a string-based error that occurs, this will be the key they are
         dropped into.
 
+    ``csrf_token`` (None)
+        When supplied, require exactly one matching CSRF value in the combined
+        query and POST parameters.
+
     ``is_unicode_params`` (False)
         passthrough to new `Form`
 
@@ -226,12 +230,21 @@ def _form_validate_core(
 
         if __debug__:
             log.debug("form_validate - validating against a schema")
-        try:
-            results = schema.to_python(decoded_params)
-        except formencode.Invalid as e:
-            errors = e.unpack_errors(variable_decode, dict_char, list_char)
-            if isinstance(errors, str):
-                errors = {error_string_key: errors}
+        # FormEncode's built-in Email validator calls strip() on its input.
+        # Report collections as field errors before handing them to that validator.
+        errors = {
+            field: "Please enter a single email address."
+            for field, validator in getattr(schema, "fields", {}).items()
+            if type(validator) is formencode.validators.Email
+            and isinstance(decoded_params.get(field), (list, dict))
+        }
+        if not errors:
+            try:
+                results = schema.to_python(decoded_params)
+            except formencode.Invalid as e:
+                errors = e.unpack_errors(variable_decode, dict_char, list_char)
+                if isinstance(errors, str):
+                    errors = {error_string_key: errors}
         formStash.is_parsed = True
 
         formStash.parsed_form["defaults"] = decoded_params
@@ -257,7 +270,7 @@ def _form_validate_core(
                 )
         else:
             if csrf_token is not None:
-                if request.params.get(csrf_name) != csrf_token:
+                if request.params.getall(csrf_name) != [csrf_token]:
                     # don't raise an error, because we have to stash the form
                     formStash.set_error(
                         field=formStash.csrf_error_field,
