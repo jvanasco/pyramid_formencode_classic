@@ -4,6 +4,8 @@ TODO:
     coverage report && coverage html
 
 Unreleased
+    * Escape HTML attributes in FormStash.csrf_input_field. Callers should pass
+      raw attribute values to the helper.
     * Preserve response errors when encoding them during form reprinting.
     * Report branch coverage in the Python 3.14 CI job and via tox -e cover,
       including an HTML report downloadable from GitHub Actions.

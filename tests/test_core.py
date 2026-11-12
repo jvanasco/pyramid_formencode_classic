@@ -12,6 +12,7 @@ from typing import Callable
 from typing import Dict
 from typing import Optional
 import unittest
+from xml.etree import ElementTree
 
 # pypi
 import formencode
@@ -5592,3 +5593,74 @@ class TestFormCoverage(unittest.TestCase):
                 assert stash.count_errors(include_special=True) == (
                     len(expected_error_fields) + len(expected_special)
                 )
+
+
+class TestFormEntryPoints(_TestHarness, unittest.TestCase):
+    """Verify form rendering and request input through the public API."""
+
+    def test_csrf_input_field_escapes_attributes(self) -> None:
+        """Round-trip raw attribute values through the generated HTML."""
+        stash = pyramid_formencode_classic.FormStash(Form_Email())
+        raw_attributes = {
+            "id": 'csrf"id',
+            "name": "csrf&name",
+            "type": 'hidden" type="text',
+            "value": """a&b"c'd<e>""",
+        }
+
+        for htmlfill_ignore in (True, False):
+            with self.subTest(htmlfill_ignore=htmlfill_ignore):
+                markup = stash.csrf_input_field(
+                    id=raw_attributes["id"],
+                    name=raw_attributes["name"],
+                    type=raw_attributes["type"],
+                    csrf_token=raw_attributes["value"],
+                    htmlfill_ignore=htmlfill_ignore,
+                )
+                expected = raw_attributes.copy()
+                if htmlfill_ignore:
+                    expected["data-formencode-ignore"] = "1"
+
+                element = ElementTree.fromstring(markup)
+                assert element.tag == "input"
+                assert element.attrib == expected
+
+    def test_reprint_with_render_view_and_template(self) -> None:
+        """Render a Pyramid template with the rejected values and errors."""
+        self.request.POST.update({"email": "invalid", "username": "alice"})
+        valid, stash = pyramid_formencode_classic.form_validate(
+            self.request, Form_EmailUsername()
+        )
+        assert not valid
+        email_error = stash.get_error("email")
+        assert isinstance(email_error, str)
+
+        def render_view() -> Dict[str, DummyRequest]:
+            return {"request": self.request}
+
+        response = pyramid_formencode_classic.form_reprint(
+            self.request,
+            None,
+            render_view=render_view,
+            render_view_template="tests:fixtures/form_a-html_error_placeholder-default.mako",
+        )
+
+        assert response.status_int == 200
+        assert 'name="email" value="invalid"' in response.text
+        assert 'name="username" value="alice"' in response.text
+        assert email_error in response.text
+
+    def test_validate_combines_get_and_post(self) -> None:
+        """Validate a required field from each source when both are enabled."""
+        request = Request.blank(
+            "/?email=person%40example.com", POST={"username": "alice"}
+        )
+        request.pyramid_formencode_classic = {}
+
+        valid, stash = pyramid_formencode_classic.form_validate(
+            request, Form_EmailUsername(), validate_get=True, validate_post=True
+        )
+
+        assert valid
+        assert stash.results == {"email": "person@example.com", "username": "alice"}
+        assert not stash.has_errors()

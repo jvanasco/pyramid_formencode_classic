@@ -1,4 +1,5 @@
 # stdlib
+from html import escape
 import logging
 from typing import Dict
 from typing import Iterable
@@ -584,13 +585,14 @@ class FormStash(object):
         csrf_token: str = "",
         htmlfill_ignore: bool = True,
     ) -> str:
+        """Render a CSRF input from raw attribute values, escaping them for HTML."""
         return (
             """<input id="%(id)s" type="%(type)s" name="%(name)s" value="%(csrf_token)s"%(htmlfill_ignore)s/>"""
             % {
-                "id": id,
-                "name": name,
-                "type": type,
-                "csrf_token": csrf_token,
+                "id": escape(id, quote=True),
+                "name": escape(name, quote=True),
+                "type": escape(type, quote=True),
+                "csrf_token": escape(csrf_token, quote=True),
                 "htmlfill_ignore": (
                     " data-formencode-ignore='1' " if htmlfill_ignore else ""
                 ),
